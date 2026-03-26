@@ -1794,6 +1794,17 @@ document.addEventListener('keydown',e=>{
   if(document.getElementById('list-detail').classList.contains('open')){closeDetail();return;}
 });
 
+// ══ FORCE PRODUCT LINKS TO ALWAYS OPEN IN NEW TAB ══
+// Prevents back-button from leaving the site on mobile or any browser
+document.addEventListener('click',function(e){
+  const a=e.target.closest('a.lf-cell, a.btn-shop-link, a.card-cta2, a.picard');
+  if(!a)return;
+  const href=a.getAttribute('href');
+  if(!href||href==='#')return;
+  e.preventDefault();
+  window.open(href,'_blank','noopener,noreferrer');
+},true);
+
 // ══ STICKY NAV2 OFFSET ══
 function updateHeaderHeight(){
   const h=document.querySelector('.site-header');
