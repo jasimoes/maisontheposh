@@ -141,7 +141,7 @@ body.creator .btn-new{display:flex;}
 .new-row:hover{background:var(--surf);color:var(--mid);}
 
 /* ══ IG/LF GRID ══ */
-.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;}
+.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;align-items:start;}
 .lf-cell{display:flex;flex-direction:column;cursor:pointer;background:var(--white);text-decoration:none;position:relative;}
 .lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--bg);}
 .lf-cell .lf-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
@@ -594,13 +594,17 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <label class="fl" style="margin-bottom:4px">Affiliate or Instagram Link</label>
       <div style="font-size:10px;color:var(--soft);margin-bottom:8px;line-height:1.5;">Paste a CJ / Awin / Rakuten link <em>or</em> an Instagram post URL — auto-fills details &amp; image.</div>
       <div class="fetch-row">
-        <input type="url" class="fi" id="fetch-url" placeholder="https://… affiliate link or instagram.com/p/…">
+        <input type="url" class="fi" id="fetch-url" placeholder="https://… primary affiliate link or instagram.com/p/…">
         <button class="btn-go" id="fetch-btn" onclick="fetchProduct()">Auto-fill</button>
       </div>
       <div class="fmsg" id="fmsg"></div>
-      <div style="margin-top:10px;">
-        <label class="fl" style="margin-bottom:4px">Second Affiliate Link <span class="flh">(optional — alternate retailer)</span></label>
-        <input type="url" class="fi" id="fetch-url2" placeholder="https://… second affiliate link">
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px;">
+        <label class="fl" style="margin-bottom:0;">More Retailer Links <span class="flh">(optional — up to 5 more)</span></label>
+        <input type="url" class="fi" id="fetch-url2" placeholder="Retailer 2">
+        <input type="url" class="fi" id="fetch-url3" placeholder="Retailer 3">
+        <input type="url" class="fi" id="fetch-url4" placeholder="Retailer 4">
+        <input type="url" class="fi" id="fetch-url5" placeholder="Retailer 5">
+        <input type="url" class="fi" id="fetch-url6" placeholder="Retailer 6">
       </div>
     </div>
     <div class="fg"><label class="fl">Product Name</label><input type="text" class="fi" id="i-name" placeholder="e.g. Margaux Ballet Flat"></div>
@@ -765,7 +769,7 @@ async function loadFromCloud(){
       ...l,
       items:(items||[]).filter(it=>it.list_id===l.id).map(it=>({
         id:it.id,name:it.name,brand:it.brand,price:it.price,
-        note:it.note,link:it.link,image:it.image,cat:it.cat
+        note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat
       }))
     }));
     // item_ids stores minimal objects (no image) — rehydrate images from allItems pool
@@ -831,7 +835,7 @@ async function saveItem(it,listId){
     await sbFetch('items',{
       method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:it.id,list_id:listId,name:it.name,brand:it.brand||'—',price:it.price||'',note:it.note||'',link:it.link||'#',image:it.image||'',cat:it.cat||'',sort_order:0})
+      body:JSON.stringify({id:it.id,list_id:listId,name:it.name,brand:it.brand||'—',price:it.price||'',note:it.note||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image||'',cat:it.cat||'',sort_order:0})
     });
   }catch(e){
     console.error('saveItem failed:',e);
@@ -1125,8 +1129,7 @@ function openEditItem(itemId){
   const l=D.lists.find(x=>x.id===currentListId);if(!l)return;
   const it=l.items.find(x=>x.id===itemId);if(!it)return;
   editingItemId=itemId;
-  document.getElementById('fetch-url').value=it.link==='#'?'':it.link;
-  document.getElementById('fetch-url2').value=it.link2||'';
+  setLinks(it);
   document.getElementById('i-name').value=it.name;
   document.getElementById('i-brand').value=it.brand==='—'?'':it.brand;
   document.getElementById('i-price').value=it.price;
@@ -1165,8 +1168,7 @@ async function saveEditItem(){
     brand:document.getElementById('i-brand').value.trim()||'—',
     price:document.getElementById('i-price').value.trim()||'',
     note:document.getElementById('i-note').value.trim(),
-    link:document.getElementById('fetch-url').value.trim()||l.items[idx].link,
-    link2:document.getElementById('fetch-url2').value.trim()||'',
+    ...getLinks(),
     image,
     cat:detectedItemCat||l.items[idx].cat||''
   };
@@ -1220,7 +1222,7 @@ function renderLatest(){
       :`<div class="lf-img-wrap"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div></div>`;
     return `<a class="lf-cell" href="#" data-item-id="${h(it.id)}">
       ${img}
-      <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${h(it.price)}</div></div>
+      <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${it.price?'$'+h(it.price):''}</div></div>
       ${it.note?`<div class="note-badge" title="${h(it.note)}">✦</div>`:''}
     </a>`;
   }).join('');
@@ -1413,9 +1415,30 @@ async function createList(){
 
 // ══ ADD ITEM ══
 function openAddItem(){if(!currentListId)return;document.getElementById('ai-ov').classList.add('open');}
+function getLinks(){
+  return {
+    link: document.getElementById('fetch-url').value.trim()||'#',
+    link2:document.getElementById('fetch-url2').value.trim()||'',
+    link3:document.getElementById('fetch-url3').value.trim()||'',
+    link4:document.getElementById('fetch-url4').value.trim()||'',
+    link5:document.getElementById('fetch-url5').value.trim()||'',
+    link6:document.getElementById('fetch-url6').value.trim()||'',
+  };
+}
+function setLinks(it){
+  document.getElementById('fetch-url').value=it.link==='#'?'':(it.link||'');
+  document.getElementById('fetch-url2').value=it.link2||'';
+  document.getElementById('fetch-url3').value=it.link3||'';
+  document.getElementById('fetch-url4').value=it.link4||'';
+  document.getElementById('fetch-url5').value=it.link5||'';
+  document.getElementById('fetch-url6').value=it.link6||'';
+}
+function clearLinks(){
+  ['fetch-url','fetch-url2','fetch-url3','fetch-url4','fetch-url5','fetch-url6'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+}
 function closeAI(){
   document.getElementById('ai-ov').classList.remove('open');
-  ['fetch-url','fetch-url2','i-name','i-brand','i-price','i-note','url-img'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['fetch-url','fetch-url2','fetch-url3','fetch-url4','fetch-url5','fetch-url6','i-name','i-brand','i-price','i-note','url-img'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('auto-img').value='';document.getElementById('up-val').value='';
   document.getElementById('fmsg').textContent='';document.getElementById('fmsg').className='fmsg';
   document.getElementById('auto-prev').innerHTML='<p class="ihint">Auto-fill above</p>';
@@ -1615,11 +1638,10 @@ async function addItem(){
   const l=D.lists.find(x=>x.id===currentListId);if(!l)return;
   const name=document.getElementById('i-name').value.trim();
   if(!name){toast('Product name required');return;}
-  const link=document.getElementById('fetch-url').value.trim()||'#';
-  const link2=document.getElementById('fetch-url2').value.trim()||'';
+  const links=getLinks();
   const rawImg=getImg();
   const image=await compressImage(rawImg);
-  const item={id:uid(),name,brand:document.getElementById('i-brand').value.trim()||'—',price:document.getElementById('i-price').value.trim()||'',note:document.getElementById('i-note').value.trim(),link,link2,image,cat:detectedItemCat||''};
+  const item={id:uid(),name,brand:document.getElementById('i-brand').value.trim()||'—',price:document.getElementById('i-price').value.trim()||'',note:document.getElementById('i-note').value.trim(),...links,image,cat:detectedItemCat||''};
   l.items.push(item);
   const btn=document.querySelector('#ai-ov .btn-p');
   if(btn){btn.textContent='Saving…';btn.disabled=true;}
@@ -1860,24 +1882,23 @@ function openItemPop(itemId){
   // Info
   document.getElementById('ip-brand').textContent=item.brand||'';
   document.getElementById('ip-name').textContent=item.name||'';
-  document.getElementById('ip-price').textContent=item.price?item.price:'';
+  document.getElementById('ip-price').textContent=item.price?'$'+item.price:'';
   document.getElementById('ip-note').textContent=item.note||'';
 
-  // Actions — one or two retailer links
+  // Actions — collect all non-empty links
   const actions=document.getElementById('ip-actions');
-  const link1=item.link&&item.link!=='#'?item.link:null;
-  const link2=item.link2&&item.link2!=='#'?item.link2:null;
+  const allLinks=[item.link,item.link2,item.link3,item.link4,item.link5,item.link6]
+    .filter(l=>l&&l!=='#'&&l.trim()!=='');
 
-  if(link1&&link2){
-    // Two options — show retailer label + both buttons
-    actions.innerHTML=`
-      <div class="ip-retailer-label">Shop at</div>
-      <a class="ip-btn ip-btn-primary" href="${h(link1)}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Option 1 →</a>
-      <a class="ip-btn ip-btn-secondary" href="${h(link2)}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Option 2 →</a>`;
-  } else if(link1){
-    actions.innerHTML=`<a class="ip-btn ip-btn-primary" href="${h(link1)}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Shop Now →</a>`;
-  } else {
+  if(allLinks.length===0){
     actions.innerHTML=`<span style="font-size:11px;color:var(--soft);">No link available.</span>`;
+  } else if(allLinks.length===1){
+    actions.innerHTML=`<a class="ip-btn ip-btn-primary" href="${h(allLinks[0])}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Shop Now →</a>`;
+  } else {
+    const btns=allLinks.map((l,i)=>
+      `<a class="ip-btn ${i===0?'ip-btn-primary':'ip-btn-secondary'}" href="${h(l)}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Option ${i+1} →</a>`
+    ).join('');
+    actions.innerHTML=`<div class="ip-retailer-label">Shop at</div>${btns}`;
   }
 
   document.getElementById('ip-pop').classList.add('open');
