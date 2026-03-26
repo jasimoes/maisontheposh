@@ -59,48 +59,65 @@ function h(s){
 async function load(){
   const params=new URLSearchParams(location.search);
   const id=params.get('id');
-  if(!id){
-    document.getElementById('content').innerHTML='<div class="error">No list specified.</div>';
-    return;
-  }
-  try{
-    const [lRes,iRes]=await Promise.all([
-      fetch(`${SUPA_URL}/rest/v1/lists?id=eq.${encodeURIComponent(id)}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}}),
-      fetch(`${SUPA_URL}/rest/v1/items?list_id=eq.${encodeURIComponent(id)}&select=*&order=created_at.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}})
-    ]);
-    const [lists,items]=await Promise.all([lRes.json(),iRes.json()]);
-    const list=lists[0];
-    if(!list){
-      document.getElementById('content').innerHTML='<div class="error">List not found.</div>';
-      return;
-    }
-    document.title=`MaisonThePosh · ${list.name}`;
-    document.getElementById('list-hdr').innerHTML=
-      `<div class="list-title">${h(list.name)}</div>`+
-      (list.note?`<div class="list-note">${h(list.note)}</div>`:'');
+  const idsParam=params.get('ids');
+
+  // Helper to render item cards
+  function renderCards(items){
     if(!items||!items.length){
-      document.getElementById('content').innerHTML='<div class="loading" style="color:#C8C5BE;">No items in this list yet.</div>';
+      document.getElementById('content').innerHTML='<div class="loading" style="color:#C8C5BE;">No items yet.</div>';
       return;
     }
     const cards=items.map(it=>{
       const img=it.image
         ?`<img class="card-img" src="${h(it.image)}" alt="${h(it.name)}" loading="lazy">`
         :`<div class="card-ph">${h((it.brand||'?')[0])}</div>`;
-      const cta2=it.link2?`<a class="card-cta2" href="${h(it.link2)}" target="_blank" rel="noopener">Shop (Alt) →</a>`:'';
       return `<a class="card" href="${h(it.link||'#')}" target="_blank" rel="noopener">
         ${img}
         <div class="card-info">
           <div class="card-brand">${h(it.brand)}</div>
           <div class="card-name">${h(it.name)}</div>
-          <div class="card-price">${h(it.price)}</div>
+          <div class="card-price">${it.price?'$'+h(it.price):''}</div>
           ${it.note?`<div class="card-note">${h(it.note)}</div>`:''}
           <span class="card-cta">Shop →</span>
         </div>
-      </a>${cta2?`<div style="background:#fff;padding:0 11px 13px;">${cta2}</div>`:''}`;
+      </a>`;
     }).join('');
     document.getElementById('content').innerHTML=`<div class="grid">${cards}</div>`;
+  }
+
+  try{
+    if(idsParam){
+      // Custom widget — fetch specific items by ID
+      const ids=idsParam.split(',').map(s=>s.trim()).filter(Boolean);
+      if(!ids.length){document.getElementById('content').innerHTML='<div class="error">No items specified.</div>';return;}
+      document.title='MaisonThePosh · Custom Edit';
+      document.getElementById('list-hdr').innerHTML='<div class="list-title">My Edit</div>';
+      // Fetch all items that match the IDs using IN filter
+      const inFilter=ids.map(id=>`"${id}"`).join(',');
+      const iRes=await fetch(`${SUPA_URL}/rest/v1/items?id=in.(${ids.map(id=>encodeURIComponent(id)).join(',')})&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}});
+      const allItems=await iRes.json();
+      // Preserve the order the user selected them
+      const ordered=ids.map(id=>allItems.find(it=>it.id===id)).filter(Boolean);
+      renderCards(ordered);
+    } else if(id){
+      // List widget — fetch full list
+      const [lRes,iRes]=await Promise.all([
+        fetch(`${SUPA_URL}/rest/v1/lists?id=eq.${encodeURIComponent(id)}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}}),
+        fetch(`${SUPA_URL}/rest/v1/items?list_id=eq.${encodeURIComponent(id)}&select=*&order=created_at.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}})
+      ]);
+      const [lists,items]=await Promise.all([lRes.json(),iRes.json()]);
+      const list=lists[0];
+      if(!list){document.getElementById('content').innerHTML='<div class="error">List not found.</div>';return;}
+      document.title=`MaisonThePosh · ${list.name}`;
+      document.getElementById('list-hdr').innerHTML=
+        `<div class="list-title">${h(list.name)}</div>`+
+        (list.note?`<div class="list-note">${h(list.note)}</div>`:'');
+      renderCards(items);
+    } else {
+      document.getElementById('content').innerHTML='<div class="error">No list specified.</div>';
+    }
   }catch(e){
-    document.getElementById('content').innerHTML='<div class="error">Could not load list. Please try again.</div>';
+    document.getElementById('content').innerHTML='<div class="error">Could not load. Please try again.</div>';
   }
 }
 load();

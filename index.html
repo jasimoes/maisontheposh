@@ -366,7 +366,49 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .look-drop p{font-size:12px;color:var(--soft);}
 .look-prev{width:100%;max-height:200px;object-fit:cover;margin-bottom:12px;display:none;}
 
-/* Embed popup */
+/* ══ WIDGET BUILDER ══ */
+.wb-pop{position:fixed;inset:0;background:var(--white);z-index:480;display:none;flex-direction:column;}
+.wb-pop.open{display:flex;}
+.wb-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;border-bottom:1px solid var(--border);flex-shrink:0;gap:16px;}
+.wb-hdr-left{display:flex;align-items:center;gap:16px;}
+.wb-title{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--ink);}
+.wb-count{font-size:11px;color:var(--soft);white-space:nowrap;}
+.wb-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--soft);padding:4px 8px;transition:color .15s;line-height:1;}
+.wb-close:hover{color:var(--ink);}
+.wb-toolbar{display:flex;align-items:center;gap:10px;padding:14px 32px;border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+.wb-search{display:flex;align-items:center;gap:8px;background:var(--surf);border:1px solid var(--border);padding:0 12px;flex:1;min-width:180px;max-width:340px;}
+.wb-search input{background:none;border:none;outline:none;font-family:var(--sans);font-size:12px;color:var(--ink);padding:9px 0;width:100%;}
+.wb-search svg{flex-shrink:0;opacity:.4;}
+.wb-filters{display:flex;gap:6px;flex-wrap:wrap;}
+.wb-filter{font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border:1px solid var(--border);background:none;color:var(--soft);cursor:pointer;transition:all .15s;}
+.wb-filter.on{background:var(--ink);color:white;border-color:var(--ink);}
+.wb-body{flex:1;overflow-y:auto;padding:24px 32px;}
+.wb-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:16px;}
+.wb-card{position:relative;cursor:pointer;border:2px solid transparent;transition:border-color .15s;}
+.wb-card.selected{border-color:var(--ink);}
+.wb-card-img{width:100%;aspect-ratio:3/4;overflow:hidden;background:var(--white);}
+.wb-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.wb-card:hover .wb-card-img img{transform:scale(1.03);}
+.wb-card-info{padding:8px 4px 4px;}
+.wb-card-brand{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);}
+.wb-card-name{font-family:var(--serif);font-size:12px;color:var(--ink);line-height:1.3;}
+.wb-card-price{font-size:11px;color:var(--mid);margin-top:2px;}
+.wb-check{position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:white;display:flex;align-items:center;justify-content:center;font-size:11px;transition:all .15s;}
+.wb-card.selected .wb-check{background:var(--ink);border-color:var(--ink);color:white;}
+.wb-footer{display:flex;align-items:center;justify-content:space-between;padding:14px 32px;border-top:1px solid var(--border);flex-shrink:0;gap:16px;}
+.wb-sel-info{font-size:12px;color:var(--mid);}
+.wb-footer-btns{display:flex;gap:8px;}
+.wb-btn-clear{padding:9px 18px;background:none;border:1px solid var(--border);font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);cursor:pointer;transition:all .15s;}
+.wb-btn-clear:hover{border-color:var(--mid);color:var(--mid);}
+.wb-btn-go{padding:9px 22px;background:var(--ink);border:none;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:white;cursor:pointer;transition:opacity .15s;}
+.wb-btn-go:hover{opacity:.8;}
+.wb-btn-go:disabled{opacity:.35;cursor:default;}
+.wb-empty{grid-column:1/-1;padding:60px 20px;text-align:center;font-family:var(--serif);font-size:16px;color:var(--soft);}
+@media(max-width:700px){
+  .wb-hdr,.wb-toolbar,.wb-body,.wb-footer{padding-left:18px;padding-right:18px;}
+  .wb-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+  .wb-search{max-width:100%;flex:1 1 100%;}
+}
 .embed-pop{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);}
 .embed-pop.open{display:flex;}
 .embed-box{background:var(--white);border:1px solid var(--border);width:100%;max-width:560px;padding:26px;animation:rise .18s ease;}
@@ -439,6 +481,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <div class="hdr-top-links">
     <div style="flex:1;display:flex;justify-content:flex-end;padding-right:16px;">
       <button class="btn-new creator-only" onclick="openNewList()" style="font-size:9px;padding:4px 10px;">+ New List</button>
+      <button class="btn-new creator-only" onclick="openWB()" style="font-size:9px;padding:4px 10px;">⊞ Build Widget</button>
     </div>
     <div class="hdr-top-links-center">
       <a href="https://instagram.com/maisontheposh" target="_blank" class="hdr-link">
@@ -758,6 +801,43 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <div class="ip-opts-title">Where to buy</div>
     <div class="ip-opts-sub">All links open directly to the retailer.</div>
     <table class="ip-opts-table" id="ip-opts-table"></table>
+  </div>
+</div>
+
+<!-- WIDGET BUILDER -->
+<div class="wb-pop" id="wb-pop">
+  <div class="wb-hdr">
+    <div class="wb-hdr-left">
+      <button class="wb-close" onclick="closeWB()">←</button>
+      <div class="wb-title">Build Widget</div>
+      <div class="wb-count" id="wb-count">0 items selected</div>
+    </div>
+  </div>
+  <div class="wb-toolbar">
+    <div class="wb-search">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="wb-search-input" placeholder="Search by name, brand, price…" oninput="renderWB()">
+    </div>
+    <div class="wb-filters" id="wb-filters">
+      <button class="wb-filter on" data-filter="all" onclick="setWBFilter(this,'all')">All</button>
+      <button class="wb-filter" data-filter="clothing" onclick="setWBFilter(this,'clothing')">Clothing</button>
+      <button class="wb-filter" data-filter="accessories" onclick="setWBFilter(this,'accessories')">Accessories</button>
+      <button class="wb-filter" data-filter="handbags" onclick="setWBFilter(this,'handbags')">Handbags</button>
+      <button class="wb-filter" data-filter="shoes" onclick="setWBFilter(this,'shoes')">Shoes</button>
+      <button class="wb-filter" data-filter="jewelry" onclick="setWBFilter(this,'jewelry')">Jewelry</button>
+      <button class="wb-filter" data-filter="beauty" onclick="setWBFilter(this,'beauty')">Beauty</button>
+      <button class="wb-filter" data-filter="home" onclick="setWBFilter(this,'home')">Home</button>
+    </div>
+  </div>
+  <div class="wb-body">
+    <div class="wb-grid" id="wb-grid"></div>
+  </div>
+  <div class="wb-footer">
+    <div class="wb-sel-info" id="wb-sel-info">Select items to include in your widget</div>
+    <div class="wb-footer-btns">
+      <button class="wb-btn-clear" onclick="clearWBSelection()">Clear</button>
+      <button class="wb-btn-go" id="wb-btn-go" onclick="generateWidget()" disabled>Generate Widget →</button>
+    </div>
   </div>
 </div>
 
@@ -1350,6 +1430,99 @@ async function renderWidgets(){
 }
 
 // ══ EMBED ══
+// ══ WIDGET BUILDER ══
+let _wbSelected=new Set();
+let _wbFilter='all';
+
+function openWB(){
+  _wbSelected=new Set();
+  _wbFilter='all';
+  document.getElementById('wb-search-input').value='';
+  document.querySelectorAll('.wb-filter').forEach(f=>f.classList.toggle('on',f.dataset.filter==='all'));
+  renderWB();
+  document.getElementById('wb-pop').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeWB(){
+  document.getElementById('wb-pop').classList.remove('open');
+  document.body.style.overflow='';
+}
+function setWBFilter(el,val){
+  _wbFilter=val;
+  document.querySelectorAll('.wb-filter').forEach(f=>f.classList.toggle('on',f===el));
+  renderWB();
+}
+function renderWB(){
+  const q=document.getElementById('wb-search-input').value.toLowerCase().trim();
+  // Gather all items from all lists
+  const all=[];
+  D.lists.forEach(l=>l.items.forEach(it=>all.push({...it,_listName:l.name,_listT1:l.t1})));
+  // Sort newest first
+  all.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
+  // Filter
+  const filtered=all.filter(it=>{
+    const catMatch=_wbFilter==='all'||(it.cat||'')=== _wbFilter;
+    const qMatch=!q||
+      (it.name||'').toLowerCase().includes(q)||
+      (it.brand||'').toLowerCase().includes(q)||
+      (it.price||'').toLowerCase().includes(q)||
+      (it._listName||'').toLowerCase().includes(q);
+    return catMatch&&qMatch;
+  });
+  const grid=document.getElementById('wb-grid');
+  if(!filtered.length){
+    grid.innerHTML=`<div class="wb-empty">No items found</div>`;
+    updateWBCount();return;
+  }
+  grid.innerHTML=filtered.map(it=>{
+    const sel=_wbSelected.has(it.id);
+    const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:'';
+    return `<div class="wb-card${sel?' selected':''}" onclick="toggleWBItem('${h(it.id)}')">
+      <div class="wb-card-img">${img}</div>
+      <div class="wb-card-info">
+        <div class="wb-card-brand">${h(it.brand)}</div>
+        <div class="wb-card-name">${h(it.name)}</div>
+        <div class="wb-card-price">${it.price?'$'+h(it.price):''}</div>
+      </div>
+      <div class="wb-check">${sel?'✓':''}</div>
+    </div>`;
+  }).join('');
+  updateWBCount();
+}
+function toggleWBItem(id){
+  if(_wbSelected.has(id))_wbSelected.delete(id);
+  else _wbSelected.add(id);
+  // Update just the clicked card
+  const cards=document.querySelectorAll('.wb-card');
+  cards.forEach(card=>{
+    const cardId=card.getAttribute('onclick').match(/'([^']+)'/)?.[1];
+    if(cardId===id){
+      const sel=_wbSelected.has(id);
+      card.classList.toggle('selected',sel);
+      card.querySelector('.wb-check').textContent=sel?'✓':'';
+    }
+  });
+  updateWBCount();
+}
+function clearWBSelection(){
+  _wbSelected.clear();
+  renderWB();
+}
+function updateWBCount(){
+  const n=_wbSelected.size;
+  document.getElementById('wb-count').textContent=n===0?'0 items selected':`${n} item${n!==1?'s':''} selected`;
+  document.getElementById('wb-sel-info').textContent=n===0?'Select items to include in your widget':`${n} item${n!==1?'s':''} selected`;
+  document.getElementById('wb-btn-go').disabled=n===0;
+}
+function generateWidget(){
+  if(!_wbSelected.size)return;
+  const ids=[..._wbSelected].join(',');
+  const url=`https://maisontheposh.com/widget.html?ids=${encodeURIComponent(ids)}`;
+  // Show the embed popup with this URL
+  document.getElementById('embed-code').textContent=url;
+  document.getElementById('embed-pop').classList.add('open');
+}
+
 function openEmbed(id){
   const l=D.lists.find(x=>x.id===id);if(!l)return;
   const url=`https://maisontheposh.com/widget.html?id=${encodeURIComponent(l.id)}`;
@@ -1914,6 +2087,7 @@ document.addEventListener('click',function(e){
 },true);
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
+  if(document.getElementById('wb-pop').classList.contains('open')){closeWB();return;}
   if(document.getElementById('ip-opts-pop').classList.contains('open')){closeOptsPop();return;}
   if(document.getElementById('ip-pop').classList.contains('open')){closeItemPop();return;}
   if(document.getElementById('pw-ov').classList.contains('open')){closePW();return;}
