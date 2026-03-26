@@ -914,10 +914,7 @@ async function loadFromCloud(){
     };
     D={lists:listsWithItems,looks:(looks||[]).map(l=>({...l,items:normalizeLookItems(l.item_ids)}))};
     showLoading(false);
-    render();
-    // Auto-open item popup if ?item=ID is in the URL
-    const _itemParam=new URLSearchParams(location.search).get('item');
-    if(_itemParam)setTimeout(()=>openItemPop(_itemParam),120);
+    restoreFromURL();
   }catch(e){
     console.error('Load failed:',e);
     showLoading(false);
@@ -1129,8 +1126,9 @@ function setT1(val,btn){
   btn.classList.add('on');
   document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
-  closeDetail();
+  closeDetail(true);
   render();
+  history.pushState({tab:val},'',`/?tab=${val}`);
 }
 function setCat(val,btn){activeCat=val;document.querySelectorAll('.t2').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
 
@@ -1156,8 +1154,14 @@ function stripCard(l){
   const count=Math.max(l.items.length,5);
   const slots=[];
   for(let i=0;i<count;i++){
-    if(imgs[i])slots.push(`<div class="strip-cell"><img src="${h(imgs[i].image)}" alt="" onerror="this.style.display='none'"></div>`);
-    else if(l.items[i])slots.push(`<div class="strip-cell"><span class="strip-ph">${(l.items[i].brand||'?')[0]}</span></div>`);
+    const it=l.items[i];
+    const img=imgs[i];
+    const itemId=it?it.id:'';
+    const clickHandler=itemId
+      ?`onclick="event.stopPropagation();if(window.matchMedia('(pointer:coarse)').matches){openItemPop('${itemId}')}else{openDetail('${h(l.id)}')}"` 
+      :'onclick="event.stopPropagation()"';
+    if(img)slots.push(`<div class="strip-cell" ${clickHandler} style="cursor:pointer"><img src="${h(img.image)}" alt="" onerror="this.style.display='none'"></div>`);
+    else if(it)slots.push(`<div class="strip-cell" ${clickHandler} style="cursor:pointer"><span class="strip-ph">${(it.brand||'?')[0]}</span></div>`);
     else slots.push(`<div class="strip-ghost"></div>`);
   }
   const noteHtml=l.note?`<div class="wl-note">"${h(l.note)}"</div>`:'';
@@ -1173,13 +1177,13 @@ function stripCard(l){
       <button class="wl-btn" title="Open" onclick="event.stopPropagation();openDetail('${h(l.id)}')">≡</button>
       <button class="wl-btn" title="Options" onclick="event.stopPropagation();toggleCtx('${h(l.id)}')">···</button>
     </div>`:'';
-  return `<div class="wl clickable" id="wl-${h(l.id)}" onclick="openDetail('${h(l.id)}')" ontouchstart="this._tx=event.touches[0].clientX" ontouchend="if(Math.abs(event.changedTouches[0].clientX-this._tx)>10)event.preventDefault()">
-    <div class="strip" onclick="event.stopPropagation()">${slots.join('')}</div>
-    <div class="wl-foot">
+  return `<div class="wl clickable" id="wl-${h(l.id)}" onclick="if(!window.matchMedia('(pointer:coarse)').matches)openDetail('${h(l.id)}')" ontouchstart="this._tx=event.touches[0].clientX" ontouchend="if(Math.abs(event.changedTouches[0].clientX-this._tx)>10)event.preventDefault()">
+    <div class="strip">${slots.join('')}</div>
+    <div class="wl-foot" onclick="event.stopPropagation();openDetail('${h(l.id)}')" style="cursor:pointer">
       <div class="wl-left">
         <div class="wl-title">${h(l.name)}</div>
         ${noteHtml}
-        <div class="wl-count">${l.items.length} Product${l.items.length!==1?'s':''}</div>
+        <div class="wl-count">${l.items.length} Product${l.items.length!==1?'s':''} · <span style="color:var(--mid);text-decoration:underline;text-underline-offset:2px;">View all →</span></div>
       </div>
       ${acts}
     </div>
@@ -1199,12 +1203,16 @@ function openDetail(id){
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
   window.scrollTo({top:0,behavior:'smooth'});
+  history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
-function closeDetail(){
+function closeDetail(silent){
   document.getElementById('list-detail').classList.remove('open');
   document.getElementById('feed').style.display='block';
   currentListId=null;
   render();
+  // If called from back button (silent=true via popstate), don't push new state
+  // If called from ← Back button, go back in history naturally
+  if(!silent)history.back();
 }
 
 function renderDetailItems(items){
@@ -2197,6 +2205,81 @@ document.addEventListener('click',function(e){
   window.open(href,'_blank','noopener,noreferrer');
 },true);
 
+// ══ HISTORY / BACK-FORWARD ══
+function restoreFromURL(){
+  const params=new URLSearchParams(location.search);
+  const tab=params.get('tab')||'latest';
+  const listId=params.get('list');
+  const itemId=params.get('item');
+  // Set active tab
+  const validTabs=['latest','weekly','collections','social','widgets'];
+  const t=validTabs.includes(tab)?tab:'latest';
+  activeT1=t;activeCat='all';
+  document.querySelectorAll('.t1').forEach(b=>{
+    const match=b.dataset.t1===t;
+    b.classList.toggle('on',match);
+  });
+  document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(t));
+  // Open list if specified
+  if(listId&&D.lists.find(x=>x.id===listId)){
+    const l=D.lists.find(x=>x.id===listId);
+    currentListId=listId;
+    activeT1=l.t1||t;
+    document.getElementById('detail-title').textContent=l.name;
+    document.getElementById('detail-search-inp').value='';
+    document.getElementById('search-hint').textContent='';
+    detailAllItems=[...l.items];
+    renderDetailItems(l.items);
+    document.getElementById('feed').style.display='none';
+    document.getElementById('list-detail').classList.add('open');
+  } else {
+    document.getElementById('list-detail').classList.remove('open');
+    document.getElementById('feed').style.display='block';
+    currentListId=null;
+    render();
+  }
+  // Open item popup if specified
+  if(itemId)setTimeout(()=>openItemPop(itemId),120);
+}
+
+window.addEventListener('popstate',function(e){
+  // Close any open popups first
+  closeItemPop();closeOptsPop();
+  if(document.getElementById('wb-pop').classList.contains('open'))closeWB();
+  const state=e.state||{};
+  const params=new URLSearchParams(location.search);
+  const listId=state.list||params.get('list');
+  const tab=state.tab||params.get('tab')||'latest';
+
+  if(listId&&D.lists.find(x=>x.id===listId)){
+    // Going forward into a list — open it without pushing new state
+    const l=D.lists.find(x=>x.id===listId);
+    activeT1=l.t1||tab;
+    currentListId=listId;
+    document.getElementById('detail-title').textContent=l.name;
+    document.getElementById('detail-search-inp').value='';
+    document.getElementById('search-hint').textContent='';
+    detailAllItems=[...l.items];
+    renderDetailItems(l.items);
+    document.getElementById('feed').style.display='none';
+    document.getElementById('list-detail').classList.add('open');
+    window.scrollTo({top:0});
+  } else {
+    // Going back to a tab — close detail silently, restore tab
+    document.getElementById('list-detail').classList.remove('open');
+    document.getElementById('feed').style.display='block';
+    currentListId=null;
+    const validTabs=['latest','weekly','collections','social','widgets'];
+    activeT1=validTabs.includes(tab)?tab:'latest';
+    activeCat='all';
+    document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
+    document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(activeT1));
+    document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
+    render();
+    window.scrollTo({top:0});
+  }
+});
+
 // ══ STICKY NAV2 OFFSET ══
 function updateHeaderHeight(){
   const h=document.querySelector('.site-header');
@@ -2221,6 +2304,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   }
   _savedNLHTML=document.getElementById('nl-fp').innerHTML;
   trackPageView();
+  // Seed initial history entry so back works from the first page
+  const _initParams=new URLSearchParams(location.search);
+  const _initTab=_initParams.get('tab')||_initParams.get('list')?'':'latest';
+  if(!location.search)history.replaceState({tab:'latest'},'','/?tab=latest');
   loadFromCloud();
 });
 </script>
