@@ -1909,9 +1909,9 @@ function closePanel(){document.getElementById('backdrop').classList.remove('open
 document.addEventListener('click',function(e){
   const editBtn=e.target.closest('[data-edit-id]');
   const delBtn=e.target.closest('[data-delete-id]');
-  if(editBtn){e.stopPropagation();openEditItem(editBtn.dataset.editId);}
-  if(delBtn){e.stopPropagation();deleteItem(delBtn.dataset.deleteId);}
-});
+  if(editBtn){e.stopPropagation();e.stopImmediatePropagation();openEditItem(editBtn.dataset.editId);}
+  if(delBtn){e.stopPropagation();e.stopImmediatePropagation();deleteItem(delBtn.dataset.deleteId);}
+},true);
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
   if(document.getElementById('ip-opts-pop').classList.contains('open')){closeOptsPop();return;}
