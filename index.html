@@ -739,6 +739,10 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <div class="ip-price" id="ip-price"></div>
       <div class="ip-note" id="ip-note"></div>
       <div class="ip-actions" id="ip-actions"></div>
+      <div class="creator-only-btn" id="ip-copy-link-row" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;display:none;flex-direction:column;gap:7px;">
+        <button onclick="copyAffiliateLink()" style="width:100%;padding:9px;background:none;border:1px solid var(--border);font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--ink)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--soft)'">⎘ Copy Affiliate Link</button>
+        <button onclick="copyItemPageLink()" style="width:100%;padding:9px;background:none;border:1px dashed var(--border);font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);cursor:pointer;transition:all .18s;" onmouseover="this.style.borderColor='var(--ink)';this.style.color='var(--ink)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--soft)'">⎘ Copy Link to My Site</button>
+      </div>
     </div>
   </div>
 </div>
@@ -827,6 +831,9 @@ async function loadFromCloud(){
     D={lists:listsWithItems,looks:(looks||[]).map(l=>({...l,items:normalizeLookItems(l.item_ids)}))};
     showLoading(false);
     render();
+    // Auto-open item popup if ?item=ID is in the URL
+    const _itemParam=new URLSearchParams(location.search).get('item');
+    if(_itemParam)setTimeout(()=>openItemPop(_itemParam),120);
   }catch(e){
     console.error('Load failed:',e);
     showLoading(false);
@@ -1147,6 +1154,26 @@ function renderDetailItems(items){
   } else {
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='none');
   }
+}
+
+function copyAffiliateLink(){
+  const itemId=document.getElementById('ip-pop').dataset.itemId;
+  if(!itemId)return;
+  let item=null;
+  for(const l of D.lists){const found=l.items.find(it=>it.id===itemId);if(found){item=found;break;}}
+  if(!item||!item.link||item.link==='#'){toast('No affiliate link set for this item');return;}
+  navigator.clipboard.writeText(item.link).then(()=>toast('Affiliate link copied!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=item.link;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Affiliate link copied!');
+  });
+}
+
+function copyItemPageLink(){
+  const itemId=document.getElementById('ip-pop').dataset.itemId;
+  if(!itemId)return;
+  const url=`https://maisontheposh.com/?item=${encodeURIComponent(itemId)}`;
+  navigator.clipboard.writeText(url).then(()=>toast('Item link copied — paste into Substack!')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Item link copied!');
+  });
 }
 
 function copyItemLink(itemId,link){
@@ -1898,13 +1925,20 @@ document.addEventListener('keydown',e=>{
 
 // ══ ITEM PREVIEW POPUP ══
 function openItemPop(itemId){
-  // Find item across all latest/weekly lists
+  // Find item across all lists
   let item=null;
   for(const l of D.lists){
     const found=l.items.find(it=>it.id===itemId);
     if(found){item=found;break;}
   }
   if(!item)return;
+
+  // Store current item id for copy link
+  document.getElementById('ip-pop').dataset.itemId=itemId;
+
+  // Show copy link row for creator
+  const copyRow=document.getElementById('ip-copy-link-row');
+  if(copyRow)copyRow.style.display=isCreator?'flex':'none';
 
   // Image
   const imgCol=document.getElementById('ip-img-col');
