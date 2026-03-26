@@ -710,8 +710,8 @@ async function loadFromCloud(){
   try{
     showLoading(true);
     const [lists,items,looks]=await Promise.all([
-      sbFetch('lists?select=*&order=created_at.asc'),
-      sbFetch('items?select=*&order=created_at.asc'),
+      sbFetch('lists?select=*&order=created_at.desc'),
+      sbFetch('items?select=*&order=created_at.desc'),
       sbFetch('looks?select=*&order=created_at.desc')
     ]);
 
@@ -965,7 +965,7 @@ function render(){
   if(activeT1==='social'){renderSocial();return;}
   if(activeT1==='latest'){renderLatest();return;}
 
-  let lists=D.lists.filter(l=>l.t1===activeT1);
+  let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
   if(!lists.length){
     feed.innerHTML=`<div class="empty"><h3>Nothing here yet</h3><p>Create a new list to get started.</p></div>`+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
     return;
@@ -1168,7 +1168,7 @@ function renderLatest(){
     feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds or Weekly Curation lists.':'Add items and select '+activeCat+' as their category.'}</p></div>`;
     return;
   }
-  items.sort((a,b)=>(b.ts||0)-(a.ts||0));
+  items.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
   items=items.slice(0,102);
   const cells=items.map(it=>{
     const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>`;
