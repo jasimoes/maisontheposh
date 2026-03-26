@@ -143,16 +143,16 @@ body.creator .btn-new{display:flex;}
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
 .wl.clickable{cursor:pointer;}
 .wl.clickable:hover{background:var(--surf);}
-.strip{display:flex;height:210px;gap:1px;background:var(--border);overflow:hidden;}
-.strip-cell{flex:0 0 calc(20% - .8px);background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.strip{display:flex;height:210px;gap:1px;background:var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
+.strip::-webkit-scrollbar{display:none;}
+.strip-cell{flex:0 0 calc(20% - .8px);min-width:160px;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .strip-cell img{width:100%;height:100%;object-fit:cover;transition:transform .5s;}
 .wl.clickable:hover .strip-cell img{transform:scale(1.04);}
 .strip-ph{font-family:var(--serif);font-size:24px;color:var(--faint);}
-.strip-ghost{flex:0 0 calc(20% - .8px);background:var(--bg);}
+.strip-ghost{flex:0 0 calc(20% - .8px);min-width:160px;background:var(--bg);}
 @media(max-width:700px){
-  .strip{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x;scrollbar-width:none;height:180px;}
-  .strip::-webkit-scrollbar{display:none;}
-  .strip-cell,.strip-ghost{flex:0 0 42vw;scroll-snap-align:start;}
+  .strip{height:180px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x;}
+  .strip-cell,.strip-ghost{flex:0 0 42vw;min-width:42vw;scroll-snap-align:start;}
 }
 .wl-foot{padding:13px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
 .wl-left{flex:1;min-width:0;}
@@ -1073,8 +1073,9 @@ function render(){
 
 function stripCard(l){
   const imgs=l.items.filter(i=>i.image);
+  const count=Math.max(l.items.length,5);
   const slots=[];
-  for(let i=0;i<5;i++){
+  for(let i=0;i<count;i++){
     if(imgs[i])slots.push(`<div class="strip-cell"><img src="${h(imgs[i].image)}" alt="" onerror="this.style.display='none'"></div>`);
     else if(l.items[i])slots.push(`<div class="strip-cell"><span class="strip-ph">${(l.items[i].brand||'?')[0]}</span></div>`);
     else slots.push(`<div class="strip-ghost"></div>`);
