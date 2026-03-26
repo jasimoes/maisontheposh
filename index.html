@@ -84,27 +84,54 @@ body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weigh
 .ip-img-col img{width:100%;height:100%;object-fit:cover;display:block;}
 .ip-img-ph{width:100%;height:100%;min-height:320px;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:48px;color:var(--faint);}
 .ip-info-col{flex:1;padding:36px 32px 32px;display:flex;flex-direction:column;}
-.ip-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--soft);line-height:1;padding:4px 6px;transition:color .15s;}
+.ip-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--soft);line-height:1;padding:4px 6px;transition:color .15s;z-index:2;}
 .ip-close:hover{color:var(--ink);}
 .ip-brand{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:6px;}
 .ip-name{font-family:var(--serif);font-size:22px;font-weight:400;color:var(--ink);line-height:1.3;margin-bottom:10px;}
 .ip-price{font-size:16px;color:var(--ink);font-weight:300;margin-bottom:14px;}
 .ip-note{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--mid);line-height:1.65;margin-bottom:24px;padding-top:14px;border-top:1px solid var(--border);}
 .ip-note:empty{display:none;padding:0;border:none;margin:0;}
-.ip-actions{margin-top:auto;display:flex;flex-direction:column;gap:8px;}
-.ip-btn{display:block;width:100%;padding:13px 20px;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;transition:all .18s;}
-.ip-btn-primary{background:var(--ink);color:white;}
+.ip-actions{margin-top:auto;display:flex;flex-direction:column;gap:0;}
+.ip-btn-primary{display:block;width:100%;padding:13px 20px;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;cursor:pointer;border:none;background:var(--ink);color:white;transition:opacity .18s;}
 .ip-btn-primary:hover{opacity:.82;}
-.ip-btn-secondary{background:none;border:1px solid var(--border);color:var(--mid);}
-.ip-btn-secondary:hover{border-color:var(--ink);color:var(--ink);}
-.ip-retailer-label{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
-@media(max-width:600px){
-  .ip-box{flex-direction:column;max-height:95vh;}
-  .ip-img-col{flex:0 0 auto;}
-  .ip-img-col img{max-height:52vw;width:100%;object-fit:cover;}
-  .ip-img-ph{min-height:180px;}
-  .ip-info-col{padding:20px 20px 24px;}
-  .ip-name{font-size:18px;}
+.ip-alt-row{display:flex;align-items:center;gap:10px;margin-top:14px;}
+.ip-alt-divider{flex:1;height:1px;background:var(--border);}
+.ip-alt-label{font-size:10px;color:var(--soft);white-space:nowrap;}
+.ip-alt-btn{display:block;width:100%;margin-top:10px;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.1em;color:var(--mid);text-decoration:none;cursor:pointer;background:none;border:none;padding:6px 0;transition:color .18s;}
+.ip-alt-btn:hover{color:var(--ink);}
+/* ── Buying Options Panel ── */
+.ip-opts-pop{position:fixed;inset:0;background:rgba(28,27,25,.55);z-index:460;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.ip-opts-pop.open{display:flex;}
+.ip-opts-box{background:var(--white);max-width:680px;width:100%;max-height:88vh;overflow-y:auto;position:relative;padding:32px 32px 28px;}
+.ip-opts-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--soft);padding:4px 6px;transition:color .15s;}
+.ip-opts-close:hover{color:var(--ink);}
+.ip-opts-title{font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:4px;}
+.ip-opts-sub{font-size:11px;color:var(--soft);margin-bottom:24px;line-height:1.5;}
+.ip-opts-table{width:100%;border-collapse:collapse;}
+.ip-opts-table tr{border-bottom:1px solid var(--border);}
+.ip-opts-table tr:last-child{border-bottom:none;}
+.ip-opts-table td{padding:13px 10px;vertical-align:middle;}
+.ip-opts-thumb{width:44px;height:44px;object-fit:cover;display:block;background:var(--bg);}
+.ip-opts-num{font-size:10px;letter-spacing:.1em;color:var(--soft);width:24px;}
+.ip-opts-name{font-family:var(--serif);font-size:13px;color:var(--ink);flex:1;}
+.ip-opts-shop{display:inline-block;padding:7px 16px;border:1px solid var(--ink);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);text-decoration:none;white-space:nowrap;transition:all .16s;}
+.ip-opts-shop:hover{background:var(--ink);color:white;}
+
+/* ══ MOBILE POPUP — bottom sheet, full image ══ */
+@media(max-width:700px){
+  .ip-pop{padding:0;align-items:flex-end;background:rgba(28,27,25,.6);}
+  .ip-box{flex-direction:column;max-width:100%;width:100%;max-height:92vh;border-radius:16px 16px 0 0;overflow-y:auto;}
+  .ip-img-col{flex:0 0 auto;width:100%;}
+  .ip-img-col img{width:100%;height:72vw;max-height:340px;object-fit:cover;object-position:top center;display:block;}
+  .ip-img-ph{min-height:200px;}
+  .ip-close{top:12px;right:12px;background:rgba(255,255,255,.85);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;backdrop-filter:blur(4px);}
+  .ip-info-col{padding:20px 20px 32px;}
+  .ip-name{font-size:20px;}
+  .ip-price{font-size:15px;}
+  .ip-btn-primary{padding:15px 20px;font-size:11px;}
+  .ip-opts-box{border-radius:16px 16px 0 0;max-height:80vh;padding:24px 20px 32px;}
+  .ip-opts-pop{padding:0;align-items:flex-end;}
+  .ip-opts-table td{padding:10px 6px;}
 }
 body.creator .t1.creator-only{display:block;}
 body.creator .btn-new{display:flex;}
@@ -712,6 +739,16 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <div class="ip-note" id="ip-note"></div>
       <div class="ip-actions" id="ip-actions"></div>
     </div>
+  </div>
+</div>
+
+<!-- BUYING OPTIONS POPUP -->
+<div class="ip-opts-pop" id="ip-opts-pop" onclick="if(event.target===this)closeOptsPop()">
+  <div class="ip-opts-box">
+    <button class="ip-opts-close" onclick="closeOptsPop()">✕</button>
+    <div class="ip-opts-title">Where to buy</div>
+    <div class="ip-opts-sub">All links open directly to the retailer.</div>
+    <table class="ip-opts-table" id="ip-opts-table"></table>
   </div>
 </div>
 
@@ -1850,6 +1887,7 @@ document.addEventListener('click',function(e){
 });
 document.addEventListener('keydown',e=>{
   if(e.key!=='Escape')return;
+  if(document.getElementById('ip-opts-pop').classList.contains('open')){closeOptsPop();return;}
   if(document.getElementById('ip-pop').classList.contains('open')){closeItemPop();return;}
   if(document.getElementById('pw-ov').classList.contains('open')){closePW();return;}
   if(document.getElementById('el-ov').classList.contains('open')){closeEL();return;}
@@ -1885,7 +1923,7 @@ function openItemPop(itemId){
   document.getElementById('ip-price').textContent=item.price?'$'+item.price:'';
   document.getElementById('ip-note').textContent=item.note||'';
 
-  // Actions — collect all non-empty links
+  // Actions
   const actions=document.getElementById('ip-actions');
   const allLinks=[item.link,item.link2,item.link3,item.link4,item.link5,item.link6]
     .filter(l=>l&&l!=='#'&&l.trim()!=='');
@@ -1893,12 +1931,16 @@ function openItemPop(itemId){
   if(allLinks.length===0){
     actions.innerHTML=`<span style="font-size:11px;color:var(--soft);">No link available.</span>`;
   } else if(allLinks.length===1){
-    actions.innerHTML=`<a class="ip-btn ip-btn-primary" href="${h(allLinks[0])}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Shop Now →</a>`;
+    actions.innerHTML=`<a class="ip-btn-primary" href="${h(allLinks[0])}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Shop Now →</a>`;
   } else {
-    const btns=allLinks.map((l,i)=>
-      `<a class="ip-btn ${i===0?'ip-btn-primary':'ip-btn-secondary'}" href="${h(l)}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Option ${i+1} →</a>`
-    ).join('');
-    actions.innerHTML=`<div class="ip-retailer-label">Shop at</div>${btns}`;
+    const altCount=allLinks.length-1;
+    actions.innerHTML=`
+      <a class="ip-btn-primary" href="${h(allLinks[0])}" target="_blank" rel="noopener noreferrer" onclick="closeItemPop()">Shop Now →</a>
+      <div class="ip-alt-row"><span class="ip-alt-divider"></span><span class="ip-alt-label">or</span><span class="ip-alt-divider"></span></div>
+      <button class="ip-alt-btn" onclick="openOptsPop()">See ${altCount} other buying option${altCount>1?'s':''} →</button>`;
+    // Store links on window for opts popup
+    window._ipAllLinks=allLinks;
+    window._ipItemImg=item.image||'';
   }
 
   document.getElementById('ip-pop').classList.add('open');
@@ -1907,6 +1949,24 @@ function openItemPop(itemId){
 function closeItemPop(){
   document.getElementById('ip-pop').classList.remove('open');
   document.body.style.overflow='';
+}
+function openOptsPop(){
+  const links=window._ipAllLinks||[];
+  const img=window._ipItemImg||'';
+  const rows=links.slice(1).map((l,i)=>{
+    const thumb=img?`<img class="ip-opts-thumb" src="${h(img)}" alt="">`:`<div class="ip-opts-thumb"></div>`;
+    return `<tr>
+      <td>${thumb}</td>
+      <td class="ip-opts-num">${i+2}</td>
+      <td class="ip-opts-name">Option ${i+2}</td>
+      <td style="text-align:right;"><a class="ip-opts-shop" href="${h(l)}" target="_blank" rel="noopener noreferrer" onclick="closeOptsPop();closeItemPop()">Shop Now →</a></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('ip-opts-table').innerHTML=rows;
+  document.getElementById('ip-opts-pop').classList.add('open');
+}
+function closeOptsPop(){
+  document.getElementById('ip-opts-pop').classList.remove('open');
 }
 
 // ══ FORCE PRODUCT LINKS TO ALWAYS OPEN IN NEW TAB ══
