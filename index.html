@@ -142,13 +142,12 @@ body.creator .btn-new{display:flex;}
 
 /* ══ IG/LF GRID ══ */
 .lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;}
-.lf-cell img{width:100%;height:100%;object-fit:cover;transition:transform .45s;}
-.lf-cell:hover img{transform:scale(1.05);}
-.lf-cell{position:relative;overflow:hidden;cursor:pointer;background:var(--white);display:flex;flex-direction:column;}
-.lf-cell img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;transition:transform .45s;flex-shrink:0;}
-.lf-cell:hover img{transform:scale(1.04);}
+.lf-cell{display:flex;flex-direction:column;cursor:pointer;background:var(--white);text-decoration:none;position:relative;}
+.lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--bg);}
+.lf-cell .lf-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
+.lf-cell:hover .lf-img-wrap img{transform:scale(1.04);}
 .lf-over{display:none;}
-.lf-info{padding:10px 4px 4px;background:var(--white);}
+.lf-info{padding:10px 2px 6px;background:var(--white);}
 .lf-brand{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:3px;}
 .lf-name{font-family:var(--serif);font-size:13px;color:var(--ink);line-height:1.35;margin-bottom:3px;}
 .lf-price{font-size:11px;color:var(--mid);}
@@ -1216,7 +1215,9 @@ function renderLatest(){
   items.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
   items=items.slice(0,102);
   const cells=items.map(it=>{
-    const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>`;
+    const img=it.image
+      ?`<div class="lf-img-wrap"><img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'"></div>`
+      :`<div class="lf-img-wrap"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div></div>`;
     return `<a class="lf-cell" href="#" data-item-id="${h(it.id)}">
       ${img}
       <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${h(it.price)}</div></div>
