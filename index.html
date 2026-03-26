@@ -97,8 +97,8 @@ body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weigh
 .ip-alt-row{display:flex;align-items:center;gap:10px;margin-top:14px;}
 .ip-alt-divider{flex:1;height:1px;background:var(--border);}
 .ip-alt-label{font-size:10px;color:var(--soft);white-space:nowrap;}
-.ip-alt-btn{display:block;width:100%;margin-top:10px;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.1em;color:var(--mid);text-decoration:none;cursor:pointer;background:none;border:none;padding:6px 0;transition:color .18s;}
-.ip-alt-btn:hover{color:var(--ink);}
+.ip-alt-btn{display:block;width:100%;margin-top:10px;text-align:center;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);text-decoration:none;cursor:pointer;background:none;border:1px solid var(--border);padding:13px 20px;transition:all .18s;}
+.ip-alt-btn:hover{color:var(--ink);border-color:var(--ink);}
 /* ── Buying Options Panel ── */
 .ip-opts-pop{position:fixed;inset:0;background:rgba(28,27,25,.55);z-index:460;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
 .ip-opts-pop.open{display:flex;}
@@ -242,7 +242,8 @@ body.creator .btn-new{display:flex;}
 
 /* Items in list detail — Collective-style cards */
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:24px 40px;}
-.dcard{background:var(--white);border:1px solid var(--border);display:flex;flex-direction:column;position:relative;}
+.dcard{background:var(--white);border:1px solid var(--border);display:flex;flex-direction:column;position:relative;transition:border-color .18s;}
+.dcard:hover{border-color:var(--ink);}
 .dcard-img{aspect-ratio:1;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .dcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
 .dcard:hover .dcard-img img{transform:scale(1.04);}
@@ -1124,25 +1125,19 @@ function renderDetailItems(items){
     const imgHtml=it.image
       ?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`
       :`<div class="dcard-ph">${(it.brand||'?')[0]}</div>`;
-    const copyBtn=`<button class="btn-copy-link creator-only-btn" onclick="copyItemLink('${h(it.id)}','${h(it.link)}')">Copy Link</button>`;
-    const shopBtn=`<a class="btn-shop-link" href="${h(it.link)}" target="_blank" rel="noopener">Shop →</a>`;
-    const shop2Btn=it.link2?`<a class="btn-shop-link" href="${h(it.link2)}" target="_blank" rel="noopener" style="margin-top:4px;">Shop (Alt) →</a>`:'';
+    const copyBtn=`<button class="btn-copy-link creator-only-btn" onclick="event.stopPropagation();copyItemLink('${h(it.id)}','${h(it.link)}')">Copy Link</button>`;
     const creatorBtns=`<div class="creator-only-btn" style="display:flex;gap:6px;margin-top:6px;">
-      <button data-edit-id="${h(it.id)}" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
-      <button data-delete-id="${h(it.id)}" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Delete</button>
+      <button data-edit-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
+      <button data-delete-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Delete</button>
     </div>`;
-    return `<div class="dcard">
+    return `<div class="dcard" style="cursor:pointer;" onclick="openItemPop('${h(it.id)}')">
       <div class="dcard-img">${imgHtml}</div>
       <div class="dcard-info">
         <div class="dcard-brand">${h(it.brand)}</div>
         <div class="dcard-name">${h(it.name)}</div>
-        <div class="dcard-price">${h(it.price)}</div>
+        <div class="dcard-price">${it.price?'$'+h(it.price):''}</div>
         <div class="dcard-note">${h(it.note||'')}</div>
-        <div class="dcard-actions">
-          ${copyBtn}
-          ${shopBtn}
-          ${shop2Btn}
-        </div>
+        <div class="dcard-actions">${copyBtn}</div>
         ${creatorBtns}
       </div>
     </div>`;
