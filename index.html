@@ -58,7 +58,7 @@ body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weigh
 .hdr-logo-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:7.5px;font-weight:200;color:var(--ink);letter-spacing:.2em;white-space:nowrap;}
 
 /* Row 3: Nav centered */
-.site-nav{display:flex;align-items:center;justify-content:center;gap:0;border-top:1px solid var(--border);overflow-x:auto;scrollbar-width:none;}
+.site-nav{display:flex;align-items:center;justify-content:center;gap:0;border-top:1px solid var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;touch-action:pan-x;}
 .site-nav::-webkit-scrollbar{display:none;}
 .t1{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1px solid transparent;padding:13px 22px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:300;}
 .t1:hover{color:var(--ink);}
@@ -69,7 +69,7 @@ body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weigh
 .profile{display:none;}
 
 /* ══ NAV T2 ══ */
-.nav2{background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:0 40px;overflow-x:auto;scrollbar-width:none;position:sticky;top:var(--header-h,122px);z-index:199;}
+.nav2{background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:center;padding:0 40px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;position:sticky;top:var(--header-h,122px);z-index:199;touch-action:pan-x;}
 .nav2::-webkit-scrollbar{display:none;}
 .nav2.hide{display:none;}
 .t2{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 14px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
@@ -549,17 +549,6 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
         <button class="chip" onclick="selT1c(this,'social')">Social</button>
       </div>
     </div>
-    <div class="fg"><label class="fl">Category</label>
-      <div class="chips" id="nl-cc">
-        <button class="chip" onclick="selCatc(this,'clothing')">Clothing</button>
-        <button class="chip" onclick="selCatc(this,'accessories')">Accessories</button>
-        <button class="chip" onclick="selCatc(this,'handbags')">Handbags</button>
-        <button class="chip" onclick="selCatc(this,'shoes')">Shoes</button>
-        <button class="chip" onclick="selCatc(this,'jewelry')">Jewelry</button>
-        <button class="chip" onclick="selCatc(this,'beauty')">Beauty</button>
-        <button class="chip" onclick="selCatc(this,'home')">Home</button>
-      </div>
-    </div>
     <div class="fg"><label class="fl">Affiliate Network <span class="flh">(internal only)</span></label>
       <select class="fs" id="nl-net"><option value="awin">Awin</option><option value="cj">CJ</option><option value="rakuten">Rakuten</option><option value="multi">Multiple networks</option></select>
     </div>
@@ -681,12 +670,13 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 <!-- EMBED POPUP -->
 <div class="embed-pop" id="embed-pop" onclick="if(event.target===this)closeEmbed()">
   <div class="embed-box">
-    <h3>Embed Widget in Substack</h3>
-    <p>Copy this code and paste it into a Substack post using the <strong>HTML block</strong>. Your readers see a live shoppable product grid with your affiliate links.</p>
-    <div class="embed-code" id="embed-code"></div>
-    <div class="embed-note">Works in any Substack post. Products link directly to retailers via your affiliate URLs. Includes your "Your Take" notes for every item.</div>
+    <h3>Share Shoppable List</h3>
+    <p>Copy this link and paste it directly into your Substack post. Readers get a live shoppable product page with all your affiliate links.</p>
+    <div class="embed-code" id="embed-code" style="font-size:12px;word-break:break-all;user-select:all;cursor:text;"></div>
+    <div class="embed-note">Paste the link into any Substack post, email, or social caption. Products link directly to retailers via your affiliate URLs.</div>
     <div class="embed-btns">
-      <button class="btn-p" style="margin-top:0" onclick="copyEmbed()">Copy Code</button>
+      <button class="btn-p" style="margin-top:0" onclick="copyEmbed()">Copy Link</button>
+      <button class="btn-g" style="margin-top:0" onclick="openWidgetTab()">Preview</button>
       <button class="btn-g" style="margin-top:0" onclick="closeEmbed()">Close</button>
     </div>
   </div>
@@ -1250,13 +1240,12 @@ async function renderWidgets(){
 // ══ EMBED ══
 function openEmbed(id){
   const l=D.lists.find(x=>x.id===id);if(!l)return;
-  const itemsHtml=l.items.map(it=>`    <a href="${it.link}" target="_blank" rel="noopener" style="display:block;text-decoration:none;color:#1C1B19;background:#fff;border:1px solid #E2DED7;">${it.image?`<img src="${it.image}" alt="${it.name}" style="width:100%;aspect-ratio:3/4;object-fit:cover;display:block;">`:`<div style="width:100%;aspect-ratio:3/4;background:#F2EFE9;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif;font-size:28px;color:#C8C5BE;">${(it.brand||'?')[0]}</div>`}
-      <div style="padding:8px 10px 12px;"><div style="font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9E9C97;margin-bottom:2px;">${it.brand}</div><div style="font-family:Georgia,serif;font-size:12px;color:#1C1B19;line-height:1.35;margin-bottom:3px;">${it.name}</div><div style="font-size:11px;color:#6B6860;">${it.price}</div>${it.note?`<div style="font-size:10px;color:#6B6860;font-family:Georgia,serif;font-style:italic;margin-top:4px;line-height:1.4;">${it.note}</div>`:''}<div style="margin-top:7px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #E2DED7;color:#6B6860;">Shop →</div></div></a>`).join('\n');
-  const code=`<!-- MaisonThePosh · ${l.name} -->\n<div style="font-family:Georgia,serif;margin:20px 0;">\n  <p style="font-size:13px;font-style:italic;color:#6B6860;margin-bottom:12px;">${l.note||''}</p>\n  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#E2DED7;">\n${itemsHtml}\n  </div>\n  <p style="font-size:10px;color:#9E9C97;margin-top:8px;text-align:right;">— <a href="https://maisontheposh.substack.com" style="color:#9E9C97;text-decoration:none;">MaisonThePosh</a></p>\n</div>`;
-  document.getElementById('embed-code').textContent=code;
+  const url=`https://maisontheposh.com/widget.html?id=${encodeURIComponent(l.id)}`;
+  document.getElementById('embed-code').textContent=url;
   document.getElementById('embed-pop').classList.add('open');
 }
-function copyEmbed(){navigator.clipboard.writeText(document.getElementById('embed-code').textContent).then(()=>toast('Code copied — paste into Substack HTML block'));}
+function copyEmbed(){navigator.clipboard.writeText(document.getElementById('embed-code').textContent).then(()=>toast('Link copied — paste into Substack!')).catch(()=>{const ta=document.createElement('textarea');ta.value=document.getElementById('embed-code').textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Link copied!');});}
+function openWidgetTab(){const url=document.getElementById('embed-code').textContent;if(url)window.open(url,'_blank');}
 function closeEmbed(){document.getElementById('embed-pop').classList.remove('open');}
 
 // ══ EDIT LIST ══

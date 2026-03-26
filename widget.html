@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MaisonThePosh · Shoppable List</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:#fff;color:#1C1B19;font-family:'Jost',sans-serif;font-weight:300;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:900px;margin:0 auto;padding:32px 20px 60px;}
+.hdr{text-align:center;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid #E2DED7;}
+.hdr-logo{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;font-weight:300;letter-spacing:.2em;color:#9E9C97;text-decoration:none;display:inline-block;margin-bottom:14px;}
+.list-title{font-family:'Cormorant Garamond',Georgia,serif;font-size:26px;font-weight:300;color:#1C1B19;margin-bottom:6px;}
+.list-note{font-family:'Cormorant Garamond',Georgia,serif;font-size:14px;font-style:italic;color:#6B6860;line-height:1.6;}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:#E2DED7;}
+.card{background:#fff;text-decoration:none;color:#1C1B19;display:block;transition:opacity .18s;}
+.card:hover{opacity:.88;}
+.card-img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block;background:#F2EFE9;}
+.card-ph{width:100%;aspect-ratio:3/4;background:#F2EFE9;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;color:#C8C5BE;}
+.card-info{padding:9px 11px 13px;}
+.card-brand{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9E9C97;margin-bottom:2px;}
+.card-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;color:#1C1B19;line-height:1.35;margin-bottom:3px;}
+.card-price{font-size:11px;color:#6B6860;}
+.card-note{font-size:10px;color:#6B6860;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;margin-top:4px;line-height:1.4;}
+.card-cta{display:block;margin-top:8px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #E2DED7;color:#6B6860;}
+.card-cta2{display:block;margin-top:4px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #E2DED7;color:#9E9C97;}
+.footer{text-align:right;margin-top:10px;font-size:10px;color:#9E9C97;}
+.footer a{color:#9E9C97;text-decoration:none;}
+.footer a:hover{color:#1C1B19;}
+.loading{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;color:#9E9C97;letter-spacing:.08em;}
+.error{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#B03030;}
+@media(max-width:600px){
+  .grid{grid-template-columns:repeat(2,1fr);}
+  .wrap{padding:24px 14px 48px;}
+  .list-title{font-size:22px;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <a class="hdr-logo" href="https://maisontheposh.com">MAISONTHEPOSH</a>
+    <div id="list-hdr"></div>
+  </div>
+  <div id="content"><div class="loading">Loading…</div></div>
+  <div class="footer"><a href="https://maisontheposh.com">maisontheposh.com</a></div>
+</div>
+
+<script>
+const SUPA_URL='https://epfabylszufvjnubyvnj.supabase.co';
+const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZmFieWxzenVmdmpudWJ5dm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTMxNjcsImV4cCI6MjA4OTQyOTE2N30.2e9EtH0iDJbklgIT0__ypH87K-5MpuPqVK2hQMwkjIE';
+
+function h(s){
+  if(!s)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function load(){
+  const params=new URLSearchParams(location.search);
+  const id=params.get('id');
+  if(!id){
+    document.getElementById('content').innerHTML='<div class="error">No list specified.</div>';
+    return;
+  }
+  try{
+    const [lRes,iRes]=await Promise.all([
+      fetch(`${SUPA_URL}/rest/v1/lists?id=eq.${encodeURIComponent(id)}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}}),
+      fetch(`${SUPA_URL}/rest/v1/items?list_id=eq.${encodeURIComponent(id)}&select=*&order=created_at.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}})
+    ]);
+    const [lists,items]=await Promise.all([lRes.json(),iRes.json()]);
+    const list=lists[0];
+    if(!list){
+      document.getElementById('content').innerHTML='<div class="error">List not found.</div>';
+      return;
+    }
+    document.title=`MaisonThePosh · ${list.name}`;
+    document.getElementById('list-hdr').innerHTML=
+      `<div class="list-title">${h(list.name)}</div>`+
+      (list.note?`<div class="list-note">${h(list.note)}</div>`:'');
+    if(!items||!items.length){
+      document.getElementById('content').innerHTML='<div class="loading" style="color:#C8C5BE;">No items in this list yet.</div>';
+      return;
+    }
+    const cards=items.map(it=>{
+      const img=it.image
+        ?`<img class="card-img" src="${h(it.image)}" alt="${h(it.name)}" loading="lazy">`
+        :`<div class="card-ph">${h((it.brand||'?')[0])}</div>`;
+      const cta2=it.link2?`<a class="card-cta2" href="${h(it.link2)}" target="_blank" rel="noopener">Shop (Alt) →</a>`:'';
+      return `<a class="card" href="${h(it.link||'#')}" target="_blank" rel="noopener">
+        ${img}
+        <div class="card-info">
+          <div class="card-brand">${h(it.brand)}</div>
+          <div class="card-name">${h(it.name)}</div>
+          <div class="card-price">${h(it.price)}</div>
+          ${it.note?`<div class="card-note">${h(it.note)}</div>`:''}
+          <span class="card-cta">Shop →</span>
+        </div>
+      </a>${cta2?`<div style="background:#fff;padding:0 11px 13px;">${cta2}</div>`:''}`;
+    }).join('');
+    document.getElementById('content').innerHTML=`<div class="grid">${cards}</div>`;
+  }catch(e){
+    document.getElementById('content').innerHTML='<div class="error">Could not load list. Please try again.</div>';
+  }
+}
+load();
+</script>
+</body>
+</html>
