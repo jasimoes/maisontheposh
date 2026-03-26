@@ -149,6 +149,11 @@ body.creator .btn-new{display:flex;}
 .wl.clickable:hover .strip-cell img{transform:scale(1.04);}
 .strip-ph{font-family:var(--serif);font-size:24px;color:var(--faint);}
 .strip-ghost{flex:0 0 calc(20% - .8px);background:var(--bg);}
+@media(max-width:700px){
+  .strip{overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;touch-action:pan-x;scrollbar-width:none;height:180px;}
+  .strip::-webkit-scrollbar{display:none;}
+  .strip-cell,.strip-ghost{flex:0 0 42vw;scroll-snap-align:start;}
+}
 .wl-foot{padding:13px 20px 12px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
 .wl-left{flex:1;min-width:0;}
 .wl-title{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--ink);margin-bottom:3px;}
@@ -170,7 +175,7 @@ body.creator .btn-new{display:flex;}
 /* ══ IG/LF GRID ══ */
 .lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;align-items:start;}
 .lf-cell{display:flex;flex-direction:column;cursor:pointer;background:var(--white);text-decoration:none;position:relative;}
-.lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--bg);}
+.lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--white);}
 .lf-cell .lf-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
 .lf-cell:hover .lf-img-wrap img{transform:scale(1.04);}
 .lf-over{display:none;}
@@ -381,9 +386,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   .hdr-logo-row{padding:14px 18px 12px;}
   .hdr-logo-mtp{font-size:24px;}
   .nav2{padding:0 14px;top:var(--header-h,106px);}
+  .t1{font-size:9px;letter-spacing:.08em;padding:11px 12px;}
   .detail-hdr,.detail-search-wrap,.detail-grid,.detail-add-btn{padding-left:18px;padding-right:18px;}
-  .strip{height:150px;}
-  .strip-cell,.strip-ghost{flex-basis:calc(33.333% - .67px);}
   .panel{width:100%;border-left:none;}
   .lf-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 18px;}
   .social-grid{grid-template-columns:repeat(2,1fr);}
@@ -1088,8 +1092,8 @@ function stripCard(l){
       <button class="wl-btn" title="Open" onclick="event.stopPropagation();openDetail('${h(l.id)}')">≡</button>
       <button class="wl-btn" title="Options" onclick="event.stopPropagation();toggleCtx('${h(l.id)}')">···</button>
     </div>`:'';
-  return `<div class="wl clickable" id="wl-${h(l.id)}" onclick="openDetail('${h(l.id)}')">
-    <div class="strip">${slots.join('')}</div>
+  return `<div class="wl clickable" id="wl-${h(l.id)}" onclick="openDetail('${h(l.id)}')" ontouchstart="this._tx=event.touches[0].clientX" ontouchend="if(Math.abs(event.changedTouches[0].clientX-this._tx)>10)event.preventDefault()">
+    <div class="strip" onclick="event.stopPropagation()">${slots.join('')}</div>
     <div class="wl-foot">
       <div class="wl-left">
         <div class="wl-title">${h(l.name)}</div>
