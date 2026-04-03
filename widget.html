@@ -30,10 +30,27 @@ body{background:#fff;color:#1C1B19;font-family:'Jost',sans-serif;font-weight:300
 .footer a:hover{color:#1C1B19;}
 .loading{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;color:#9E9C97;letter-spacing:.08em;}
 .error{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#B03030;}
+
+/* ── Buying options overlay ── */
+.opts-overlay{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.opts-overlay.open{display:flex;}
+.opts-box{background:#fff;max-width:480px;width:100%;padding:28px 28px 24px;position:relative;max-height:90vh;overflow-y:auto;}
+.opts-close{position:absolute;top:12px;right:14px;background:none;border:none;font-size:18px;cursor:pointer;color:#9E9C97;line-height:1;padding:4px 6px;}
+.opts-thumb-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #E2DED7;}
+.opts-thumb{width:52px;height:52px;object-fit:cover;background:#F2EFE9;display:block;flex-shrink:0;}
+.opts-thumb-ph{width:52px;height:52px;background:#F2EFE9;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',Georgia,serif;font-size:22px;color:#C8C5BE;flex-shrink:0;}
+.opts-item-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#1C1B19;line-height:1.3;}
+.opts-item-brand{font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#9E9C97;margin-bottom:3px;}
+.opts-list{display:flex;flex-direction:column;gap:8px;}
+.opts-link{display:block;width:100%;padding:12px 16px;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #1C1B19;color:#1C1B19;text-decoration:none;transition:all .18s;}
+.opts-link:hover{background:#1C1B19;color:#fff;}
+.opts-title{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9E9C97;margin-bottom:10px;}
+
 @media(max-width:600px){
   .grid{grid-template-columns:repeat(2,1fr);}
   .wrap{padding:24px 14px 48px;}
   .list-title{font-size:22px;}
+  .opts-box{padding:22px 18px 20px;}
 }
 </style>
 </head>
@@ -47,60 +64,112 @@ body{background:#fff;color:#1C1B19;font-family:'Jost',sans-serif;font-weight:300
   <div class="footer"><a href="https://maisontheposh.com">maisontheposh.com</a></div>
 </div>
 
+<!-- Buying options overlay -->
+<div class="opts-overlay" id="opts-overlay" onclick="if(event.target===this)closeOpts()">
+  <div class="opts-box">
+    <button class="opts-close" onclick="closeOpts()">×</button>
+    <div class="opts-thumb-row">
+      <div id="opts-thumb-wrap"></div>
+      <div>
+        <div class="opts-item-brand" id="opts-brand"></div>
+        <div class="opts-item-name" id="opts-name"></div>
+      </div>
+    </div>
+    <div class="opts-title">All buying options</div>
+    <div class="opts-list" id="opts-list"></div>
+  </div>
+</div>
+
 <script>
 const SUPA_URL='https://epfabylszufvjnubyvnj.supabase.co';
 const SUPA_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZmFieWxzenVmdmpudWJ5dm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTMxNjcsImV4cCI6MjA4OTQyOTE2N30.2e9EtH0iDJbklgIT0__ypH87K-5MpuPqVK2hQMwkjIE';
+
+// ── Back navigation: pressing browser back always goes to main site ──
+history.replaceState({widget:true},'',location.href);
+window.addEventListener('popstate',function(e){
+  if(e.state&&e.state.widget){
+    // User pressed back — send them to the main site
+    window.location.href='https://maisontheposh.com';
+  }
+});
 
 function h(s){
   if(!s)return'';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── Buying options overlay ──
+let _optsItem=null;
+function openOpts(it,e){
+  if(e){e.preventDefault();e.stopPropagation();}
+  _optsItem=it;
+  // Thumb
+  const tw=document.getElementById('opts-thumb-wrap');
+  tw.innerHTML=it.image
+    ?`<img class="opts-thumb" src="${h(it.image)}" alt="${h(it.name)}">`
+    :`<div class="opts-thumb-ph">${h((it.brand||'?')[0])}</div>`;
+  document.getElementById('opts-brand').textContent=it.brand||'';
+  document.getElementById('opts-name').textContent=it.name||'';
+  // Collect all links
+  const links=[it.link,it.link2,it.link3,it.link4,it.link5,it.link6].filter(Boolean);
+  const labels=['Shop now','Option 2','Option 3','Option 4','Option 5','Option 6'];
+  document.getElementById('opts-list').innerHTML=links.map((url,i)=>
+    `<a class="opts-link" href="${h(url)}" target="_blank" rel="noopener">${labels[i]} →</a>`
+  ).join('');
+  document.getElementById('opts-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeOpts(){
+  document.getElementById('opts-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeOpts();});
+
 async function load(){
   const params=new URLSearchParams(location.search);
   const id=params.get('id');
   const idsParam=params.get('ids');
 
-  // Helper to render item cards
   function renderCards(items){
     if(!items||!items.length){
       document.getElementById('content').innerHTML='<div class="loading" style="color:#C8C5BE;">No items yet.</div>';
       return;
     }
-    const cards=items.map(it=>{
+    // Store items for the overlay to reference
+    window._widgetItems=items;
+
+    const cards=items.map((it,idx)=>{
       const img=it.image
         ?`<img class="card-img" src="${h(it.image)}" alt="${h(it.name)}" loading="lazy">`
         :`<div class="card-ph">${h((it.brand||'?')[0])}</div>`;
-      return `<a class="card" href="${h(it.link||'#')}" target="_blank" rel="noopener">
+      const extraLinks=[it.link2,it.link3,it.link4,it.link5,it.link6].filter(Boolean);
+      const hasOpts=extraLinks.length>0;
+      return `<div class="card" onclick="if(!event.defaultPrevented)openOpts(window._widgetItems[${idx}],event)">
         ${img}
         <div class="card-info">
           <div class="card-brand">${h(it.brand)}</div>
           <div class="card-name">${h(it.name)}</div>
           <div class="card-price">${it.price?'$'+h(it.price):''}</div>
           ${it.note?`<div class="card-note">${h(it.note)}</div>`:''}
-          <span class="card-cta">Shop →</span>
+          <a class="card-cta" href="${h(it.link||'#')}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Shop →</a>
+          ${hasOpts?`<span class="card-cta2" onclick="event.stopPropagation();openOpts(window._widgetItems[${idx}],event)">See ${extraLinks.length} other option${extraLinks.length>1?'s':''} →</span>`:''}
         </div>
-      </a>`;
+      </div>`;
     }).join('');
     document.getElementById('content').innerHTML=`<div class="grid">${cards}</div>`;
   }
 
   try{
     if(idsParam){
-      // Custom widget — fetch specific items by ID
       const ids=idsParam.split(',').map(s=>s.trim()).filter(Boolean);
       if(!ids.length){document.getElementById('content').innerHTML='<div class="error">No items specified.</div>';return;}
       document.title='MaisonThePosh · Custom Edit';
       document.getElementById('list-hdr').innerHTML='<div class="list-title">My Edit</div>';
-      // Fetch all items that match the IDs using IN filter
-      const inFilter=ids.map(id=>`"${id}"`).join(',');
       const iRes=await fetch(`${SUPA_URL}/rest/v1/items?id=in.(${ids.map(id=>encodeURIComponent(id)).join(',')})&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}});
       const allItems=await iRes.json();
-      // Preserve the order the user selected them
       const ordered=ids.map(id=>allItems.find(it=>it.id===id)).filter(Boolean);
       renderCards(ordered);
     } else if(id){
-      // List widget — fetch full list
       const [lRes,iRes]=await Promise.all([
         fetch(`${SUPA_URL}/rest/v1/lists?id=eq.${encodeURIComponent(id)}&select=*`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}}),
         fetch(`${SUPA_URL}/rest/v1/items?list_id=eq.${encodeURIComponent(id)}&select=*&order=created_at.desc`,{headers:{'apikey':SUPA_KEY,'Authorization':`Bearer ${SUPA_KEY}`}})
