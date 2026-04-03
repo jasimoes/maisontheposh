@@ -421,6 +421,41 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .embed-btns{display:flex;gap:9px;}
 .embed-btns button{flex:1;}
 
+/* ── Pick from Collections overlay ── */
+.pick-ov{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:510;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
+.pick-ov.open{display:flex;}
+.pick-box{background:var(--white);border:1px solid var(--border);width:100%;max-width:780px;max-height:88vh;display:flex;flex-direction:column;animation:rise .18s ease;}
+.pick-hdr{padding:16px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:12px;}
+.pick-hdr-left{display:flex;flex-direction:column;gap:2px;}
+.pick-title{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);}
+.pick-sub{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);}
+.pick-search{display:flex;align-items:center;gap:8px;background:var(--surf);border:1px solid var(--border);padding:0 12px;flex:1;max-width:280px;}
+.pick-search svg{width:13px;height:13px;stroke:var(--mid);stroke-width:2;fill:none;flex-shrink:0;}
+.pick-search input{flex:1;border:none;background:transparent;font-family:var(--sans);font-size:12px;color:var(--ink);outline:none;padding:8px 0;font-weight:300;}
+.pick-close{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;font-size:16px;color:var(--mid);display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;}
+.pick-close:hover{border-color:var(--ink);color:var(--ink);}
+.pick-body{overflow-y:auto;flex:1;padding:16px 22px;}
+.pick-section-label{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:10px 0 8px;font-family:var(--sans);}
+.pick-section-label:first-child{margin-top:0;}
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px;}
+.pick-card{border:1px solid var(--border);cursor:pointer;transition:border-color .15s;position:relative;background:var(--white);}
+.pick-card:hover{border-color:var(--ink);}
+.pick-card-img{aspect-ratio:1;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.pick-card-img img{width:100%;height:100%;object-fit:cover;}
+.pick-card-ph{font-family:var(--serif);font-size:24px;color:var(--faint);}
+.pick-card-info{padding:7px 9px 9px;}
+.pick-card-brand{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+.pick-card-name{font-family:var(--serif);font-size:11px;color:var(--ink);line-height:1.3;}
+.pick-card-price{font-size:10px;color:var(--mid);margin-top:2px;}
+.pick-empty{padding:40px 20px;text-align:center;font-family:var(--serif);font-size:15px;color:var(--soft);grid-column:1/-1;}
+@media(max-width:700px){
+  .pick-box{max-height:92vh;border-radius:0;}
+  .pick-ov{padding:0;align-items:flex-end;}
+  .pick-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .pick-hdr{flex-wrap:wrap;gap:8px;}
+  .pick-search{max-width:100%;flex:1 1 100%;}
+}
+
 /* toast */
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:white;padding:9px 20px;font-size:11px;letter-spacing:.08em;z-index:999;transition:transform .26s;pointer-events:none;white-space:nowrap;}
 .toast.show{transform:translateX(-50%) translateY(0);}
@@ -551,7 +586,10 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Items grid -->
   <div class="detail-grid" id="detail-grid"></div>
   <!-- Add item row — creator only -->
-  <div class="detail-add-btn creator-only-btn" onclick="openAddItem()">＋ Add Item</div>
+  <div style="display:flex;border-top:1px solid var(--border);">
+    <div class="detail-add-btn creator-only-btn" style="flex:1;border-top:none;" onclick="openAddItem()">＋ Add Item</div>
+    <div class="detail-add-btn creator-only-btn" id="pick-from-col-btn" style="flex:1;border-top:none;border-left:1px solid var(--border);display:none;" onclick="openPickFromCollections()">＋ Pick from Collections</div>
+  </div>
 </div>
 
 <!-- BACKDROP + PANEL for looks -->
@@ -845,6 +883,24 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 
 <!-- EMBED POPUP -->
 <div class="embed-pop" id="embed-pop" onclick="if(event.target===this)closeEmbed()">
+
+<!-- ── Pick from Collections Overlay ── -->
+<div class="pick-ov" id="pick-ov" onclick="if(event.target===this)closePickFromCollections()">
+  <div class="pick-box">
+    <div class="pick-hdr">
+      <div class="pick-hdr-left">
+        <div class="pick-title">Pick from Collections</div>
+        <div class="pick-sub">Tap an item to add it to this weekly list</div>
+      </div>
+      <div class="pick-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="pick-search-inp" placeholder="Search items…" oninput="filterPickItems(this.value)">
+      </div>
+      <button class="pick-close" onclick="closePickFromCollections()">×</button>
+    </div>
+    <div class="pick-body" id="pick-body"></div>
+  </div>
+</div>
   <div class="embed-box">
     <h3>Share Shoppable List</h3>
     <p>Copy this link and paste it directly into your Substack post. Readers get a live shoppable product page with all your affiliate links.</p>
@@ -1205,6 +1261,9 @@ function openDetail(id){
   renderDetailItems(l.items);
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
+  // Show "Pick from Collections" button only for weekly lists (creator mode)
+  const pickBtn=document.getElementById('pick-from-col-btn');
+  if(pickBtn) pickBtn.style.display=(l.t1==='weekly')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
@@ -1898,7 +1957,69 @@ async function addItem(){
   closeAI();detailAllItems=[...l.items];renderDetailItems(l.items);render();toast('Item added ✓');
 }
 
-// ══ ANALYTICS — page view tracking ══
+// ══ PICK FROM COLLECTIONS ══
+let pickAllItems=[];
+function openPickFromCollections(){
+  if(!currentListId)return;
+  // Gather all items from collection lists (not weekly/latest/social)
+  pickAllItems=[];
+  D.lists.filter(l=>l.t1==='collections'&&l.id!==currentListId).forEach(l=>{
+    l.items.forEach(it=>pickAllItems.push({...it,_listName:l.name}));
+  });
+  document.getElementById('pick-search-inp').value='';
+  renderPickItems(pickAllItems);
+  document.getElementById('pick-ov').classList.add('open');
+}
+function closePickFromCollections(){
+  document.getElementById('pick-ov').classList.remove('open');
+}
+function filterPickItems(term){
+  if(!term.trim()){renderPickItems(pickAllItems);return;}
+  const t=term.toLowerCase();
+  renderPickItems(pickAllItems.filter(it=>(it.name||'').toLowerCase().includes(t)||(it.brand||'').toLowerCase().includes(t)||(it._listName||'').toLowerCase().includes(t)));
+}
+function renderPickItems(items){
+  const body=document.getElementById('pick-body');
+  if(!items.length){body.innerHTML='<div class="pick-empty">No collection items found</div>';return;}
+  // Group by source list
+  const byList={};
+  items.forEach(it=>{(byList[it._listName]=byList[it._listName]||[]).push(it);});
+  body.innerHTML=Object.entries(byList).map(([listName,its])=>`
+    <div class="pick-section-label">${h(listName)}</div>
+    <div class="pick-grid">${its.map(it=>{
+      const img=it.image?`<img src="${h(it.image)}" alt="" loading="lazy">`:`<div class="pick-card-ph">${(it.brand||'?')[0]}</div>`;
+      return `<div class="pick-card" onclick="pickItem('${h(it.id)}')">
+        <div class="pick-card-img">${img}</div>
+        <div class="pick-card-info">
+          <div class="pick-card-brand">${h(it.brand||'')}</div>
+          <div class="pick-card-name">${h(it.name)}</div>
+          ${it.price?`<div class="pick-card-price">$${h(it.price)}</div>`:''}
+        </div>
+      </div>`;
+    }).join('')}</div>
+  `).join('');
+}
+async function pickItem(srcId){
+  if(!currentListId)return;
+  const targetList=D.lists.find(x=>x.id===currentListId);if(!targetList)return;
+  const src=pickAllItems.find(x=>x.id===srcId);if(!src)return;
+  // Copy the item into the current weekly list with a new ID
+  const newItem={
+    id:uid(),name:src.name,brand:src.brand||'—',price:src.price||'',
+    note:src.note||'',link:src.link||'#',link2:src.link2||'',link3:src.link3||'',
+    link4:src.link4||'',link5:src.link5||'',link6:src.link6||'',
+    image:src.image||'',cat:src.cat||''
+  };
+  targetList.items.push(newItem);
+  closePickFromCollections();
+  detailAllItems=[...targetList.items];
+  renderDetailItems(targetList.items);
+  render();
+  await saveItem(newItem,currentListId);
+  toast(`"${src.name}" added ✓`);
+}
+
+
 async function trackPageView(){
   try{
     const today=new Date().toISOString().split('T')[0];
