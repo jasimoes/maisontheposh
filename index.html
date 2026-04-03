@@ -1683,8 +1683,15 @@ function renderWB(){
   D.lists.forEach(l=>l.items.forEach(it=>all.push({...it,_listName:l.name,_listT1:l.t1})));
   // Sort newest first
   all.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
+  // Deduplicate by name+brand — keep only first (newest) occurrence
+  const seen=new Set();
+  const deduped=all.filter(it=>{
+    const key=(it.name||'').toLowerCase().trim()+'|'+(it.brand||'').toLowerCase().trim();
+    if(seen.has(key))return false;
+    seen.add(key);return true;
+  });
   // Filter
-  const filtered=all.filter(it=>{
+  const filtered=deduped.filter(it=>{
     const catMatch=_wbFilter==='all'||(it.cat||'')=== _wbFilter;
     const qMatch=!q||
       (it.name||'').toLowerCase().includes(q)||
