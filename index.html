@@ -558,7 +558,10 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <div class="panel-hd">
     <div class="panel-hd-top">
       <h2 class="panel-title" id="panel-title"></h2>
-      <button class="panel-x" onclick="closePanel()">✕</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button id="panel-edit-btn" onclick="openEditLook(document.getElementById('panel').dataset.lookId)" style="display:none;padding:5px 12px;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;">Edit</button>
+        <button class="panel-x" onclick="closePanel()">✕</button>
+      </div>
     </div>
     <div id="panel-note-d" style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--mid);line-height:1.65;"></div>
   </div>
@@ -1007,6 +1010,7 @@ let activeT1='latest',activeCat='all',currentListId=null,nlT1='',nlCat='',aTab='
 let isCreator=false;
 let detailAllItems=[];
 let lookManualItems=[];
+let _editingLookId=null; // null = create, string = editing existing look
 
 function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
@@ -1954,6 +1958,8 @@ function renderAnalytics(views){
   </div>`;
 }
 function openCreateLook(){
+  _editingLookId=null;
+  document.querySelector('#look-ov .ftitle').textContent='Create a Look';
   document.getElementById('look-title').value='';
   document.getElementById('look-note').value='';
   document.getElementById('look-img-val').value='';
@@ -1969,6 +1975,38 @@ function openCreateLook(){
   const picker=document.getElementById('look-picker');
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
   picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first, or use the Add a Link tab.</p>';
+  document.getElementById('look-ov').classList.add('open');
+}
+function openEditLook(id){
+  const look=(D.looks||[]).find(x=>x.id===id);if(!look)return;
+  _editingLookId=id;
+  closePanel();
+  // Pre-fill form
+  document.querySelector('#look-ov .ftitle').textContent='Edit Look';
+  document.getElementById('look-title').value=look.title||'';
+  document.getElementById('look-note').value=look.note||'';
+  // Cover image
+  lookImgVal=look.image||'';
+  document.getElementById('look-img-val').value=lookImgVal;
+  if(lookImgVal){
+    document.getElementById('look-prev').src=lookImgVal;
+    document.getElementById('look-img-preview').style.display='block';
+    document.getElementById('look-dropzone').style.display='none';
+  } else {
+    document.getElementById('look-prev').src='';
+    document.getElementById('look-img-preview').style.display='none';
+    document.getElementById('look-dropzone').style.display='block';
+  }
+  // Separate list-linked items from manual items
+  const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
+  const allItemIds=new Set(allItems.map(it=>it.id));
+  const checkedIds=new Set((look.items||[]).filter(it=>allItemIds.has(it.id)).map(it=>it.id));
+  lookManualItems=(look.items||[]).filter(it=>!allItemIds.has(it.id)).map(it=>({...it}));
+  // Build picker
+  switchPickerTab('list');
+  const picker=document.getElementById('look-picker');
+  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}"${checkedIds.has(it.id)?' checked':''} style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">No items in your lists yet.</p>';
+  renderLookManualItems();
   document.getElementById('look-ov').classList.add('open');
 }
 function switchPickerTab(n){
@@ -2012,20 +2050,38 @@ async function saveLook(){
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push(it)));
   const listItems=checked.map(id=>allItems.find(it=>it.id===id)).filter(Boolean);
   const allTagged=[...listItems,...lookManualItems];
-  // Use higher-res compressor for cover, standard for any item images
   const compressedImg=await compressLookCover(lookImgVal);
   if(!D.looks)D.looks=[];
-  const look={id:uid(),title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged,ts:Date.now()};
-  D.looks.unshift(look);
-  const btn=document.querySelector('#look-ov .btn-p');
-  if(btn){btn.textContent='Saving…';btn.disabled=true;}
-  try{
-    await saveLookToCloud(look);
-    closeLook();render();toast('Look saved ✓');
-  }catch(e){
-    toast('⚠ Save failed — check connection and try again');
-  }finally{
-    if(btn){btn.textContent='SAVE LOOK';btn.disabled=false;}
+
+  if(_editingLookId){
+    // Update existing look
+    const idx=D.looks.findIndex(x=>x.id===_editingLookId);
+    if(idx===-1){toast('⚠ Look not found');return;}
+    D.looks[idx]={...D.looks[idx],title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged};
+    const btn=document.querySelector('#look-ov .btn-p');
+    if(btn){btn.textContent='Saving…';btn.disabled=true;}
+    try{
+      await saveLookToCloud(D.looks[idx]);
+      closeLook();render();toast('Look updated ✓');
+    }catch(e){
+      toast('⚠ Save failed — check connection and try again');
+    }finally{
+      if(btn){btn.textContent='SAVE LOOK';btn.disabled=false;}
+    }
+  } else {
+    // Create new look
+    const look={id:uid(),title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged,ts:Date.now()};
+    D.looks.unshift(look);
+    const btn=document.querySelector('#look-ov .btn-p');
+    if(btn){btn.textContent='Saving…';btn.disabled=true;}
+    try{
+      await saveLookToCloud(look);
+      closeLook();render();toast('Look saved ✓');
+    }catch(e){
+      toast('⚠ Save failed — check connection and try again');
+    }finally{
+      if(btn){btn.textContent='SAVE LOOK';btn.disabled=false;}
+    }
   }
 }
 
@@ -2069,9 +2125,13 @@ function clearLookImg(){
   document.getElementById('look-img-preview').style.display='none';
   document.getElementById('look-dropzone').style.display='block';
 }
-function closeLook(){document.getElementById('look-ov').classList.remove('open');}
+function closeLook(){document.getElementById('look-ov').classList.remove('open');_editingLookId=null;}
 function openLookPanel(id){
   const look=(D.looks||[]).find(x=>x.id===id);if(!look)return;
+  document.getElementById('panel').dataset.lookId=id;
+  // Show edit button for creators only
+  const editBtn=document.getElementById('panel-edit-btn');
+  if(editBtn)editBtn.style.display=isCreator?'block':'none';
   document.getElementById('panel-title').textContent=look.title;
   document.getElementById('panel-note-d').textContent=look.note||'';
   const g=document.getElementById('panel-items');
