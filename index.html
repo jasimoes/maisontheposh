@@ -775,7 +775,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 <!-- CREATE LOOK -->
 <div class="fov" id="look-ov">
   <div class="fp">
-    <h3 class="ftitle">Create a Look</h3>
+    <h3 class="ftitle" id="look-form-title">Create a Look</h3>
+    <input type="hidden" id="editing-look-id">
     <div class="fg">
       <label class="fl">Cover Image</label>
       <div style="font-size:11px;color:var(--soft);margin-bottom:10px;line-height:1.6;">
@@ -1515,7 +1516,16 @@ function renderLatest(){
     feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds or Weekly Curation lists.':'Add items and select '+activeCat+' as their category.'}</p></div>`;
     return;
   }
+  // Sort newest first
   items.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
+  // Deduplicate — keep only the first (newest) occurrence of each item by name+brand
+  const seen=new Set();
+  items=items.filter(it=>{
+    const key=(it.name||'').toLowerCase().trim()+'|'+(it.brand||'').toLowerCase().trim();
+    if(seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
   items=items.slice(0,102);
   const cells=items.map(it=>{
     const img=it.image
@@ -1546,10 +1556,12 @@ function renderSocial(){
         :`<div class="scard" onclick="openDetail('${h(item.id)}')"><div class="scard-ph"><div class="scard-ph-icon">◻</div><div class="scard-ph-txt">${h(item.name)}</div></div></div>`;
     } else {
       // It's a look — position:relative is on .scard already via CSS
-      const delBtn=isCreator?`<button onclick="event.stopPropagation();deleteLook('${h(item.id)}')" style="position:absolute;top:7px;right:7px;background:rgba(0,0,0,.6);color:white;border:none;width:24px;height:24px;cursor:pointer;font-size:11px;border-radius:50%;z-index:10;line-height:24px;text-align:center;padding:0;">✕</button>`:'';
+      const creatorBtns=isCreator?`
+        <button onclick="event.stopPropagation();openEditLook('${h(item.id)}')" style="position:absolute;top:7px;left:7px;background:rgba(255,255,255,.88);color:var(--ink);border:none;width:24px;height:24px;cursor:pointer;font-size:11px;border-radius:50%;z-index:10;line-height:24px;text-align:center;padding:0;" title="Edit look">✎</button>
+        <button onclick="event.stopPropagation();deleteLook('${h(item.id)}')" style="position:absolute;top:7px;right:7px;background:rgba(0,0,0,.6);color:white;border:none;width:24px;height:24px;cursor:pointer;font-size:11px;border-radius:50%;z-index:10;line-height:24px;text-align:center;padding:0;">✕</button>`:'';
       return item.image
-        ?`<div class="scard" onclick="openLookPanel('${h(item.id)}')"><img src="${h(item.image)}" alt=""><div class="scard-over"></div><div class="scard-label"><div class="scard-title">${h(item.title)}</div><div class="scard-count">${(item.items||[]).length} tagged</div></div>${delBtn}</div>`
-        :`<div class="scard" onclick="openLookPanel('${h(item.id)}')"><div class="scard-ph"><div class="scard-ph-icon">✦</div><div class="scard-ph-txt">${h(item.title)}</div></div>${delBtn}</div>`;
+        ?`<div class="scard" onclick="openLookPanel('${h(item.id)}')"><img src="${h(item.image)}" alt=""><div class="scard-over"></div><div class="scard-label"><div class="scard-title">${h(item.title)}</div><div class="scard-count">${(item.items||[]).length} tagged</div></div>${creatorBtns}</div>`
+        :`<div class="scard" onclick="openLookPanel('${h(item.id)}')"><div class="scard-ph"><div class="scard-ph-icon">✦</div><div class="scard-ph-txt">${h(item.title)}</div></div>${creatorBtns}</div>`;
     }
   }).join('');
   const addLookBtn=isCreator?`<div class="scard" style="cursor:pointer;background:var(--surf);" onclick="openCreateLook()"><div class="scard-ph"><div class="scard-ph-icon" style="font-size:32px;opacity:.3">＋</div><div class="scard-ph-txt">Create a look</div></div></div>`:'';
@@ -2165,6 +2177,8 @@ function renderAnalytics(views){
   </div>`;
 }
 function openCreateLook(){
+  document.getElementById('look-form-title').textContent='Create a Look';
+  document.getElementById('editing-look-id').value='';
   document.getElementById('look-title').value='';
   document.getElementById('look-note').value='';
   document.getElementById('look-img-val').value='';
@@ -2180,6 +2194,39 @@ function openCreateLook(){
   const picker=document.getElementById('look-picker');
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
   picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first, or use the Add a Link tab.</p>';
+  document.getElementById('look-ov').classList.add('open');
+}
+
+function openEditLook(id){
+  const look=(D.looks||[]).find(x=>x.id===id);if(!look)return;
+  document.getElementById('look-form-title').textContent='Edit Look';
+  document.getElementById('editing-look-id').value=id;
+  document.getElementById('look-title').value=look.title||'';
+  document.getElementById('look-note').value=look.note||'';
+  // Cover image
+  lookImgVal=look.image||'';
+  document.getElementById('look-img-val').value=lookImgVal;
+  if(lookImgVal){
+    document.getElementById('look-prev').src=lookImgVal;
+    document.getElementById('look-img-preview').style.display='block';
+    document.getElementById('look-dropzone').style.display='none';
+  } else {
+    document.getElementById('look-prev').src='';
+    document.getElementById('look-img-preview').style.display='none';
+    document.getElementById('look-dropzone').style.display='block';
+  }
+  // Populate product picker — check items that are in this look
+  switchPickerTab('list');
+  const lookItemIds=new Set((look.items||[]).map(it=>it.id));
+  const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
+  const picker=document.getElementById('look-picker');
+  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" ${lookItemIds.has(it.id)?'checked':''} style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first.</p>';
+  // Restore any manual (non-list) items
+  const listItemIds=new Set(allItems.map(it=>it.id));
+  lookManualItems=(look.items||[]).filter(it=>!listItemIds.has(it.id));
+  renderLookManualItems();
+  document.getElementById('look-manual-name').value='';
+  document.getElementById('look-manual-url').value='';
   document.getElementById('look-ov').classList.add('open');
 }
 function switchPickerTab(n){
@@ -2223,16 +2270,26 @@ async function saveLook(){
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push(it)));
   const listItems=checked.map(id=>allItems.find(it=>it.id===id)).filter(Boolean);
   const allTagged=[...listItems,...lookManualItems];
-  // Use higher-res compressor for cover, standard for any item images
   const compressedImg=await compressLookCover(lookImgVal);
   if(!D.looks)D.looks=[];
-  const look={id:uid(),title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged,ts:Date.now()};
-  D.looks.unshift(look);
+  const editingId=document.getElementById('editing-look-id').value;
   const btn=document.querySelector('#look-ov .btn-p');
   if(btn){btn.textContent='Saving…';btn.disabled=true;}
   try{
-    await saveLookToCloud(look);
-    closeLook();render();toast('Look saved ✓');
+    if(editingId){
+      // Update existing look
+      const idx=D.looks.findIndex(x=>x.id===editingId);
+      if(idx>-1){
+        D.looks[idx]={...D.looks[idx],title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged};
+        await saveLookToCloud(D.looks[idx]);
+      }
+    } else {
+      // Create new look
+      const look={id:uid(),title,note:document.getElementById('look-note').value.trim(),image:compressedImg,items:allTagged,ts:Date.now()};
+      D.looks.unshift(look);
+      await saveLookToCloud(look);
+    }
+    closeLook();render();toast(editingId?'Look updated ✓':'Look saved ✓');
   }catch(e){
     toast('⚠ Save failed — check connection and try again');
   }finally{
@@ -2283,6 +2340,7 @@ function clearLookImg(){
 function closeLook(){document.getElementById('look-ov').classList.remove('open');}
 function openLookPanel(id){
   const look=(D.looks||[]).find(x=>x.id===id);if(!look)return;
+  history.pushState({tab:activeT1,look:id},'',`/?look=${id}`);
   document.getElementById('panel-title').textContent=look.title;
   document.getElementById('panel-note-d').textContent=''; // note now shown in grid card
   const g=document.getElementById('panel-items');
@@ -2443,6 +2501,7 @@ function restoreFromURL(){
   const tab=params.get('tab')||'latest';
   const listId=params.get('list');
   const itemId=params.get('item');
+  const lookId=params.get('look');
   // Set active tab
   const validTabs=['latest','weekly','collections','social','widgets'];
   const t=validTabs.includes(tab)?tab:'latest';
@@ -2470,6 +2529,10 @@ function restoreFromURL(){
     currentListId=null;
     render();
   }
+  // Open look panel if specified
+  if(lookId&&(D.looks||[]).find(x=>x.id===lookId)){
+    setTimeout(()=>openLookPanel(lookId),120);
+  }
   // Open item popup if specified
   if(itemId)setTimeout(()=>openItemPop(itemId),120);
 }
@@ -2478,10 +2541,17 @@ window.addEventListener('popstate',function(e){
   // Close any open popups first
   closeItemPop();closeOptsPop();
   if(document.getElementById('wb-pop').classList.contains('open'))closeWB();
+  // Close look panel if open
+  if(document.getElementById('panel').classList.contains('open')){closePanel();return;}
   const state=e.state||{};
   const params=new URLSearchParams(location.search);
+  const lookId=state.look||params.get('look');
   const listId=state.list||params.get('list');
   const tab=state.tab||params.get('tab')||'latest';
+
+  if(lookId&&(D.looks||[]).find(x=>x.id===lookId)){
+    openLookPanel(lookId);return;
+  }
 
   if(listId&&D.lists.find(x=>x.id===listId)){
     // Going forward into a list — open it without pushing new state
