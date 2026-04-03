@@ -1173,7 +1173,12 @@ function handleLogoTap(e){
 }
 
 function goHome(){
-  closeDetail();
+  closeDetail(true);
+  activeT1='latest';activeCat='all';
+  document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1==='latest'));
+  document.getElementById('nav2')&&document.getElementById('nav2').classList.remove('hide');
+  document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
+  history.pushState({tab:'latest'},'','/?tab=latest');
   render();
   window.scrollTo({top:0,behavior:'smooth'});
 }
