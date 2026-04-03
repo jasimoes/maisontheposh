@@ -298,7 +298,9 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .panel-footer-txt{font-size:11px;color:var(--soft);}
 .panel-footer a{font-size:11px;color:var(--mid);text-decoration:none;transition:color .18s;}
 .panel-footer a:hover{color:var(--ink);}
-.panel-items-g{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);}
+.picard-note-card{background:var(--surf);border:none !important;}
+.picard-note-card:hover{opacity:1 !important;background:var(--surf) !important;}
+
 .picard{background:var(--white);text-decoration:none;color:inherit;display:block;transition:background .15s;}
 .picard:hover{background:var(--surf);}
 .picard-img{aspect-ratio:3/4;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
@@ -793,7 +795,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <input type="hidden" id="look-img-val">
     </div>
     <div class="fg"><label class="fl">Look Title</label><input type="text" class="fi" id="look-title" placeholder="e.g. Quiet Luxury Weekend"></div>
-    <div class="fg"><label class="fl">Caption</label><textarea class="fi fta" id="look-note" rows="2" placeholder="Your take — outfit formula, material notes…"></textarea></div>
+    <div class="fg"><label class="fl">Editorial Note</label><textarea class="fi fta" id="look-note" rows="3" placeholder="Your take — outfit formula, material notes, why you love it…"></textarea></div>
     <div class="fg">
       <label class="fl">Tag Products <span class="flh">(optional — from your lists or add a link)</span></label>
       <!-- Tab: from list or add link -->
@@ -2282,9 +2284,16 @@ function closeLook(){document.getElementById('look-ov').classList.remove('open')
 function openLookPanel(id){
   const look=(D.looks||[]).find(x=>x.id===id);if(!look)return;
   document.getElementById('panel-title').textContent=look.title;
-  document.getElementById('panel-note-d').textContent=look.note||'';
+  document.getElementById('panel-note-d').textContent=''; // note now shown in grid card
   const g=document.getElementById('panel-items');
   const cover=look.image?`<div style="grid-column:1/-1"><img src="${h(look.image)}" style="width:100%;max-height:260px;object-fit:cover;display:block;"></div>`:'';
+  const noteCard=look.note?`<div class="picard picard-note-card" style="cursor:default;text-decoration:none;">
+    <div style="padding:18px 16px;display:flex;flex-direction:column;gap:10px;height:100%;">
+      <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-family:var(--sans);">Editor's Note</div>
+      <div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--ink);line-height:1.7;flex:1;">${h(look.note)}</div>
+      <div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:var(--sans);">— MaisonThePosh</div>
+    </div>
+  </div>`:'';
   g.innerHTML=cover+look.items.map(it=>{
     const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="picard-ph">${(it.brand||'?')[0]}</div>`;
     const extraLinks=[it.link2,it.link3,it.link4,it.link5,it.link6].filter(l=>l&&l.trim()&&l!=='#');
@@ -2292,7 +2301,7 @@ function openLookPanel(id){
       ?`<button class="picard-alt" onclick="event.preventDefault();event.stopPropagation();openPanelOpts(this)" data-item='${JSON.stringify({image:it.image||'',name:it.name||'',brand:it.brand||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||''}).replace(/'/g,"&#39;")}'>See ${extraLinks.length} other option${extraLinks.length>1?'s':''} →</button>`
       :'';
     return `<a class="picard" href="${h(it.link)}" target="_blank" rel="noopener"><div class="picard-img">${img}</div><div class="picard-info"><div class="picard-brand">${h(it.brand)}</div><div class="picard-name">${h(it.name)}</div><div class="picard-price">${it.price?'$'+h(it.price):h(it.price)}</div>${it.note?`<div class="picard-note">${h(it.note)}</div>`:''}<span class="picard-cta">Shop →</span>${altBtn}</div></a>`;
-  }).join('');
+  }).join('')+noteCard;
   document.getElementById('backdrop').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow='hidden';
