@@ -258,7 +258,11 @@ body.creator .btn-new{display:flex;}
 .dcard-name{font-family:var(--serif);font-size:13px;font-weight:400;color:var(--ink);line-height:1.35;margin-bottom:4px;flex:1;}
 .dcard-price{font-size:13px;color:var(--ink);font-weight:400;margin-bottom:3px;}
 .dcard-note{font-size:11px;color:var(--mid);font-family:var(--serif);font-style:italic;line-height:1.45;margin-bottom:8px;}
-.dcard-note:empty{display:none;}
+.dcard-drag-handle{position:absolute;top:7px;left:7px;width:22px;height:22px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--mid);font-size:14px;background:rgba(255,255,255,.88);border:1px solid var(--border);border-radius:2px;z-index:5;user-select:none;line-height:1;}
+body.creator .dcard-drag-handle{display:flex;}
+.dcard.drag-over{border-color:var(--ink);background:var(--surf);}
+.dcard.dragging{opacity:.4;border-style:dashed;}
+
 /* Copy Link — Collective style */
 .dcard-actions{display:flex;gap:6px;margin-top:auto;}
 .btn-copy-link{flex:1;padding:8px 0;text-align:center;font-family:var(--sans);font-size:11px;letter-spacing:.06em;border:1.5px solid var(--border);color:var(--mid);background:none;cursor:pointer;transition:all .18s;border-radius:100px;}
@@ -943,7 +947,7 @@ async function loadFromCloud(){
     showLoading(true);
     const [lists,items,looks]=await Promise.all([
       sbFetch('lists?select=*&order=created_at.desc'),
-      sbFetch('items?select=*&order=created_at.desc'),
+      sbFetch('items?select=*&order=sort_order.asc,created_at.desc'),
       sbFetch('looks?select=*&order=created_at.desc')
     ]);
 
@@ -1297,7 +1301,8 @@ function renderDetailItems(items){
       <button data-edit-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
       <button data-delete-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Delete</button>
     </div>`;
-    return `<div class="dcard" style="cursor:pointer;" onclick="openItemPop('${h(it.id)}')">
+    return `<div class="dcard" draggable="true" data-item-id="${h(it.id)}" style="cursor:pointer;position:relative;" onclick="openItemPop('${h(it.id)}')">
+      <div class="dcard-drag-handle creator-only-btn" title="Drag to reorder" onclick="event.stopPropagation()">⠿</div>
       <div class="dcard-img">${imgHtml}</div>
       <div class="dcard-info">
         <div class="dcard-brand">${h(it.brand)}</div>
@@ -1314,6 +1319,63 @@ function renderDetailItems(items){
   } else {
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='none');
   }
+  initItemDrag();
+}
+
+// ══ DRAG-TO-REORDER ITEMS ══
+let _dragSrcId=null;
+function initItemDrag(){
+  if(!isCreator)return;
+  const grid=document.getElementById('detail-grid');
+  if(!grid)return;
+  grid.querySelectorAll('.dcard[data-item-id]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      _dragSrcId=card.dataset.itemId;
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('dragging');
+      grid.querySelectorAll('.dcard').forEach(c=>c.classList.remove('drag-over'));
+    });
+    card.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      grid.querySelectorAll('.dcard').forEach(c=>c.classList.remove('drag-over'));
+      if(card.dataset.itemId!==_dragSrcId)card.classList.add('drag-over');
+    });
+    card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+    card.addEventListener('drop',e=>{
+      e.preventDefault();
+      card.classList.remove('drag-over');
+      if(!_dragSrcId||card.dataset.itemId===_dragSrcId)return;
+      reorderItem(_dragSrcId,card.dataset.itemId);
+      _dragSrcId=null;
+    });
+  });
+}
+async function reorderItem(srcId,targetId){
+  const l=D.lists.find(x=>x.id===currentListId);if(!l)return;
+  const items=l.items;
+  const si=items.findIndex(x=>x.id===srcId);
+  const ti=items.findIndex(x=>x.id===targetId);
+  if(si<0||ti<0)return;
+  // Move src to target position
+  const [moved]=items.splice(si,1);
+  items.splice(ti,0,moved);
+  // Update sort_order values
+  items.forEach((it,i)=>it.sort_order=i);
+  detailAllItems=[...items];
+  renderDetailItems(items);
+  initItemDrag();
+  // Batch save sort_order to Supabase
+  try{
+    await Promise.all(items.map((it,i)=>sbFetch('items',{
+      method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify({...it,sort_order:i,list_id:currentListId})
+    })));
+  }catch(e){console.error('reorder save failed',e);}
 }
 
 function copyAffiliateLink(){
