@@ -591,7 +591,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Items grid -->
   <div class="detail-grid" id="detail-grid"></div>
   <!-- Add item row — creator only -->
-  <div style="display:flex;border-top:1px solid var(--border);">
+  <div class="creator-only-btn" style="display:flex;border-top:1px solid var(--border);">
     <div class="detail-add-btn creator-only-btn" style="flex:1;border-top:none;" onclick="openAddItem()">＋ Add Item</div>
     <div class="detail-add-btn creator-only-btn" id="pick-from-col-btn" style="flex:1;border-top:none;border-left:1px solid var(--border);display:none;" onclick="openPickFromCollections()">＋ Pick from Collections</div>
   </div>
@@ -1279,9 +1279,9 @@ function openDetail(id){
   renderDetailItems(l.items);
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
-  // Show "Pick from Collections" button for weekly AND collection lists (creator mode)
+  // Show "Pick from Collections" button for weekly AND collection lists (creator mode only)
   const pickBtn=document.getElementById('pick-from-col-btn');
-  if(pickBtn) pickBtn.style.display=(l.t1==='weekly'||l.t1==='collections')?'flex':'none';
+  if(pickBtn) pickBtn.style.display=(isCreator&&(l.t1==='weekly'||l.t1==='collections'))?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
