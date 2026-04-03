@@ -882,15 +882,13 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 </div>
 
 <!-- EMBED POPUP -->
-<div class="embed-pop" id="embed-pop" onclick="if(event.target===this)closeEmbed()">
-
 <!-- ── Pick from Collections Overlay ── -->
 <div class="pick-ov" id="pick-ov" onclick="if(event.target===this)closePickFromCollections()">
   <div class="pick-box">
     <div class="pick-hdr">
       <div class="pick-hdr-left">
         <div class="pick-title">Pick from Collections</div>
-        <div class="pick-sub">Tap an item to add it to this weekly list</div>
+        <div class="pick-sub" id="pick-sub">Tap an item to add it to this list</div>
       </div>
       <div class="pick-search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -901,6 +899,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <div class="pick-body" id="pick-body"></div>
   </div>
 </div>
+
+<div class="embed-pop" id="embed-pop" onclick="if(event.target===this)closeEmbed()">
   <div class="embed-box">
     <h3>Share Shoppable List</h3>
     <p>Copy this link and paste it directly into your Substack post. Readers get a live shoppable product page with all your affiliate links.</p>
@@ -1266,9 +1266,9 @@ function openDetail(id){
   renderDetailItems(l.items);
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
-  // Show "Pick from Collections" button only for weekly lists (creator mode)
+  // Show "Pick from Collections" button for weekly AND collection lists (creator mode)
   const pickBtn=document.getElementById('pick-from-col-btn');
-  if(pickBtn) pickBtn.style.display=(l.t1==='weekly')?'flex':'none';
+  if(pickBtn) pickBtn.style.display=(l.t1==='weekly'||l.t1==='collections')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
@@ -1966,10 +1966,10 @@ async function addItem(){
 let pickAllItems=[];
 function openPickFromCollections(){
   if(!currentListId)return;
-  // Gather all items from collection lists (not weekly/latest/social)
+  // Gather items from ALL other lists (any t1) so you can pull from anywhere
   pickAllItems=[];
-  D.lists.filter(l=>l.t1==='collections'&&l.id!==currentListId).forEach(l=>{
-    l.items.forEach(it=>pickAllItems.push({...it,_listName:l.name}));
+  D.lists.filter(l=>l.id!==currentListId).forEach(l=>{
+    l.items.forEach(it=>pickAllItems.push({...it,_listName:l.name,_listT1:l.t1}));
   });
   document.getElementById('pick-search-inp').value='';
   renderPickItems(pickAllItems);
