@@ -142,6 +142,10 @@ body.creator .btn-new{display:flex;}
 /* ══ STRIP VIEW (Collections / Weekly) ══ */
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
 .wl.clickable{cursor:pointer;}
+.wl-drag-handle{position:absolute;top:50%;right:52px;transform:translateY(-50%);width:28px;height:28px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--mid);font-size:16px;background:var(--white);border:1px solid var(--border);border-radius:2px;z-index:5;user-select:none;flex-shrink:0;}
+body.creator .wl-drag-handle{display:flex;}
+.wl.list-drag-over{border-top:2px solid var(--ink);}
+.wl.list-dragging{opacity:.4;}
 .wl.clickable:hover{background:var(--surf);}
 .strip{display:flex;height:210px;gap:1px;background:var(--border);overflow-x:auto;overflow-y:hidden;scrollbar-width:none;}
 .strip::-webkit-scrollbar{display:none;}
@@ -950,7 +954,7 @@ async function loadFromCloud(){
   try{
     showLoading(true);
     const [lists,items,looks]=await Promise.all([
-      sbFetch('lists?select=*&order=created_at.desc'),
+      sbFetch('lists?select=*&order=sort_order.asc,created_at.desc'),
       sbFetch('items?select=*&order=sort_order.asc,created_at.desc'),
       sbFetch('looks?select=*&order=created_at.desc')
     ]);
@@ -1010,7 +1014,7 @@ async function saveList(l){
     await sbFetch('lists',{
       method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:l.id,name:l.name,note:l.note||'',t1:l.t1||'latest',cat:l.cat||'all',network:l.network||'multi',sort_order:0})
+      body:JSON.stringify({id:l.id,name:l.name,note:l.note||'',t1:l.t1||'latest',cat:l.cat||'all',network:l.network||'multi',sort_order:l.sort_order??0})
     });
   }catch(e){
     console.error('saveList failed:',e);
@@ -1220,13 +1224,62 @@ function render(){
   if(activeT1==='social'){renderSocial();return;}
   if(activeT1==='latest'){renderLatest();return;}
 
-  let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>new Date(b.created_at||0)-new Date(a.created_at||0));
+  let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
   if(!lists.length){
     feed.innerHTML=`<div class="empty"><h3>Nothing here yet</h3><p>Create a new list to get started.</p></div>`+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
     return;
   }
   feed.innerHTML=lists.map(l=>stripCard(l)).join('')+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
   document.addEventListener('click',closeAllCtx,{once:true});
+  if(isCreator)initListDrag();
+}
+
+// ══ DRAG-TO-REORDER LISTS ══
+let _listDragSrcId=null;
+function initListDrag(){
+  const feed=document.getElementById('feed');
+  if(!feed)return;
+  feed.querySelectorAll('.wl[data-list-id]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      _listDragSrcId=card.dataset.listId;
+      card.classList.add('list-dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('list-dragging');
+      feed.querySelectorAll('.wl').forEach(c=>c.classList.remove('list-drag-over'));
+    });
+    card.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      feed.querySelectorAll('.wl').forEach(c=>c.classList.remove('list-drag-over'));
+      if(card.dataset.listId!==_listDragSrcId)card.classList.add('list-drag-over');
+    });
+    card.addEventListener('dragleave',()=>card.classList.remove('list-drag-over'));
+    card.addEventListener('drop',e=>{
+      e.preventDefault();
+      card.classList.remove('list-drag-over');
+      if(!_listDragSrcId||card.dataset.listId===_listDragSrcId)return;
+      reorderList(_listDragSrcId,card.dataset.listId);
+      _listDragSrcId=null;
+    });
+  });
+}
+async function reorderList(srcId,targetId){
+  // Work only within the current t1 group
+  const group=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  const si=group.findIndex(x=>x.id===srcId);
+  const ti=group.findIndex(x=>x.id===targetId);
+  if(si<0||ti<0)return;
+  const [moved]=group.splice(si,1);
+  group.splice(ti,0,moved);
+  // Write sort_order back onto D.lists entries
+  group.forEach((l,i)=>{ const dl=D.lists.find(x=>x.id===l.id); if(dl)dl.sort_order=i; });
+  render();
+  // Batch save to Supabase
+  try{
+    await Promise.all(group.map((l,i)=>saveList({...l,sort_order:i})));
+  }catch(e){console.error('list reorder save failed',e);}
 }
 
 function stripCard(l){
@@ -1257,7 +1310,8 @@ function stripCard(l){
       <button class="wl-btn" title="Open" onclick="event.stopPropagation();openDetail('${h(l.id)}')">≡</button>
       <button class="wl-btn" title="Options" onclick="event.stopPropagation();toggleCtx('${h(l.id)}')">···</button>
     </div>`:'';
-  return `<div class="wl clickable" id="wl-${h(l.id)}" onclick="if(!window.matchMedia('(pointer:coarse)').matches)openDetail('${h(l.id)}')" ontouchstart="this._tx=event.touches[0].clientX" ontouchend="if(Math.abs(event.changedTouches[0].clientX-this._tx)>10)event.preventDefault()">
+  const dragHandle=isCreator?`<div class="wl-drag-handle" title="Drag to reorder" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">⠿</div>`:'';
+  return `<div class="wl clickable" id="wl-${h(l.id)}" draggable="${isCreator?'true':'false'}" data-list-id="${h(l.id)}" style="position:relative;" onclick="if(!window.matchMedia('(pointer:coarse)').matches)openDetail('${h(l.id)}')" ontouchstart="this._tx=event.touches[0].clientX" ontouchend="if(Math.abs(event.changedTouches[0].clientX-this._tx)>10)event.preventDefault()">
     <div class="strip">${slots.join('')}</div>
     <div class="wl-foot" onclick="event.stopPropagation();openDetail('${h(l.id)}')" style="cursor:pointer">
       <div class="wl-left">
@@ -1267,6 +1321,7 @@ function stripCard(l){
       </div>
       ${acts}
     </div>
+    ${dragHandle}
     ${ctxMenu}
   </div>`;
 }
