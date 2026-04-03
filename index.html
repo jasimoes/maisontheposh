@@ -462,6 +462,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 
 /* toast */
 .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--ink);color:white;padding:9px 20px;font-size:11px;letter-spacing:.08em;z-index:999;transition:transform .26s;pointer-events:none;white-space:nowrap;}
+.toast.has-undo{pointer-events:auto;cursor:pointer;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
 @media(max-width:700px){
@@ -1072,7 +1073,15 @@ let detailAllItems=[];
 let lookManualItems=[];
 
 function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('has-undo');t.onclick=null;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
+function showToastUndo(m,undoCb){
+  const t=document.getElementById('toast');
+  t.innerHTML=`${m} &nbsp;<span style="text-decoration:underline;cursor:pointer;font-weight:500;letter-spacing:.06em;">UNDO</span>`;
+  t.classList.add('show','has-undo');
+  t.onclick=()=>{undoCb();t.classList.remove('show','has-undo');t.onclick=null;};
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.classList.remove('show','has-undo');t.onclick=null;},4000);
+}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,5);}
 
 // ══ MODE TOGGLE — password protected ══
@@ -1299,7 +1308,7 @@ function renderDetailItems(items){
     const copyBtn=`<button class="btn-copy-link creator-only-btn" onclick="event.stopPropagation();copyItemLink('${h(it.id)}','${h(it.link)}')">Copy Link</button>`;
     const creatorBtns=`<div class="creator-only-btn" style="display:flex;gap:6px;margin-top:6px;">
       <button data-edit-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
-      <button data-delete-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Delete</button>
+      <button data-delete-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Remove</button>
     </div>`;
     return `<div class="dcard" draggable="true" data-item-id="${h(it.id)}" style="cursor:pointer;position:relative;" onclick="openItemPop('${h(it.id)}')">
       <div class="dcard-drag-handle creator-only-btn" title="Drag to reorder" onclick="event.stopPropagation()">⠿</div>
@@ -1458,11 +1467,20 @@ async function saveEditItem(){
   detailAllItems=[...l.items];renderDetailItems(l.items);render();toast('Item updated');
 }
 function deleteItem(itemId){
-  if(!confirm('Delete this item?'))return;
   const l=D.lists.find(x=>x.id===currentListId);if(!l)return;
+  const removed=l.items.find(x=>x.id===itemId);
+  if(!removed)return;
   l.items=l.items.filter(x=>x.id!==itemId);
-  deleteItemFromCloud(itemId);
-  detailAllItems=[...l.items];renderDetailItems(l.items);render();toast('Item deleted');
+  detailAllItems=[...l.items];renderDetailItems(l.items);render();
+  // Show toast with undo option
+  let undone=false;
+  showToastUndo(`"${removed.name}" removed`,()=>{
+    if(undone)return;undone=true;
+    l.items.splice(removed._sortIdx||l.items.length,0,removed);
+    detailAllItems=[...l.items];renderDetailItems(l.items);render();
+  });
+  // Delay cloud delete to allow undo
+  setTimeout(()=>{if(!undone)deleteItemFromCloud(itemId);},4000);
 }
 
 function filterDetailItems(q){
