@@ -247,21 +247,7 @@ body.creator .btn-new{display:flex;}
 
 /* Items in list detail — Collective-style cards */
 .detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;padding:24px 40px;}
-.dcard{background:var(--white);border:1px solid var(--border);display:flex;flex-direction:column;position:relative;transition:border-color .18s,opacity .18s;}
-.dcard.drag-over{border:2px dashed var(--ink);background:var(--surf);}
-.dcard.dragging{opacity:.35;}
-.dcard[draggable="true"]{cursor:grab;}
-.dcard[draggable="true"]:active{cursor:grabbing;}
-.drag-handle{position:absolute;top:6px;left:6px;width:22px;height:22px;background:rgba(255,255,255,.9);border:1px solid var(--border);border-radius:3px;display:none;align-items:center;justify-content:center;font-size:11px;color:var(--soft);cursor:grab;z-index:5;line-height:1;}
-.creator-mode .drag-handle{display:flex;}
-/* Move-to-list dropdown */
-.move-menu{position:absolute;bottom:100%;left:0;right:0;background:var(--white);border:1px solid var(--border);z-index:80;box-shadow:0 4px 16px rgba(0,0,0,.1);display:none;max-height:180px;overflow-y:auto;}
-.move-menu.open{display:block;}
-.move-menu-item{display:block;width:100%;padding:8px 12px;font-family:var(--sans);font-size:11px;color:var(--ink);background:none;border:none;text-align:left;cursor:pointer;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.move-menu-item:hover{background:var(--surf);}
-.move-menu-item:last-child{border-bottom:none;}
-.detail-grid.reorder-active .dcard{cursor:grab;}
-.detail-grid.reorder-active .drag-handle{opacity:1;}
+.dcard{background:var(--white);border:1px solid var(--border);display:flex;flex-direction:column;position:relative;transition:border-color .18s;}
 .dcard:hover{border-color:var(--ink);}
 .dcard-img{aspect-ratio:1;background:var(--bg);overflow:hidden;display:flex;align-items:center;justify-content:center;}
 .dcard-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s;}
@@ -322,6 +308,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .picard-note{font-size:10px;color:var(--mid);font-style:italic;font-family:var(--serif);margin-top:3px;line-height:1.4;}
 .picard-cta{display:block;margin-top:8px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border);color:var(--mid);transition:all .15s;}
 .picard:hover .picard-cta{border-color:var(--ink);background:var(--ink);color:white;}
+.picard-alt{display:block;width:100%;margin-top:4px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);color:var(--soft);background:none;cursor:pointer;font-family:var(--sans);transition:all .15s;}
+.picard-alt:hover{border-color:var(--mid);color:var(--ink);}
 
 /* ══ FORMS ══ */
 .fov{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);overflow-y:auto;}
@@ -548,7 +536,6 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <button class="detail-back" onclick="closeDetail()">← Back</button>
     <h2 class="detail-title" id="detail-title"></h2>
     <div class="detail-hdr-actions">
-      <button class="pbtn creator-only" id="btn-reorder" onclick="toggleReorderMode()" style="font-size:10px;letter-spacing:.08em;padding:5px 12px;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;font-family:var(--sans);">⠿ Reorder</button>
       <button class="pbtn creator-only" onclick="openEditList()" style="font-size:10px;letter-spacing:.08em;padding:5px 12px;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;font-family:var(--sans);">✎ Edit List</button>
       <button class="btn-convert creator-only" id="btn-convert" onclick="openEmbed(currentListId)">Convert to Widget</button>
     </div>
@@ -900,7 +887,7 @@ async function loadFromCloud(){
     showLoading(true);
     const [lists,items,looks]=await Promise.all([
       sbFetch('lists?select=*&order=created_at.desc'),
-      sbFetch('items?select=*&order=sort_order.asc,created_at.desc'),
+      sbFetch('items?select=*&order=created_at.desc'),
       sbFetch('looks?select=*&order=created_at.desc')
     ]);
 
@@ -910,7 +897,7 @@ async function loadFromCloud(){
       ...l,
       items:(items||[]).filter(it=>it.list_id===l.id).map(it=>({
         id:it.id,name:it.name,brand:it.brand,price:it.price,
-        note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat,sort_order:it.sort_order??0
+        note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat
       }))
     }));
     // item_ids stores minimal objects (no image) — rehydrate images from allItems pool
@@ -976,7 +963,7 @@ async function saveItem(it,listId){
     await sbFetch('items',{
       method:'POST',
       headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-      body:JSON.stringify({id:it.id,list_id:listId,name:it.name,brand:it.brand||'—',price:it.price||'',note:it.note||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image||'',cat:it.cat||'',sort_order:it.sort_order??0})
+      body:JSON.stringify({id:it.id,list_id:listId,name:it.name,brand:it.brand||'—',price:it.price||'',note:it.note||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image||'',cat:it.cat||'',sort_order:0})
     });
   }catch(e){
     console.error('saveItem failed:',e);
@@ -1000,7 +987,8 @@ async function saveLookToCloud(look){
     // This keeps the looks row small and avoids hitting Supabase's row/request size limits
     const itemsPayload=(look.items||[]).map(it=>({
       id:it.id,name:it.name,brand:it.brand||'',price:it.price||'',
-      note:it.note||'',link:it.link||'#'
+      note:it.note||'',link:it.link||'#',
+      link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||''
       // image intentionally omitted here — fetched from items table on load
     }));
     await sbFetch('looks',{
@@ -1037,7 +1025,6 @@ function toggleMode(){
     isCreator=false;
     sessionStorage.removeItem('mtp_creator');
     document.body.classList.remove('creator');
-    document.body.classList.remove('creator-mode');
     document.getElementById('creator-bar').classList.add('hide');
     document.querySelector('.btn-toggle-mode').textContent='Preview as Visitor';
     if(activeT1==='widgets') setT1('latest',document.querySelector('[data-t1="latest"]'));
@@ -1094,7 +1081,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(sessionStorage.getItem('mtp_creator')==='1'){
     isCreator=true;
     document.body.classList.add('creator');
-    document.body.classList.add('creator-mode');
     document.getElementById('creator-bar').classList.remove('hide');
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='');
@@ -1223,12 +1209,12 @@ function openDetail(id){
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
 function closeDetail(silent){
-  // Reset reorder mode if active
-  if(_reorderMode){_reorderMode=false;const btn=document.getElementById('btn-reorder');if(btn){btn.style.background='';btn.style.color='';btn.style.borderColor='';btn.textContent='⠿ Reorder';}}
   document.getElementById('list-detail').classList.remove('open');
   document.getElementById('feed').style.display='block';
   currentListId=null;
   render();
+  // If called from back button (silent=true via popstate), don't push new state
+  // If called from ← Back button, go back in history naturally
   if(!silent)history.back();
 }
 
@@ -1243,18 +1229,11 @@ function renderDetailItems(items){
       ?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`
       :`<div class="dcard-ph">${(it.brand||'?')[0]}</div>`;
     const copyBtn=`<button class="btn-copy-link creator-only-btn" onclick="event.stopPropagation();copyItemLink('${h(it.id)}','${h(it.link)}')">Copy Link</button>`;
-    // Other lists for Move menu
-    const otherLists=D.lists.filter(l=>l.id!==currentListId);
-    const moveMenu=otherLists.length?`<div class="move-menu" id="mmenu-${h(it.id)}">${otherLists.map(l=>`<button class="move-menu-item" onclick="event.stopPropagation();moveItemToList('${h(it.id)}','${h(l.id)}')">→ ${h(l.name)}</button>`).join('')}</div>`:'';
-    const moveBtn=otherLists.length?`<button onclick="event.stopPropagation();toggleMoveMenu('${h(it.id)}')" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;">⇄ Move</button>`:'';
-    const creatorBtns=`<div class="creator-only-btn" style="display:flex;gap:6px;margin-top:6px;position:relative;">
+    const creatorBtns=`<div class="creator-only-btn" style="display:flex;gap:6px;margin-top:6px;">
       <button data-edit-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
-      ${moveBtn}
       <button data-delete-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid #e8b4b4;background:none;color:#B03030;cursor:pointer;transition:all .15s;">✕ Delete</button>
-      ${moveMenu}
     </div>`;
-    return `<div class="dcard" data-item-id="${h(it.id)}" draggable="${isCreator?'true':'false'}" style="cursor:pointer;" onclick="openItemPop('${h(it.id)}')">
-      <div class="drag-handle" title="Drag to reorder">⠿</div>
+    return `<div class="dcard" style="cursor:pointer;" onclick="openItemPop('${h(it.id)}')">
       <div class="dcard-img">${imgHtml}</div>
       <div class="dcard-info">
         <div class="dcard-brand">${h(it.brand)}</div>
@@ -1268,211 +1247,12 @@ function renderDetailItems(items){
   }).join('');
   if(isCreator){
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='');
-    initDragSort();
   } else {
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='none');
   }
 }
 
-// ══ DRAG TO REORDER ══
-let _dragSrcId=null;
-function initDragSort(){
-  const g=document.getElementById('detail-grid');
-  if(!g)return;
-  g.querySelectorAll('.dcard[draggable="true"]').forEach(card=>{
-    card.addEventListener('dragstart',e=>{
-      _dragSrcId=card.dataset.itemId;
-      card.classList.add('dragging');
-      e.dataTransfer.effectAllowed='move';
-      e.dataTransfer.setData('text/plain',_dragSrcId);
-    });
-    card.addEventListener('dragend',()=>{
-      card.classList.remove('dragging');
-      g.querySelectorAll('.dcard').forEach(c=>c.classList.remove('drag-over'));
-    });
-    card.addEventListener('dragover',e=>{
-      e.preventDefault();
-      e.dataTransfer.dropEffect='move';
-      g.querySelectorAll('.dcard').forEach(c=>c.classList.remove('drag-over'));
-      if(card.dataset.itemId!==_dragSrcId)card.classList.add('drag-over');
-    });
-    card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
-    card.addEventListener('drop',e=>{
-      e.preventDefault();
-      card.classList.remove('drag-over');
-      const targetId=card.dataset.itemId;
-      if(!_dragSrcId||_dragSrcId===targetId)return;
-      reorderItems(_dragSrcId,targetId);
-      _dragSrcId=null;
-    });
-    // Touch support: drag handle initiates long-press move (mobile)
-    const handle=card.querySelector('.drag-handle');
-    if(handle){
-      handle.addEventListener('touchstart',e=>{e.stopPropagation();},{ passive:true });
-    }
-  });
-}
-
-function reorderItems(srcId,targetId){
-  const l=D.lists.find(x=>x.id===currentListId);if(!l)return;
-  const items=l.items;
-  const fromIdx=items.findIndex(it=>it.id===srcId);
-  const toIdx=items.findIndex(it=>it.id===targetId);
-  if(fromIdx===-1||toIdx===-1)return;
-  // Splice src out and insert before target
-  const [moved]=items.splice(fromIdx,1);
-  items.splice(toIdx,0,moved);
-  // Update sort_order in memory
-  items.forEach((it,i)=>it.sort_order=i);
-  detailAllItems=[...items];
-  renderDetailItems(items);
-  // Batch save sort_order to Supabase
-  saveSortOrder(items,currentListId);
-  toast('Order saved ✓');
-}
-
-async function saveSortOrder(items,listId){
-  try{
-    // Supabase doesn't have batch update, so fire individual PATCHes in parallel
-    await Promise.all(items.map((it,i)=>
-      sbFetch(`items?id=eq.${encodeURIComponent(it.id)}`,{
-        method:'PATCH',
-        headers:{'Prefer':'return=minimal'},
-        body:JSON.stringify({sort_order:i})
-      })
-    ));
-  }catch(e){
-    console.error('saveSortOrder failed:',e);
-    toast('⚠ Order saved locally — cloud sync failed');
-  }
-}
-
-// ══ REORDER MODE TOGGLE ══
-let _reorderMode=false;
-function toggleReorderMode(){
-  _reorderMode=!_reorderMode;
-  const btn=document.getElementById('btn-reorder');
-  const grid=document.getElementById('detail-grid');
-  if(_reorderMode){
-    btn.style.background='var(--ink)';btn.style.color='white';btn.style.borderColor='var(--ink)';
-    btn.textContent='✓ Done Reordering';
-    grid.classList.add('reorder-active');
-    // On touch devices: replace click-to-open with touch drag
-    grid.querySelectorAll('.dcard').forEach(card=>{
-      card._origOnclick=card.getAttribute('onclick');
-      card.setAttribute('onclick','');
-      initTouchDrag(card);
-    });
-  } else {
-    btn.style.background='';btn.style.color='';btn.style.borderColor='';
-    btn.textContent='⠿ Reorder';
-    grid.classList.remove('reorder-active');
-    grid.querySelectorAll('.dcard').forEach(card=>{
-      if(card._origOnclick)card.setAttribute('onclick',card._origOnclick);
-      removeTouchDrag(card);
-    });
-  }
-}
-
-// Touch drag implementation for mobile reorder
-function initTouchDrag(card){
-  let startY,startX,clone,srcId;
-  card._touchStart=e=>{
-    const t=e.touches[0];
-    startX=t.clientX;startY=t.clientY;
-    srcId=card.dataset.itemId;
-    card._touchMoved=false;
-  };
-  card._touchMove=e=>{
-    const t=e.touches[0];
-    const dx=t.clientX-startX,dy=t.clientY-startY;
-    if(!card._touchMoved&&Math.hypot(dx,dy)>8){
-      card._touchMoved=true;
-      card.classList.add('dragging');
-      // Create floating clone
-      clone=card.cloneNode(true);
-      clone.style.cssText=`position:fixed;width:${card.offsetWidth}px;opacity:.7;pointer-events:none;z-index:999;border:2px solid var(--ink);top:${card.getBoundingClientRect().top}px;left:${card.getBoundingClientRect().left}px;`;
-      document.body.appendChild(clone);
-    }
-    if(card._touchMoved&&clone){
-      e.preventDefault();
-      clone.style.top=(t.clientY-clone.offsetHeight/2)+'px';
-      clone.style.left=(t.clientX-clone.offsetWidth/2)+'px';
-      // Highlight card under finger
-      const g=document.getElementById('detail-grid');
-      g.querySelectorAll('.dcard').forEach(c=>{
-        const r=c.getBoundingClientRect();
-        const over=t.clientX>=r.left&&t.clientX<=r.right&&t.clientY>=r.top&&t.clientY<=r.bottom&&c!==card;
-        c.classList.toggle('drag-over',over);
-      });
-    }
-  };
-  card._touchEnd=e=>{
-    card.classList.remove('dragging');
-    if(clone){clone.remove();clone=null;}
-    const g=document.getElementById('detail-grid');
-    const target=g.querySelector('.dcard.drag-over');
-    g.querySelectorAll('.dcard').forEach(c=>c.classList.remove('drag-over'));
-    if(target&&srcId&&target.dataset.itemId!==srcId){
-      reorderItems(srcId,target.dataset.itemId);
-    } else if(!card._touchMoved){
-      // Tap without drag — open popup
-      const id=card.dataset.itemId;
-      if(id)openItemPop(id);
-    }
-  };
-  card.addEventListener('touchstart',card._touchStart,{passive:true});
-  card.addEventListener('touchmove',card._touchMove,{passive:false});
-  card.addEventListener('touchend',card._touchEnd);
-}
-function removeTouchDrag(card){
-  if(card._touchStart)card.removeEventListener('touchstart',card._touchStart);
-  if(card._touchMove)card.removeEventListener('touchmove',card._touchMove);
-  if(card._touchEnd)card.removeEventListener('touchend',card._touchEnd);
-}
-
-// ══ MOVE ITEM BETWEEN LISTS ══
-function toggleMoveMenu(itemId){
-  // Close all other menus first
-  document.querySelectorAll('.move-menu.open').forEach(m=>{
-    if(m.id!==`mmenu-${itemId}`)m.classList.remove('open');
-  });
-  const menu=document.getElementById(`mmenu-${itemId}`);
-  if(menu)menu.classList.toggle('open');
-}
-// Close move menus when clicking outside
-document.addEventListener('click',function(e){
-  if(!e.target.closest('.move-menu')&&!e.target.closest('[onclick*="toggleMoveMenu"]')){
-    document.querySelectorAll('.move-menu.open').forEach(m=>m.classList.remove('open'));
-  }
-});
-
-async function moveItemToList(itemId,targetListId){
-  const srcList=D.lists.find(x=>x.id===currentListId);
-  const dstList=D.lists.find(x=>x.id===targetListId);
-  if(!srcList||!dstList)return;
-  const idx=srcList.items.findIndex(it=>it.id===itemId);
-  if(idx===-1)return;
-  const [item]=srcList.items.splice(idx,1);
-  item.list_id=targetListId;
-  dstList.items.unshift(item);
-  detailAllItems=[...srcList.items];
-  renderDetailItems(srcList.items);
-  toast(`Moved to "${dstList.name}" ✓`);
-  // Persist: PATCH item's list_id in Supabase
-  try{
-    await sbFetch(`items?id=eq.${encodeURIComponent(itemId)}`,{
-      method:'PATCH',
-      headers:{'Prefer':'return=minimal'},
-      body:JSON.stringify({list_id:targetListId,sort_order:0})
-    });
-  }catch(e){
-    console.error('moveItem failed:',e);
-    toast('⚠ Move saved locally — cloud sync failed');
-  }
-}
-
-
+function copyAffiliateLink(){
   const itemId=document.getElementById('ip-pop').dataset.itemId;
   if(!itemId)return;
   let item=null;
@@ -2301,13 +2081,27 @@ function openLookPanel(id){
   const cover=look.image?`<div style="grid-column:1/-1"><img src="${h(look.image)}" style="width:100%;max-height:260px;object-fit:cover;display:block;"></div>`:'';
   g.innerHTML=cover+look.items.map(it=>{
     const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="picard-ph">${(it.brand||'?')[0]}</div>`;
-    return `<a class="picard" href="${h(it.link)}" target="_blank" rel="noopener"><div class="picard-img">${img}</div><div class="picard-info"><div class="picard-brand">${h(it.brand)}</div><div class="picard-name">${h(it.name)}</div><div class="picard-price">${h(it.price)}</div>${it.note?`<div class="picard-note">${h(it.note)}</div>`:''}<span class="picard-cta">Shop →</span></div></a>`;
+    const extraLinks=[it.link2,it.link3,it.link4,it.link5,it.link6].filter(l=>l&&l.trim()&&l!=='#');
+    const altBtn=extraLinks.length>0
+      ?`<button class="picard-alt" onclick="event.preventDefault();event.stopPropagation();openPanelOpts(this)" data-item='${JSON.stringify({image:it.image||'',name:it.name||'',brand:it.brand||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||''}).replace(/'/g,"&#39;")}'>See ${extraLinks.length} other option${extraLinks.length>1?'s':''} →</button>`
+      :'';
+    return `<a class="picard" href="${h(it.link)}" target="_blank" rel="noopener"><div class="picard-img">${img}</div><div class="picard-info"><div class="picard-brand">${h(it.brand)}</div><div class="picard-name">${h(it.name)}</div><div class="picard-price">${it.price?'$'+h(it.price):h(it.price)}</div>${it.note?`<div class="picard-note">${h(it.note)}</div>`:''}<span class="picard-cta">Shop →</span>${altBtn}</div></a>`;
   }).join('');
   document.getElementById('backdrop').classList.add('open');
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow='hidden';
 }
 function closePanel(){document.getElementById('backdrop').classList.remove('open');document.getElementById('panel').classList.remove('open');document.body.style.overflow='';}
+
+function openPanelOpts(btn){
+  try{
+    const it=JSON.parse(btn.dataset.item.replace(/&#39;/g,"'"));
+    const allLinks=[it.link,it.link2,it.link3,it.link4,it.link5,it.link6].filter(l=>l&&l.trim()&&l!=='#');
+    window._ipAllLinks=allLinks;
+    window._ipItemImg=it.image||'';
+    openOptsPop();
+  }catch(e){console.error('openPanelOpts',e);}
+}
 
 // ══ EVENT DELEGATION for item edit/delete buttons ══
 document.addEventListener('click',function(e){
