@@ -23,11 +23,22 @@ body{background:#fff;color:#1C1B19;font-family:'Jost',sans-serif;font-weight:300
 .card-name{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;color:#1C1B19;line-height:1.35;margin-bottom:3px;}
 .card-price{font-size:11px;color:#6B6860;}
 .card-note{font-size:10px;color:#6B6860;font-family:'Cormorant Garamond',Georgia,serif;font-style:italic;margin-top:4px;line-height:1.4;}
-.card-cta{display:block;margin-top:8px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #E2DED7;color:#6B6860;}
-.card-cta2{display:block;margin-top:4px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #E2DED7;color:#9E9C97;}
+.card-actions{display:flex;flex-direction:column;gap:5px;margin-top:10px;}
+.card-cta{display:block;padding:8px 12px;text-align:center;font-size:9px;letter-spacing:.16em;text-transform:uppercase;background:#1C1B19;color:#fff;text-decoration:none;transition:opacity .18s;}
+.card-cta:hover{opacity:.75;}
+.card-cta2{display:block;padding:7px 12px;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid #C8C5BE;color:#6B6860;background:#fff;cursor:pointer;transition:all .18s;}
+.card-cta2:hover{border-color:#1C1B19;color:#1C1B19;}
 .footer{text-align:right;margin-top:10px;font-size:10px;color:#9E9C97;}
 .footer a{color:#9E9C97;text-decoration:none;}
 .footer a:hover{color:#1C1B19;}
+
+/* ── Bottom site CTA ── */
+.site-cta{display:block;margin-top:40px;padding:24px 20px;border:1px solid #E2DED7;text-align:center;text-decoration:none;color:#1C1B19;transition:background .2s;}
+.site-cta:hover{background:#F9F7F4;}
+.site-cta-eyebrow{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#9E9C97;margin-bottom:8px;}
+.site-cta-headline{font-family:'Cormorant Garamond',Georgia,serif;font-size:20px;font-weight:300;color:#1C1B19;margin-bottom:6px;}
+.site-cta-sub{font-family:'Cormorant Garamond',Georgia,serif;font-size:13px;font-style:italic;color:#6B6860;margin-bottom:14px;}
+.site-cta-btn{display:inline-block;padding:9px 22px;font-size:9px;letter-spacing:.18em;text-transform:uppercase;background:#1C1B19;color:#fff;}
 .loading{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:18px;color:#9E9C97;letter-spacing:.08em;}
 .error{text-align:center;padding:60px 20px;font-family:'Cormorant Garamond',Georgia,serif;font-size:16px;color:#B03030;}
 
@@ -61,6 +72,12 @@ body{background:#fff;color:#1C1B19;font-family:'Jost',sans-serif;font-weight:300
     <div id="list-hdr"></div>
   </div>
   <div id="content"><div class="loading">Loading…</div></div>
+  <a class="site-cta" href="https://maisontheposh.com" target="_blank" rel="noopener">
+    <div class="site-cta-eyebrow">MaisonThePosh</div>
+    <div class="site-cta-headline">Explore the Latest Finds</div>
+    <div class="site-cta-sub">New arrivals, curated edits &amp; more — updated weekly</div>
+    <span class="site-cta-btn">Visit the Site →</span>
+  </a>
   <div class="footer"><a href="https://maisontheposh.com">maisontheposh.com</a></div>
 </div>
 
@@ -151,8 +168,10 @@ async function load(){
           <div class="card-name">${h(it.name)}</div>
           <div class="card-price">${it.price?'$'+h(it.price):''}</div>
           ${it.note?`<div class="card-note">${h(it.note)}</div>`:''}
-          <a class="card-cta" href="${h(it.link||'#')}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Shop →</a>
-          ${hasOpts?`<span class="card-cta2" onclick="event.stopPropagation();openOpts(window._widgetItems[${idx}],event)">See ${extraLinks.length} other option${extraLinks.length>1?'s':''} →</span>`:''}
+          <div class="card-actions">
+            <a class="card-cta" href="${h(it.link||'#')}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Shop Now →</a>
+            ${hasOpts?`<span class="card-cta2" onclick="event.stopPropagation();openOpts(window._widgetItems[${idx}],event)">${extraLinks.length} More Option${extraLinks.length>1?'s':''} →</span>`:''}
+          </div>
         </div>
       </div>`;
     }).join('');
