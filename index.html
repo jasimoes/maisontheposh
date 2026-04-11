@@ -774,7 +774,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
         <div class="iprev" id="url-prev"><p class="ihint">Paste image URL</p></div>
       </div>
       <div class="itc" id="itc-up">
-        <div class="dropz" id="dropz"><input type="file" accept="image/*" onchange="handleUpload(this.files[0])"><p>Click or drag image here</p></div>
+        <div class="dropz" id="dropz"><input type="file" accept="image/*" onchange="handleUpload(this.files[0])"><p>Click, drag, or paste image here</p></div>
         <div class="iprev" id="up-prev" style="display:none;margin-top:8px"><img id="up-img" src="" alt=""></div>
         <input type="hidden" id="up-val">
       </div>
@@ -2674,6 +2674,21 @@ window.addEventListener('DOMContentLoaded',()=>{
     ld.addEventListener('dragleave',()=>ld.classList.remove('over'));
     ld.addEventListener('drop',e=>{e.preventDefault();ld.classList.remove('over');if(e.dataTransfer.files[0])handleLookImg(e.dataTransfer.files[0]);});
   }
+  // ── PASTE TO UPLOAD ──
+  document.addEventListener('paste',e=>{
+    const items=e.clipboardData&&e.clipboardData.items;
+    if(!items)return;
+    let file=null;
+    for(let i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){file=items[i].getAsFile();break;}}
+    if(!file)return;
+    // Product image: dropz visible + upload tab active
+    const dz=document.getElementById('dropz');
+    const uploadTabOn=document.getElementById('itab-up')&&document.getElementById('itab-up').classList.contains('on');
+    if(dz&&dz.offsetParent!==null&&uploadTabOn){e.preventDefault();handleUpload(file);return;}
+    // Look image: look-dropzone visible
+    const ld2=document.getElementById('look-dropzone');
+    if(ld2&&ld2.offsetParent!==null&&ld2.style.display!=='none'){e.preventDefault();handleLookImg(file);return;}
+  });
   _savedNLHTML=document.getElementById('nl-fp').innerHTML;
   trackPageView();
   // Seed initial history entry so back works from the first page
