@@ -206,6 +206,7 @@ body.creator .wl-drag-handle{display:flex;}
 .sales-hdr{padding:28px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
 .sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
+.sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
 .btn-new-sale{padding:8px 18px;background:var(--ink);color:white;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;white-space:nowrap;flex-shrink:0;margin-top:4px;}
 .btn-new-sale:hover{opacity:.8;}
 .sales-feed{max-width:680px;margin:0 auto;padding:0 40px 100px;}
@@ -1651,7 +1652,7 @@ async function renderSales(){
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   await loadPosts();
   const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button>`:'';
-  const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks — updated as they happen.</p></div>${addBtn}</div>`;
+  const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks — updated as they happen.</p><p class="sales-disclaimer">Some links here are affiliate links — I may earn a small commission if you shop through them. I only post what I'd actually buy.</p></div>${addBtn}</div>`;
   if(!_posts.length){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`;
     return;
@@ -2964,6 +2965,7 @@ window.addEventListener('DOMContentLoaded',()=>{
     <div class="fg"><label class="fl">Caption</label><input type="text" class="fi" id="sp-f-caption" placeholder="e.g. The Row Margaux Ballet Flat"></div>
     <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-price" placeholder="890"></div>
     <div class="fg"><label class="fl">Affiliate Link</label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
+    <button class="btn-g" id="sp-copy-link-btn" onclick="(function(){const v=document.getElementById('sp-f-link').value.trim();if(!v)return;navigator.clipboard.writeText(v).then(()=>{const b=document.getElementById('sp-copy-link-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy Image Link',1800);});})()" style="font-size:10px;letter-spacing:.12em;">Copy Image Link</button>
     <button class="btn-p" onclick="saveImageForm()">Save</button>
     <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
   </div>
