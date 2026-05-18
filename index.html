@@ -208,6 +208,11 @@ body.creator .wl-drag-handle{display:flex;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
 .sp-link-only{border:1px solid var(--border);padding:14px 16px;}
+.sp-drag-handle{position:absolute;top:14px;right:14px;width:26px;height:26px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--faint);font-size:16px;background:var(--white);border:1px solid var(--border);border-radius:2px;z-index:5;user-select:none;}
+body.creator .sp-drag-handle{display:flex;}
+.sp-drag-handle:hover{color:var(--mid);border-color:var(--mid);}
+.sp.sp-dragging{opacity:.35;border-style:dashed;}
+.sp.sp-drag-over{border-top:2px solid var(--ink);}
 .btn-new-sale{padding:8px 18px;background:var(--ink);color:white;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;white-space:nowrap;flex-shrink:0;margin-top:4px;}
 .btn-new-sale:hover{opacity:.8;}
 .sales-feed{max-width:680px;margin:0 auto;padding:0 40px 100px;}
@@ -1641,7 +1646,7 @@ let _posts=[];
 async function loadPosts(){
   try{
     const [posts,images]=await Promise.all([
-      sbFetch('posts?select=*&order=published_at.desc'),
+      sbFetch('posts?select=*&order=sort_order.asc,published_at.desc'),
       sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
     ]);
     _posts=(posts||[]).map(p=>({...p,images:(images||[]).filter(img=>img.post_id===p.id)}));
@@ -1658,18 +1663,66 @@ async function renderSales(){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`;
     return;
   }
-  feed.innerHTML=hdr+`<div class="sales-feed">${_posts.map(renderPostEntry).join('')}</div>`;
+  feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${_posts.map(renderPostEntry).join('')}</div>`;
+  if(isCreator)initPostDrag();
 }
 
-function renderPostEntry(p){
+let _postDragSrcId=null;
+function initPostDrag(){
+  const feed=document.getElementById('sales-feed-list');
+  if(!feed)return;
+  feed.querySelectorAll('.sp[data-post-id]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      _postDragSrcId=card.dataset.postId;
+      card.classList.add('sp-dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',()=>{
+      card.classList.remove('sp-dragging');
+      feed.querySelectorAll('.sp').forEach(c=>c.classList.remove('sp-drag-over'));
+    });
+    card.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      feed.querySelectorAll('.sp').forEach(c=>c.classList.remove('sp-drag-over'));
+      if(card.dataset.postId!==_postDragSrcId)card.classList.add('sp-drag-over');
+    });
+    card.addEventListener('dragleave',()=>card.classList.remove('sp-drag-over'));
+    card.addEventListener('drop',e=>{
+      e.preventDefault();
+      card.classList.remove('sp-drag-over');
+      if(!_postDragSrcId||_postDragSrcId===card.dataset.postId)return;
+      reorderPosts(_postDragSrcId,card.dataset.postId);
+    });
+  });
+}
+async function reorderPosts(srcId,targetId){
+  const src=_posts.findIndex(x=>x.id===srcId);
+  const tgt=_posts.findIndex(x=>x.id===targetId);
+  if(src<0||tgt<0)return;
+  const moved=_posts.splice(src,1)[0];
+  _posts.splice(tgt,0,moved);
+  // Re-render immediately so it feels instant
+  const feedEl=document.getElementById('sales-feed-list');
+  if(feedEl)feedEl.innerHTML=_posts.map(renderPostEntry).join('');
+  initPostDrag();
+  toast('Order saved');
+  // Persist: use sort_order field on posts table
+  try{
+    await Promise.all(_posts.map((p,i)=>sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',published_at:p.published_at||new Date().toISOString(),sort_order:i})})));
+  }catch(e){console.error('post reorder save failed',e);}
+}
+
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const dragHandle=isCreator?`<div class="sp-drag-handle" title="Drag to reorder" onmousedown="event.stopPropagation()">⠿</div>`:'';
   const creatorActs=isCreator?`<div class="sp-creator-acts">
     <button class="sp-act-btn" onclick="openEditPostForm('${h(p.id)}')">✎ Edit</button>
     <button class="sp-act-btn red" onclick="confirmDeletePost('${h(p.id)}')">✕ Delete</button>
   </div>`:'';
   const imagesHtml=(p.images||[]).map(img=>renderPostImage(img,p.id)).join('');
   const addImgBtn=isCreator?`<button class="sp-add-img" onclick="openAddImageForm('${h(p.id)}')">＋ Add Image</button>`:'';
-  return `<div class="sp" id="sp-${h(p.id)}">
+  return `<div class="sp" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
+    ${dragHandle}
     <div class="sp-meta">${date}</div>
     <div class="sp-title">${h(p.title)}</div>
     ${p.subtitle?`<div class="sp-subtitle">${h(p.subtitle)}</div>`:''}
