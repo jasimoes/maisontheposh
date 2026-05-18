@@ -1388,10 +1388,7 @@ function closeDetail(silent){
   document.getElementById('list-detail').classList.remove('open');
   document.getElementById('feed').style.display='block';
   currentListId=null;
-  render();
-  // If called from back button (silent=true via popstate), don't push new state
-  // If called from ← Back button, go back in history naturally
-  if(!silent)history.back();
+  if(!silent){render();history.back();}
 }
 
 function renderDetailItems(items){
@@ -1765,11 +1762,20 @@ async function savePostForm(){
 }
 function confirmDeletePost(id){
   const p=_posts.find(x=>x.id===id);if(!p)return;
-  if(!confirm(`Delete "${p.title}"? This cannot be undone.`))return;
-  _posts=_posts.filter(x=>x.id!==id);
-  deletePostFromCloud(id);
-  renderSales();
-  toast('Post deleted');
+  const t=document.getElementById('toast');
+  t.innerHTML=`Delete "<strong>${h(p.title)}</strong>"? <span style="text-decoration:underline;cursor:pointer;font-weight:500;margin-left:8px;" id="confirm-del-yes">Yes, delete</span>`;
+  t.classList.add('show','has-undo');
+  t.onclick=null;
+  const yes=document.getElementById('confirm-del-yes');
+  if(yes)yes.onclick=()=>{
+    t.classList.remove('show','has-undo');
+    _posts=_posts.filter(x=>x.id!==id);
+    deletePostFromCloud(id).catch(e=>console.error(e));
+    renderSales();
+    toast('Post deleted');
+  };
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>{t.classList.remove('show','has-undo');t.onclick=null;},5000);
 }
 
 // ── Image form ──
@@ -2238,7 +2244,11 @@ async function fetchProduct(){
   const m=parseMeta(html,finalUrl);
   if(m.title)document.getElementById('i-name').value=m.title;
   if(m.brand)document.getElementById('i-brand').value=m.brand;
-  if(m.price)document.getElementById('i-price').value=m.price;
+  if(m.price){
+    let p=m.price.replace(/[$,]/g,'').trim();
+    p=p.replace(/\.0+$/,'');
+    document.getElementById('i-price').value=p;
+  }
   if(m.image){
     document.getElementById('auto-img').value=m.image;
     document.getElementById('auto-prev').innerHTML=`<img src="${h(m.image)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<p class=\\'ihint\\'>Image blocked — use URL or Upload tab.</p>'">`;
@@ -2296,13 +2306,13 @@ async function fetchInstagram(url,msg){
 
 function parseMeta(html,base){
   const og=p=>{for(const re of[new RegExp(`<meta[^>]+property=["']og:${p}["'][^>]+content=["']([^"'<>]{1,500})["']`,'i'),new RegExp(`<meta[^>]+content=["']([^"'<>]{1,500})["'][^>]+property=["']og:${p}["']`,'i'),new RegExp(`<meta[^>]+name=["']${p}["'][^>]+content=["']([^"'<>]{1,500})["']`,'i')]){const m=html.match(re);if(m)return m[1].trim();}return '';};
-  let title=og('title')||og('product:title')||'';title=title.replace(/\s*[\|—–\-]\s*[^|—–\-]{2,60}$/,'').replace(/&amp;/g,'&').trim();
+  let title=og('title')||og('product:title')||'';title=title.replace(/\s*[\|—–\-]\s*[^|—–\-]{2,60}$/,'').replace(/&amp;/g,'&').replace(/&ndash;/g,'–').replace(/&mdash;/g,'—').replace(/&#(\d+);/g,(_,n)=>String.fromCharCode(n)).trim();
   let image=og('image')||og('image:url')||og('image:secure_url')||'';
   if(image&&!/^https?:/.test(image))try{image=new URL(image,base).href;}catch(e){}
   let price=og('price:amount')||og('product:price:amount')||og('price')||'';
   if(!price){const jm=html.match(/"price"\s*:\s*"?([\d.,]+)"?/);if(jm)price=jm[1];}
   if(!price){const pm=html.match(/itemprop=["']price["'][^>]+content=["']([\d.,]+)["']/);if(pm)price=pm[1];}
-  if(price){price=price.replace(/[^\d.,]/g,'');if(price&&!/^[\$€£¥]/.test(price))price='$'+price;}
+  if(price){price=price.replace(/[$,€£¥]/g,'').trim();price=price.replace(/\.0+$/,'');}
   const brand=og('brand')||og('product:brand')||og('site_name')||'';
   return{title,image,price,brand};
 }
