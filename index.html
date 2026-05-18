@@ -202,8 +202,7 @@ body.creator .wl-drag-handle{display:flex;}
 .lf-ph-n{font-size:10px;color:var(--soft);text-align:center;padding:0 8px;}
 .note-badge{position:absolute;top:7px;right:7px;width:18px;height:18px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--ink);}
 
-/* ══ SALES ══ */
-/* ══ ON SALE NOW — POST FEED ══ */
+/* ══ ON SALE NOW ══ */
 .sales-hdr{padding:28px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
 .sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
@@ -213,57 +212,45 @@ body.creator .wl-drag-handle{display:flex;}
 .sales-empty{padding:80px 40px;text-align:center;}
 .sales-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
 .sales-empty p{font-size:13px;color:var(--soft);}
-
-/* ── Post entry ── */
 .sp{border-bottom:1px solid var(--border);padding:36px 0;}
 .sp:first-child{padding-top:32px;}
 .sp-meta{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
-.sp-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.25;margin-bottom:10px;}
-.sp-subtitle{font-family:var(--serif);font-size:15px;color:var(--mid);line-height:1.6;margin-bottom:16px;font-style:italic;}
-.sp-subtitle:empty{display:none;}
-.sp-body{font-size:14px;color:var(--ink);line-height:1.8;margin-bottom:24px;white-space:pre-wrap;}
-.sp-body:empty{display:none;}
-.sp-creator-acts{display:none;gap:8px;margin-bottom:20px;}
+.sp-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.25;margin-bottom:8px;}
+.sp-subtitle{font-family:var(--serif);font-size:15px;color:var(--mid);line-height:1.6;margin-bottom:14px;font-style:italic;}
+.sp-body{font-size:14px;color:var(--ink);line-height:1.8;margin-bottom:22px;white-space:pre-wrap;}
+.sp-creator-acts{display:none;gap:8px;margin-bottom:18px;}
 body.creator .sp-creator-acts{display:flex;}
 .sp-act-btn{padding:5px 13px;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
 .sp-act-btn:hover{border-color:var(--ink);color:var(--ink);}
 .sp-act-btn.red:hover{border-color:#B03030;color:#B03030;}
-
-/* ── Post images ── */
-.sp-images{display:flex;flex-direction:column;gap:28px;}
-.sp-img-item{display:flex;gap:22px;align-items:flex-start;}
-.sp-img-wrap{flex:0 0 200px;position:relative;background:var(--bg);}
-.sp-img-wrap img{width:100%;display:block;object-fit:cover;cursor:pointer;transition:opacity .18s;}
-.sp-img-wrap img:hover{opacity:.9;}
-.sp-img-ph{width:200px;height:260px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--border);background:var(--bg);position:relative;cursor:pointer;}
+.sp-images{display:flex;flex-direction:column;gap:24px;}
+.sp-img-item{display:flex;gap:20px;align-items:flex-start;}
+.sp-img-wrap{flex:0 0 180px;}
+.sp-img-wrap img{width:100%;display:block;object-fit:cover;}
+.sp-img-ph{width:180px;height:240px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--border);background:var(--bg);position:relative;cursor:pointer;}
 .sp-img-ph input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .sp-img-ph-txt{font-size:10px;color:var(--soft);text-align:center;line-height:1.6;pointer-events:none;}
-.sp-img-body{flex:1;display:flex;flex-direction:column;gap:6px;padding-top:4px;}
+.sp-img-body{flex:1;display:flex;flex-direction:column;gap:5px;padding-top:4px;}
 .sp-img-caption{font-family:var(--serif);font-size:16px;font-weight:400;color:var(--ink);line-height:1.35;}
-.sp-img-caption:empty{display:none;}
-.sp-img-price{font-size:13px;color:var(--mid);font-weight:300;}
-.sp-img-price:empty{display:none;}
+.sp-img-price{font-size:13px;color:var(--mid);}
 .sp-img-cta{display:inline-block;margin-top:10px;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;align-self:flex-start;}
 .sp-img-cta:hover{opacity:.8;}
-.sp-img-acts{display:none;gap:5px;margin-top:8px;}
+.sp-img-acts{display:none;gap:6px;margin-top:8px;}
 body.creator .sp-img-acts{display:flex;}
 .sp-img-act{padding:4px 10px;font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
 .sp-img-act:hover{border-color:var(--ink);color:var(--ink);}
 .sp-img-act.red:hover{border-color:#B03030;color:#B03030;}
-
-/* ── Add image row ── */
-.sp-add-img{display:none;align-items:center;gap:8px;padding:16px 0 0;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.13em;text-transform:uppercase;transition:color .15s;background:none;border:none;font-family:var(--sans);}
+.sp-add-img{display:none;align-items:center;gap:8px;margin-top:16px;padding:0;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.13em;text-transform:uppercase;transition:color .15s;background:none;border:none;font-family:var(--sans);}
 .sp-add-img:hover{color:var(--ink);}
 body.creator .sp-add-img{display:flex;}
-
 @media(max-width:700px){
   .sales-hdr{padding:20px 18px 16px;flex-direction:column;gap:10px;}
   .sales-feed{padding:0 18px 80px;}
   .sp{padding:28px 0;}
   .sp-title{font-size:21px;}
   .sp-img-item{flex-direction:column;gap:12px;}
-  .sp-img-wrap{flex:none;width:100%;}
-  .sp-img-ph{width:100%;height:56vw;}
+  .sp-img-wrap,.sp-img-ph{width:100%;}
+  .sp-img-ph{height:56vw;}
   .sp-img-cta{align-self:stretch;text-align:center;}
 }
 
@@ -538,7 +525,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   .detail-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .panel-items-g{grid-template-columns:repeat(2,1fr);}
   .widgets-wrap{padding:20px 18px;}
-    .fr2{grid-template-columns:1fr;}
+  .fr2{grid-template-columns:1fr;}
   .detail-title{font-size:16px;}
   .feed{padding-top:20px;}
 }
@@ -607,7 +594,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <button class="t1 on" data-t1="latest"      onclick="setT1('latest',this)">Latest Finds</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
     <button class="t1"    data-t1="collections" onclick="setT1('collections',this)">Collections</button>
-    <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
+    <button class="t1"    data-t1="sales"      onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
 </header>
@@ -651,7 +638,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Items grid -->
   <div class="detail-grid" id="detail-grid"></div>
   <!-- Add item row — creator only -->
-  <div id="detail-add-row" class="creator-only-btn" style="display:flex;border-top:1px solid var(--border);">
+  <div class="creator-only-btn" style="display:flex;border-top:1px solid var(--border);">
     <div class="detail-add-btn creator-only-btn" style="flex:1;border-top:none;" onclick="openAddItem()">＋ Add Item</div>
     <div class="detail-add-btn creator-only-btn" id="pick-from-col-btn" style="flex:1;border-top:none;border-left:1px solid var(--border);display:none;" onclick="openPickFromCollections()">＋ Pick from Collections</div>
   </div>
@@ -980,39 +967,6 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   </div>
 </div>
 
-<!-- POST EDITOR -->
-<div class="fov" id="sp-ov" onclick="if(event.target===this)closeSPForm()">
-  <div class="fp" style="max-width:560px;">
-    <h3 class="ftitle" id="sp-form-title">New Post</h3>
-    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
-    <div class="fg"><label class="fl">Subtitle <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder="e.g. Ends Sunday midnight"></div>
-    <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Write your take on the sale — what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
-    <button class="btn-p" onclick="savePostForm()">Save Post</button>
-    <button class="btn-g" onclick="closeSPForm()">Cancel</button>
-  </div>
-</div>
-
-<!-- IMAGE EDITOR -->
-<div class="fov" id="sp-img-ov" onclick="if(event.target===this)closeSPImgForm()">
-  <div class="fp" style="max-width:480px;">
-    <h3 class="ftitle" id="sp-img-form-title">Add Image</h3>
-    <div class="fg">
-      <label class="fl">Image</label>
-      <img id="sp-f-img-preview" src="" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;margin-bottom:8px;">
-      <div class="dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])handleSPImgFile(event.dataTransfer.files[0])">
-        <input type="file" accept="image/*" onchange="handleSPImgFile(this.files[0])">
-        <p>Click, drag, or paste image (Cmd/Ctrl+V)</p>
-      </div>
-      <input type="hidden" id="sp-f-img-val">
-    </div>
-    <div class="fg"><label class="fl">Caption</label><input type="text" class="fi" id="sp-f-caption" placeholder="e.g. The Row Margaux Ballet Flat"></div>
-    <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-price" placeholder="e.g. 890"></div>
-    <div class="fg"><label class="fl">Affiliate Link</label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
-    <button class="btn-p" onclick="saveImageForm()">Save</button>
-    <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
-  </div>
-</div>
-
 <div class="toast" id="toast"></div>
 
 <!-- Hidden mobile login trigger — tap MTP logo 3 times -->
@@ -1165,7 +1119,6 @@ let activeT1='latest',activeCat='all',currentListId=null,nlT1='',nlCat='',aTab='
 let isCreator=false;
 let detailAllItems=[];
 let lookManualItems=[];
-let _currentListIsSales=false;
 
 function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('has-undo');t.onclick=null;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
@@ -1428,15 +1381,6 @@ function openDetail(id){
   // Show "Pick from Collections" button for weekly AND collection lists (creator mode only)
   const pickBtn=document.getElementById('pick-from-col-btn');
   if(pickBtn) pickBtn.style.display=(isCreator&&(l.t1==='weekly'||l.t1==='collections'))?'flex':'none';
-  // Sales lists: hide search bar and standard add-item row
-  const isSales=l.t1==='sales';
-  _currentListIsSales=isSales;
-  document.getElementById('detail-search-wrap').style.display=isSales?'none':'';
-  const addRow=document.getElementById('detail-add-row');
-  if(addRow)addRow.style.display=isSales?'none':'';
-  // Update Add Item button label for context
-  const addBtn=document.querySelector('#detail-add-row .detail-add-btn');
-  if(addBtn)addBtn.textContent=isSales?'＋ Add Photo':'＋ Add Item';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
@@ -1444,26 +1388,14 @@ function closeDetail(silent){
   document.getElementById('list-detail').classList.remove('open');
   document.getElementById('feed').style.display='block';
   currentListId=null;
-  _currentListIsSales=false;
-  // Restore detail-grid to standard styles
-  const g=document.getElementById('detail-grid');
-  if(g){g.style.display='';g.style.padding='';g.style.gridTemplateColumns='';}
-  // Restore search bar and add row
-  document.getElementById('detail-search-wrap').style.display='';
-  const addRow=document.getElementById('detail-add-row');
-  if(addRow)addRow.style.display='';
   render();
+  // If called from back button (silent=true via popstate), don't push new state
+  // If called from ← Back button, go back in history naturally
   if(!silent)history.back();
 }
 
 function renderDetailItems(items){
   const g=document.getElementById('detail-grid');
-  // ── Sales post layout ──
-  if(_currentListIsSales){
-    renderSalePost(items,g);
-    return;
-  }
-  // ── Standard grid layout ──
   if(!items.length){
     g.innerHTML=`<div style="grid-column:1/-1" class="empty"><h3>No items found</h3><p>${detailAllItems.length?'Try a different search term.':'Add items using the button below.'}</p></div>`;
     return;
@@ -1704,9 +1636,8 @@ function renderLatest(){
   feed.innerHTML=`<div class="lf-grid">${cells}</div>`;
 }
 
-// ══ ON SALE NOW — POST FEED ══
-let _posts=[];  // loaded from Supabase posts + post_images tables
-let _activeSalePostId=null; // post being edited for paste-to-image
+// ══ ON SALE NOW ══
+let _posts=[];
 
 async function loadPosts(){
   try{
@@ -1714,46 +1645,31 @@ async function loadPosts(){
       sbFetch('posts?select=*&order=published_at.desc'),
       sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
     ]);
-    _posts=(posts||[]).map(p=>({
-      ...p,
-      images:(images||[]).filter(img=>img.post_id===p.id)
-    }));
+    _posts=(posts||[]).map(p=>({...p,images:(images||[]).filter(img=>img.post_id===p.id)}));
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
 }
 
 async function renderSales(){
   const feed=document.getElementById('feed');
-  feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:60px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
+  feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   await loadPosts();
-
   const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button>`:'';
-  const hdr=`<div class="sales-hdr">
-    <div class="sales-hdr-left">
-      <h2>On Sale Now</h2>
-      <p>Sales, deals &amp; picks — updated as they happen.</p>
-    </div>
-    ${addBtn}
-  </div>`;
-
+  const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks — updated as they happen.</p></div>${addBtn}</div>`;
   if(!_posts.length){
-    feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon for curated deals.'}</p></div>`;
+    feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`;
     return;
   }
-
-  const postsHtml=_posts.map(p=>renderPostEntry(p)).join('');
-  feed.innerHTML=hdr+`<div class="sales-feed">${postsHtml}</div>`;
+  feed.innerHTML=hdr+`<div class="sales-feed">${_posts.map(renderPostEntry).join('')}</div>`;
 }
 
 function renderPostEntry(p){
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
   const creatorActs=isCreator?`<div class="sp-creator-acts">
-    <button class="sp-act-btn" onclick="openEditPostForm('${h(p.id)}')">✎ Edit Post</button>
+    <button class="sp-act-btn" onclick="openEditPostForm('${h(p.id)}')">✎ Edit</button>
     <button class="sp-act-btn red" onclick="confirmDeletePost('${h(p.id)}')">✕ Delete</button>
   </div>`:'';
-
   const imagesHtml=(p.images||[]).map(img=>renderPostImage(img,p.id)).join('');
   const addImgBtn=isCreator?`<button class="sp-add-img" onclick="openAddImageForm('${h(p.id)}')">＋ Add Image</button>`:'';
-
   return `<div class="sp" id="sp-${h(p.id)}">
     <div class="sp-meta">${date}</div>
     <div class="sp-title">${h(p.title)}</div>
@@ -1766,11 +1682,12 @@ function renderPostEntry(p){
 }
 
 function renderPostImage(img,postId){
+  const clickable=img.link&&img.link!=='#';
   const imgEl=img.image
-    ?`<img src="${h(img.image)}" alt="${h(img.caption||'')}" onclick="${img.link&&img.link!=='#'?`window.open('${h(img.link)}','_blank')`:'void(0)'}" style="${img.link&&img.link!=='#'?'cursor:pointer;':''}" onerror="this.style.display='none'">`
+    ?`<img src="${h(img.image)}" alt="${h(img.caption||'')}" style="${clickable?'cursor:pointer;':''}" onclick="${clickable?`window.open('${h(img.link)}','_blank')`:'void(0)'}" onerror="this.style.display='none'">`
     :`<div class="sp-img-ph" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])uploadPostImage('${h(postId)}','${h(img.id)}',event.dataTransfer.files[0])">
         <input type="file" accept="image/*" onchange="uploadPostImage('${h(postId)}','${h(img.id)}',this.files[0])">
-        <div class="sp-img-ph-txt">Tap, drag<br>or paste</div>
+        <div class="sp-img-ph-txt">Tap, drag or paste</div>
       </div>`;
   const creatorActs=isCreator?`<div class="sp-img-acts">
     <button class="sp-img-act" onclick="openEditImageForm('${h(postId)}','${h(img.id)}')">✎ Edit</button>
@@ -1781,13 +1698,13 @@ function renderPostImage(img,postId){
     <div class="sp-img-body">
       ${img.caption?`<div class="sp-img-caption">${h(img.caption)}</div>`:''}
       ${img.price?`<div class="sp-img-price">$${h(img.price)}</div>`:''}
-      ${(img.link&&img.link!=='#')?`<a class="sp-img-cta" href="${h(img.link)}" target="_blank" rel="noopener noreferrer">Shop Now →</a>`:''}
+      ${clickable?`<a class="sp-img-cta" href="${h(img.link)}" target="_blank" rel="noopener noreferrer">Shop Now →</a>`:''}
       ${creatorActs}
     </div>
   </div>`;
 }
 
-// ── Supabase helpers for posts ──
+// ── Supabase helpers ──
 async function savePost(p){
   await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',published_at:p.published_at||new Date().toISOString()})});
 }
@@ -1801,7 +1718,7 @@ async function deletePostImageFromCloud(id){
   await sbFetch(`post_images?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
 }
 
-// ── New Post form ──
+// ── Post form ──
 let _editingPostId=null;
 function openNewPostForm(){
   _editingPostId=null;
@@ -1826,18 +1743,19 @@ function closeSPForm(){document.getElementById('sp-ov').classList.remove('open')
 async function savePostForm(){
   const title=document.getElementById('sp-f-title').value.trim();
   if(!title){toast('Title required');return;}
+  const subtitle=document.getElementById('sp-f-subtitle').value.trim();
+  const body=document.getElementById('sp-f-body').value.trim();
   const btn=document.querySelector('#sp-ov .btn-p');
   btn.textContent='Saving…';btn.disabled=true;
   try{
     if(_editingPostId){
       const p=_posts.find(x=>x.id===_editingPostId);
-      if(p){p.title=title;p.subtitle=document.getElementById('sp-f-subtitle').value.trim();p.body=document.getElementById('sp-f-body').value.trim();}
-      await savePost({id:_editingPostId,title,subtitle:document.getElementById('sp-f-subtitle').value.trim(),body:document.getElementById('sp-f-body').value.trim()});
+      if(p){p.title=title;p.subtitle=subtitle;p.body=body;}
+      await savePost({id:_editingPostId,title,subtitle,body});
     } else {
-      const newPost={id:uid(),title,subtitle:document.getElementById('sp-f-subtitle').value.trim(),body:document.getElementById('sp-f-body').value.trim(),published_at:new Date().toISOString(),images:[]};
+      const newPost={id:uid(),title,subtitle,body,published_at:new Date().toISOString(),images:[]};
       _posts.unshift(newPost);
       await savePost(newPost);
-      _activeSalePostId=newPost.id;
     }
     closeSPForm();
     renderSales();
@@ -1845,8 +1763,6 @@ async function savePostForm(){
   }catch(e){toast('⚠ Could not save post');console.error(e);}
   btn.textContent='Save Post';btn.disabled=false;
 }
-
-// ── Delete post ──
 function confirmDeletePost(id){
   const p=_posts.find(x=>x.id===id);if(!p)return;
   if(!confirm(`Delete "${p.title}"? This cannot be undone.`))return;
@@ -1856,15 +1772,12 @@ function confirmDeletePost(id){
   toast('Post deleted');
 }
 
-// ── Add image form ──
-let _editingImagePostId=null,_editingImageId=null;
+// ── Image form ──
+let _editingImgPostId=null,_editingImgId=null;
 function openAddImageForm(postId){
-  _editingImagePostId=postId;
-  _editingImageId=null;
-  _activeSalePostId=postId;
+  _editingImgPostId=postId;_editingImgId=null;
   document.getElementById('sp-img-form-title').textContent='Add Image';
   document.getElementById('sp-f-img-preview').style.display='none';
-  document.getElementById('sp-f-img-preview').src='';
   document.getElementById('sp-f-img-val').value='';
   document.getElementById('sp-f-caption').value='';
   document.getElementById('sp-f-price').value='';
@@ -1874,15 +1787,10 @@ function openAddImageForm(postId){
 function openEditImageForm(postId,imgId){
   const p=_posts.find(x=>x.id===postId);if(!p)return;
   const img=p.images.find(x=>x.id===imgId);if(!img)return;
-  _editingImagePostId=postId;
-  _editingImageId=imgId;
+  _editingImgPostId=postId;_editingImgId=imgId;
   document.getElementById('sp-img-form-title').textContent='Edit Image';
-  if(img.image){
-    document.getElementById('sp-f-img-preview').src=img.image;
-    document.getElementById('sp-f-img-preview').style.display='block';
-  } else {
-    document.getElementById('sp-f-img-preview').style.display='none';
-  }
+  const prev=document.getElementById('sp-f-img-preview');
+  if(img.image){prev.src=img.image;prev.style.display='block';}else{prev.style.display='none';}
   document.getElementById('sp-f-img-val').value=img.image||'';
   document.getElementById('sp-f-caption').value=img.caption||'';
   document.getElementById('sp-f-price').value=img.price||'';
@@ -1890,19 +1798,17 @@ function openEditImageForm(postId,imgId){
   document.getElementById('sp-img-ov').classList.add('open');
 }
 function closeSPImgForm(){document.getElementById('sp-img-ov').classList.remove('open');}
-
 function handleSPImgFile(file){
   if(!file||!file.type.startsWith('image/'))return;
   const reader=new FileReader();
   reader.onload=async(e)=>{
     const compressed=await compressImage(e.target.result);
     document.getElementById('sp-f-img-val').value=compressed;
-    document.getElementById('sp-f-img-preview').src=compressed;
-    document.getElementById('sp-f-img-preview').style.display='block';
+    const prev=document.getElementById('sp-f-img-preview');
+    prev.src=compressed;prev.style.display='block';
   };
   reader.readAsDataURL(file);
 }
-
 async function saveImageForm(){
   const image=document.getElementById('sp-f-img-val').value;
   const caption=document.getElementById('sp-f-caption').value.trim();
@@ -1911,35 +1817,32 @@ async function saveImageForm(){
   const btn=document.querySelector('#sp-img-ov .btn-p');
   btn.textContent='Saving…';btn.disabled=true;
   try{
-    const p=_posts.find(x=>x.id===_editingImagePostId);if(!p)return;
-    if(_editingImageId){
-      const img=p.images.find(x=>x.id===_editingImageId);
+    const p=_posts.find(x=>x.id===_editingImgPostId);if(!p)return;
+    if(_editingImgId){
+      const img=p.images.find(x=>x.id===_editingImgId);
       if(img){img.image=image||img.image;img.caption=caption;img.price=price;img.link=link;}
-      await savePostImage({id:_editingImageId,post_id:_editingImagePostId,image:image||img.image,caption,price,link,sort_order:img.sort_order||0});
+      await savePostImage({id:_editingImgId,post_id:_editingImgPostId,image:image||img.image,caption,price,link,sort_order:img.sort_order||0});
     } else {
-      const newImg={id:uid(),post_id:_editingImagePostId,image,caption,price,link,sort_order:p.images.length};
+      const newImg={id:uid(),post_id:_editingImgPostId,image,caption,price,link,sort_order:p.images.length};
       p.images.push(newImg);
       await savePostImage(newImg);
     }
     closeSPImgForm();
-    // Re-render just this post's images
-    const imgContainer=document.getElementById(`sp-images-${_editingImagePostId}`);
-    if(imgContainer){const pp=_posts.find(x=>x.id===_editingImagePostId);if(pp)imgContainer.innerHTML=pp.images.map(img=>renderPostImage(img,_editingImagePostId)).join('');}
+    const c=document.getElementById(`sp-images-${_editingImgPostId}`);
+    const pp=_posts.find(x=>x.id===_editingImgPostId);
+    if(c&&pp)c.innerHTML=pp.images.map(img=>renderPostImage(img,_editingImgPostId)).join('');
     toast('Image saved');
   }catch(e){toast('⚠ Could not save image');console.error(e);}
   btn.textContent='Save';btn.disabled=false;
 }
-
 async function deletePostImage(postId,imgId){
   const p=_posts.find(x=>x.id===postId);if(!p)return;
   p.images=p.images.filter(x=>x.id!==imgId);
   await deletePostImageFromCloud(imgId);
-  const imgContainer=document.getElementById(`sp-images-${postId}`);
-  if(imgContainer)imgContainer.innerHTML=p.images.map(img=>renderPostImage(img,postId)).join('');
+  const c=document.getElementById(`sp-images-${postId}`);
+  if(c)c.innerHTML=p.images.map(img=>renderPostImage(img,postId)).join('');
   toast('Image removed');
 }
-
-// ── Paste anywhere on sales tab → add image to active/latest post ──
 async function uploadPostImage(postId,imgId,file){
   if(!file||!file.type.startsWith('image/'))return;
   const reader=new FileReader();
@@ -1948,14 +1851,12 @@ async function uploadPostImage(postId,imgId,file){
     const p=_posts.find(x=>x.id===postId);if(!p)return;
     const img=p.images.find(x=>x.id===imgId);
     if(img){img.image=compressed;await savePostImage(img);}
-    const imgContainer=document.getElementById(`sp-images-${postId}`);
-    if(imgContainer)imgContainer.innerHTML=p.images.map(i=>renderPostImage(i,postId)).join('');
+    const c=document.getElementById(`sp-images-${postId}`);
+    if(c)c.innerHTML=p.images.map(i=>renderPostImage(i,postId)).join('');
     toast('Image saved');
   };
   reader.readAsDataURL(file);
 }
-
-function openNewSale(){openNewPostForm();}
 
 // ══ WIDGETS ══
 async function renderWidgets(){
@@ -3006,10 +2907,8 @@ window.addEventListener('DOMContentLoaded',()=>{
     let file=null;
     for(let i=0;i<items.length;i++){if(items[i].type.startsWith('image/')){file=items[i].getAsFile();break;}}
     if(!file)return;
-    // Sales tab open + image form open → load into image form
-    if(document.getElementById('sp-img-ov')&&document.getElementById('sp-img-ov').classList.contains('open')){
-      e.preventDefault();handleSPImgFile(file);return;
-    }
+    // Image editor open → paste into it
+    if(document.getElementById('sp-img-ov').classList.contains('open')){e.preventDefault();handleSPImgFile(file);return;}
     // Product image: dropz visible + upload tab active
     const dz=document.getElementById('dropz');
     const uploadTabOn=document.getElementById('itab-up')&&document.getElementById('itab-up').classList.contains('on');
@@ -3027,6 +2926,39 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadFromCloud();
 });
 </script>
+<!-- ON SALE NOW: POST EDITOR -->
+<div class="fov" id="sp-ov" onclick="if(event.target===this)closeSPForm()">
+  <div class="fp" style="max-width:560px;">
+    <h3 class="ftitle" id="sp-form-title">New Post</h3>
+    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
+    <div class="fg"><label class="fl">Subtitle <span class="flh">(optional — e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
+    <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale — what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
+    <button class="btn-p" onclick="savePostForm()">Save Post</button>
+    <button class="btn-g" onclick="closeSPForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ON SALE NOW: IMAGE EDITOR -->
+<div class="fov" id="sp-img-ov" onclick="if(event.target===this)closeSPImgForm()">
+  <div class="fp" style="max-width:480px;">
+    <h3 class="ftitle" id="sp-img-form-title">Add Image</h3>
+    <div class="fg">
+      <label class="fl">Image</label>
+      <img id="sp-f-img-preview" src="" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;margin-bottom:8px;">
+      <div class="dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])handleSPImgFile(event.dataTransfer.files[0])">
+        <input type="file" accept="image/*" onchange="handleSPImgFile(this.files[0])">
+        <p>Click, drag, or paste (Cmd/Ctrl+V)</p>
+      </div>
+      <input type="hidden" id="sp-f-img-val">
+    </div>
+    <div class="fg"><label class="fl">Caption</label><input type="text" class="fi" id="sp-f-caption" placeholder="e.g. The Row Margaux Ballet Flat"></div>
+    <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-price" placeholder="890"></div>
+    <div class="fg"><label class="fl">Affiliate Link</label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
+    <button class="btn-p" onclick="saveImageForm()">Save</button>
+    <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
+  </div>
+</div>
+
 </body>
-<!-- mtp-build-6 -->
+<!-- mtp-build-4 -->
 </html>
