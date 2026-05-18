@@ -207,6 +207,7 @@ body.creator .wl-drag-handle{display:flex;}
 .sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
+.sp-link-only{border:1px solid var(--border);padding:14px 16px;}
 .btn-new-sale{padding:8px 18px;background:var(--ink);color:white;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;white-space:nowrap;flex-shrink:0;margin-top:4px;}
 .btn-new-sale:hover{opacity:.8;}
 .sales-feed{max-width:680px;margin:0 auto;padding:0 40px 100px;}
@@ -1681,18 +1682,30 @@ function renderPostEntry(p){
 
 function renderPostImage(img,postId){
   const clickable=img.link&&img.link!=='#';
-  const imgEl=img.image
+  const hasImage=!!img.image;
+  const imgEl=hasImage
     ?`<img src="${h(img.image)}" alt="${h(img.caption||'')}" style="${clickable?'cursor:pointer;':''}" onclick="${clickable?`window.open('${h(img.link)}','_blank')`:'void(0)'}" onerror="this.style.display='none'">`
-    :`<div class="sp-img-ph" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])uploadPostImage('${h(postId)}','${h(img.id)}',event.dataTransfer.files[0])">
+    :isCreator?`<div class="sp-img-ph" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])uploadPostImage('${h(postId)}','${h(img.id)}',event.dataTransfer.files[0])">
         <input type="file" accept="image/*" onchange="uploadPostImage('${h(postId)}','${h(img.id)}',this.files[0])">
         <div class="sp-img-ph-txt">Tap, drag or paste</div>
-      </div>`;
+      </div>`:'';
   const creatorActs=isCreator?`<div class="sp-img-acts">
     <button class="sp-img-act" onclick="openEditImageForm('${h(postId)}','${h(img.id)}')">✎ Edit</button>
     <button class="sp-img-act red" onclick="deletePostImage('${h(postId)}','${h(img.id)}')">✕ Remove</button>
   </div>`:'';
+  // Link-only (no image): show as a clean shop button row, no image box
+  if(!hasImage&&!isCreator){
+    if(!clickable)return '';
+    return `<div class="sp-img-item sp-link-only" id="spimg-${h(img.id)}">
+      <div class="sp-img-body">
+        ${img.caption?`<div class="sp-img-caption">${h(img.caption)}</div>`:''}
+        ${img.price?`<div class="sp-img-price">$${h(img.price)}</div>`:''}
+        <a class="sp-img-cta" href="${h(img.link)}" target="_blank" rel="noopener noreferrer">Shop Now →</a>
+      </div>
+    </div>`;
+  }
   return `<div class="sp-img-item" id="spimg-${h(img.id)}">
-    <div class="sp-img-wrap">${imgEl}</div>
+    ${imgEl?`<div class="sp-img-wrap">${imgEl}</div>`:''}
     <div class="sp-img-body">
       ${img.caption?`<div class="sp-img-caption">${h(img.caption)}</div>`:''}
       ${img.price?`<div class="sp-img-price">$${h(img.price)}</div>`:''}
@@ -1786,6 +1799,7 @@ function openAddImageForm(postId){
   document.getElementById('sp-img-form-title').textContent='Add Image';
   document.getElementById('sp-f-img-preview').style.display='none';
   document.getElementById('sp-f-img-val').value='';
+  document.getElementById('sp-f-img-url').value='';
   document.getElementById('sp-f-caption').value='';
   document.getElementById('sp-f-price').value='';
   document.getElementById('sp-f-link').value='';
@@ -1799,6 +1813,7 @@ function openEditImageForm(postId,imgId){
   const prev=document.getElementById('sp-f-img-preview');
   if(img.image){prev.src=img.image;prev.style.display='block';}else{prev.style.display='none';}
   document.getElementById('sp-f-img-val').value=img.image||'';
+  document.getElementById('sp-f-img-url').value=(img.image&&img.image.startsWith('http'))?img.image:'';
   document.getElementById('sp-f-caption').value=img.caption||'';
   document.getElementById('sp-f-price').value=img.price||'';
   document.getElementById('sp-f-link').value=img.link||'';
@@ -2962,9 +2977,13 @@ window.addEventListener('DOMContentLoaded',()=>{
       </div>
       <input type="hidden" id="sp-f-img-val">
     </div>
+    <div class="fg">
+      <label class="fl">Image URL <span class="flh">(optional — paste a link to load image)</span></label>
+      <input type="url" class="fi" id="sp-f-img-url" placeholder="https://…" oninput="(function(v){if(!v)return;const prev=document.getElementById('sp-f-img-preview');prev.src=v;prev.style.display='block';document.getElementById('sp-f-img-val').value=v;})(this.value.trim())">
+    </div>
     <div class="fg"><label class="fl">Caption</label><input type="text" class="fi" id="sp-f-caption" placeholder="e.g. The Row Margaux Ballet Flat"></div>
     <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-price" placeholder="890"></div>
-    <div class="fg"><label class="fl">Affiliate Link</label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
+    <div class="fg"><label class="fl">Affiliate Link <span class="flh">(no image? just add this — a Shop button will show)</span></label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
     <button class="btn-g" id="sp-copy-link-btn" onclick="(function(){const v=document.getElementById('sp-f-link').value.trim();if(!v)return;navigator.clipboard.writeText(v).then(()=>{const b=document.getElementById('sp-copy-link-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy Image Link',1800);});})()" style="font-size:10px;letter-spacing:.12em;">Copy Image Link</button>
     <button class="btn-p" onclick="saveImageForm()">Save</button>
     <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
