@@ -2937,8 +2937,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <!-- ON SALE NOW: POST EDITOR -->
-<div class="fov" id="sp-ov" onclick="if(event.target===this)closeSPForm()">
-  <div class="fp" style="max-width:560px;">
+<div class="fov" id="sp-ov">
+  <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
     <h3 class="ftitle" id="sp-form-title">New Post</h3>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional — e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
@@ -2949,8 +2949,8 @@ window.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <!-- ON SALE NOW: IMAGE EDITOR -->
-<div class="fov" id="sp-img-ov" onclick="if(event.target===this)closeSPImgForm()">
-  <div class="fp" style="max-width:480px;">
+<div class="fov" id="sp-img-ov">
+  <div class="fp" style="max-width:480px;" onclick="event.stopPropagation()">
     <h3 class="ftitle" id="sp-img-form-title">Add Image</h3>
     <div class="fg">
       <label class="fl">Image</label>
