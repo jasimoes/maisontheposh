@@ -207,7 +207,7 @@ body.creator .wl-drag-handle{display:flex;}
 .sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
-.sp-link-only{border:1px solid var(--border);padding:14px 16px;}
+.sp-link-only{padding:4px 0;}
 .sp-drag-handle{position:absolute;top:14px;right:14px;width:26px;height:26px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--faint);font-size:16px;background:var(--white);border:1px solid var(--border);border-radius:2px;z-index:5;user-select:none;}
 body.creator .sp-drag-handle{display:flex;}
 .sp-drag-handle:hover{color:var(--mid);border-color:var(--mid);}
@@ -1646,9 +1646,11 @@ let _posts=[];
 async function loadPosts(){
   try{
     const [posts,images]=await Promise.all([
-      sbFetch('posts?select=*&order=published_at.desc'),
+      sbFetch('posts?select=*&order=sort_order.asc,published_at.desc'),
       sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
     ]);
+    console.log('[MTP] posts from Supabase:', posts);
+    console.log('[MTP] images from Supabase:', images);
     _posts=(posts||[]).map(p=>({...p,images:(images||[]).filter(img=>img.post_id===p.id)}));
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
 }
