@@ -1646,7 +1646,7 @@ let _posts=[];
 async function loadPosts(){
   try{
     const [posts,images]=await Promise.all([
-      sbFetch('posts?select=*&order=sort_order.asc,published_at.desc'),
+      sbFetch('posts?select=*&order=published_at.desc'),
       sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
     ]);
     _posts=(posts||[]).map(p=>({...p,images:(images||[]).filter(img=>img.post_id===p.id)}));
