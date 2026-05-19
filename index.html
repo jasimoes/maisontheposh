@@ -1713,6 +1713,7 @@ async function reorderPosts(srcId,targetId){
   }catch(e){console.error('post reorder save failed',e);}
 }
 
+function renderPostEntry(p){
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
   const dragHandle=isCreator?`<div class="sp-drag-handle" title="Drag to reorder" onmousedown="event.stopPropagation()">⠿</div>`:'';
   const creatorActs=isCreator?`<div class="sp-creator-acts">
@@ -1725,8 +1726,8 @@ async function reorderPosts(srcId,targetId){
     ${dragHandle}
     <div class="sp-meta">${date}</div>
     <div class="sp-title">${h(p.title)}</div>
-    ${p.subtitle?`<div class="sp-subtitle">${h(p.subtitle)}</div>`:''}
-    ${p.body?`<div class="sp-body">${h(p.body)}</div>`:''}
+    ${p.subtitle?'<div class="sp-subtitle">'+h(p.subtitle)+'</div>':''}
+    ${p.body?'<div class="sp-body">'+h(p.body)+'</div>':''}
     ${creatorActs}
     <div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>
     ${addImgBtn}
@@ -1736,8 +1737,9 @@ async function reorderPosts(srcId,targetId){
 function renderPostImage(img,postId){
   const clickable=img.link&&img.link!=='#';
   const hasImage=!!img.image;
+  const imgOnclick=clickable?"window.open('"+h(img.link)+"','_blank')":'void(0)';
   const imgEl=hasImage
-    ?`<img src="${h(img.image)}" alt="${h(img.caption||'')}" style="${clickable?'cursor:pointer;':''}" onclick="${clickable?`window.open('${h(img.link)}','_blank')`:'void(0)'}" onerror="this.style.display='none'">`
+    ?'<img src="'+h(img.image)+'" alt="'+h(img.caption||'')+'" style="'+(clickable?'cursor:pointer;':'')+'" onclick="'+imgOnclick+'" onerror="this.style.display=\'none\'">'
     :isCreator?`<div class="sp-img-ph" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])uploadPostImage('${h(postId)}','${h(img.id)}',event.dataTransfer.files[0])">
         <input type="file" accept="image/*" onchange="uploadPostImage('${h(postId)}','${h(img.id)}',this.files[0])">
         <div class="sp-img-ph-txt">Tap, drag or paste</div>
