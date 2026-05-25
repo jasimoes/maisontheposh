@@ -32,6 +32,8 @@ body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weigh
 .creator-dot{width:7px;height:7px;border-radius:50%;background:#6EE7A0;flex-shrink:0;}
 .btn-toggle-mode{padding:5px 14px;border:1px solid rgba(255,255,255,.4);background:none;color:white;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .18s;}
 .btn-toggle-mode:hover{background:rgba(255,255,255,.12);}
+.imp-log-ok{color:#3A7D5A;}
+.imp-log-err{color:#A33030;}
 
 /* ══ HEADER ══ */
 .hdr{background:var(--white);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;position:sticky;top:0;z-index:200;}
@@ -564,7 +566,60 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <div class="creator-dot"></div>
     <span>Creator Mode — only you see this</span>
   </div>
-  <button class="btn-toggle-mode" onclick="toggleMode()">Preview as Visitor</button>
+  <div style="display:flex;gap:10px;align-items:center;">
+    <button class="btn-toggle-mode" onclick="openImporter()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">↑ Import ShopMy</button>
+    <button class="btn-toggle-mode" onclick="toggleMode()">Preview as Visitor</button>
+  </div>
+</div>
+
+<!-- SHOPMY IMPORTER OVERLAY -->
+<div class="fov" id="importer-ov" style="z-index:500;">
+  <div class="fp" style="max-width:680px;width:100%;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Import ShopMy Links</h3>
+    <p style="font-size:13px;color:var(--mid);margin-bottom:1.25rem;font-family:var(--serif);font-style:italic;">Drop your ShopMy CSV export — new items will be added to Latest Finds. Duplicates are skipped automatically.</p>
+
+    <div class="dropz" id="imp-dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])handleImportFile(event.dataTransfer.files[0])">
+      <input type="file" accept=".csv" onchange="handleImportFile(this.files[0])">
+      <p>Click or drag CSV here</p>
+    </div>
+
+    <div id="imp-stats" style="display:none;margin:1rem 0;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1rem;">
+        <div style="background:var(--bg);padding:.75rem 1rem;border:1px solid var(--border);">
+          <div style="font-size:1.4rem;font-family:var(--serif);font-weight:400;" id="imp-n-total">0</div>
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);">total rows</div>
+        </div>
+        <div style="background:var(--bg);padding:.75rem 1rem;border:1px solid var(--border);">
+          <div style="font-size:1.4rem;font-family:var(--serif);font-weight:400;" id="imp-n-new">0</div>
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);">new items</div>
+        </div>
+        <div style="background:var(--bg);padding:.75rem 1rem;border:1px solid var(--border);">
+          <div style="font-size:1.4rem;font-family:var(--serif);font-weight:400;" id="imp-n-dupe">0</div>
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);">duplicates</div>
+        </div>
+        <div style="background:var(--bg);padding:.75rem 1rem;border:1px solid var(--border);">
+          <div style="font-size:1.4rem;font-family:var(--serif);font-weight:400;" id="imp-n-done">0</div>
+          <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);">imported</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;margin-bottom:1rem;">
+        <table style="width:100%;border-collapse:collapse;font-size:12px;">
+          <thead><tr>
+            <th style="text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:400;">Title</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:400;">Brand</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:400;">Category</th>
+            <th style="text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);padding:6px 8px;border-bottom:1px solid var(--border);font-weight:400;">ShopMy link</th>
+          </tr></thead>
+          <tbody id="imp-preview"></tbody>
+        </table>
+      </div>
+      <div style="height:2px;background:var(--border);margin-bottom:.75rem;display:none;" id="imp-prog-bar"><div id="imp-prog-fill" style="height:100%;background:var(--ink);width:0%;transition:width .3s;"></div></div>
+      <div id="imp-log" style="display:none;background:var(--bg);border:1px solid var(--border);padding:.75rem;max-height:160px;overflow-y:auto;font-family:monospace;font-size:11px;color:var(--soft);margin-bottom:1rem;"></div>
+    </div>
+
+    <button class="btn-p" id="imp-btn" style="display:none;" onclick="runImport()">Import to Latest Finds</button>
+    <button class="btn-g" onclick="closeImporter()">Close</button>
+  </div>
 </div>
 
 <!-- PASSWORD MODAL -->
@@ -1701,19 +1756,21 @@ async function renderJournal(){
     }
     if(!allPosts.length){feed.innerHTML=`<div class="sales-empty"><h3>No posts yet</h3><p>Check back soon.</p></div>`;return;}
     function postCard(p){
-      const title=p.title||'';
+      const title=(p.title||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
       const link='https://maisontheposh.substack.com/p/'+p.slug;
       const img=p.cover_image||'';
       const excerpt=(p.subtitle||'').slice(0,180);
       const date=p.post_date?new Date(p.post_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
-      return '<article class="journal-card" onclick="window.open(''+link+'','_blank')">'
-        +(img?'<div class="journal-img"><img src="'+img+'" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>':'')
-        +'<div class="journal-body">'
-        +'<p class="journal-date">'+date+'</p>'
-        +'<h2 class="journal-title">'+title+'</h2>'
-        +(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')
-        +'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Substack →</a>'
-        +'</div></article>';
+      const el=document.createElement('article');
+      el.className='journal-card';
+      el.style.cursor='pointer';
+      el.addEventListener('click',()=>window.open(link,'_blank'));
+      if(img){const d=document.createElement('div');d.className='journal-img';const i=document.createElement('img');i.src=img;i.alt='';i.loading='lazy';i.onerror=()=>d.style.display='none';d.appendChild(i);el.appendChild(d);}
+      const body=document.createElement('div');body.className='journal-body';
+      body.innerHTML=(date?'<p class="journal-date">'+date+'</p>':'')+'<h2 class="journal-title">'+title+'</h2>'+(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')+'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener">Read on Substack →</a>';
+      body.querySelector('.journal-read').addEventListener('click',e=>e.stopPropagation());
+      el.appendChild(body);
+      return el.outerHTML;
     }
     const cards=allPosts.map(postCard).join('');
     feed.innerHTML=`<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed">${cards}</div></div>`;
@@ -3035,6 +3092,113 @@ function updateHeaderHeight(){
 }
 
 // ══ DRAG/DROP ══
+// ══ SHOPMY IMPORTER ══
+function openImporter(){document.getElementById('importer-ov').classList.add('open');}
+function closeImporter(){document.getElementById('importer-ov').classList.remove('open');_impItems=[];}
+
+function _impInferCat(title,brand,url){
+  const t=(title+' '+brand+' '+url).toLowerCase();
+  if(/bag|tote|clutch|purse|pouch|satchel|shoulder.?bag/.test(t))return 'handbags';
+  if(/shoe|boot|loafer|heel|pump|sneaker|sandal|flat|mule|slingback/.test(t))return 'shoes';
+  if(/necklace|ring|earring|bracelet|pendant|jewel|bangle|cuff|watch/.test(t))return 'jewelry';
+  if(/scarf|belt|hat|cap|sunglass|glove|hairbrush|hair|tassel/.test(t))return 'accessories';
+  if(/cream|serum|moisturizer|lipstick|perfume|fragrance|skincare|beauty|makeup|mascara/.test(t))return 'beauty';
+  if(/coat|jacket|dress|skirt|pant|trouser|top|shirt|sweater|cardigan|blazer|jean|shorts|suit|blouse|cape|vest|knitwear|t-shirt|tee|pullover|hoodie|romper|jumpsuit|legging|bodysuit/.test(t))return 'clothing';
+  if(/candle|vase|pillow|throw|furniture|rug|lamp|curtain|bedding/.test(t))return 'home';
+  return 'clothing';
+}
+
+function _impParseCSV(text){
+  const lines=[];let cur='',inQ=false;
+  for(let i=0;i<text.length;i++){const c=text[i];if(c==='"')inQ=!inQ;else if(c==='\n'&&!inQ){lines.push(cur);cur='';}else cur+=c;}
+  if(cur)lines.push(cur);
+  const rows=lines.map(line=>{const cols=[];let field='',q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"')q=!q;else if(c===','&&!q){cols.push(field.trim());field='';}else field+=c;}cols.push(field.trim());return cols;});
+  if(!rows.length)return[];
+  const header=rows[0].map(h=>h.toLowerCase().replace(/\s+/g,'_'));
+  return rows.slice(1).filter(r=>r.length>1&&r.some(c=>c)).map(r=>{const obj={};header.forEach((h,i)=>obj[h]=(r[i]||'').trim());return obj;});
+}
+
+function _impLog(msg,type=''){
+  const log=document.getElementById('imp-log');
+  log.style.display='block';
+  const d=document.createElement('div');
+  d.className=type?'imp-log-'+type:'';
+  d.textContent=msg;
+  log.appendChild(d);
+  log.scrollTop=log.scrollHeight;
+}
+
+let _impItems=[];
+
+async function handleImportFile(file){
+  if(!file)return;
+  _impItems=[];
+  document.getElementById('imp-stats').style.display='block';
+  document.getElementById('imp-btn').style.display='none';
+  document.getElementById('imp-log').innerHTML='';
+  document.getElementById('imp-log').style.display='none';
+  document.getElementById('imp-prog-bar').style.display='none';
+  ['imp-n-total','imp-n-new','imp-n-dupe','imp-n-done'].forEach(id=>document.getElementById(id).textContent='…');
+  const text=await file.text();
+  const rows=_impParseCSV(text);
+  document.getElementById('imp-n-total').textContent=rows.length;
+  // Build existing key set from D.unassigned + all list items
+  const existing=new Set();
+  (D.unassigned||[]).forEach(it=>existing.add((it.link2||'').toLowerCase().split('?')[0]+'|'+(it.brand||'').toLowerCase()));
+  (D.lists||[]).forEach(l=>l.items.forEach(it=>existing.add((it.link2||'').toLowerCase().split('?')[0]+'|'+(it.brand||'').toLowerCase())));
+  _impItems=rows.map(r=>{
+    const title=(r.title||r.name||'').replace(/\s+/g,' ').trim();
+    const brand=(r.affiliate_merchant||'').trim();
+    const shortUrl=(r.short_url||'').trim();
+    const destUrl=(r.url||'').trim();
+    const cat=_impInferCat(title,brand,destUrl);
+    const key=destUrl.toLowerCase().split('?')[0]+'|'+brand.toLowerCase();
+    return{title,brand,shortUrl,destUrl,cat,isDupe:existing.has(key)};
+  }).filter(r=>r.title&&r.shortUrl);
+  const newItems=_impItems.filter(r=>!r.isDupe);
+  const dupes=_impItems.filter(r=>r.isDupe);
+  document.getElementById('imp-n-new').textContent=newItems.length;
+  document.getElementById('imp-n-dupe').textContent=dupes.length;
+  document.getElementById('imp-n-done').textContent=0;
+  const tbody=document.getElementById('imp-preview');
+  tbody.innerHTML='';
+  newItems.slice(0,5).forEach(item=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML='<td style="padding:6px 8px;border-bottom:1px solid var(--border);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+item.title+'">'+item.title.slice(0,35)+(item.title.length>35?'…':'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+( item.brand||'—')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--soft);">'+item.cat+'</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--soft);">'+item.shortUrl.replace('https://','')+'</td>';
+    tbody.appendChild(tr);
+  });
+  if(newItems.length>0)document.getElementById('imp-btn').style.display='block';
+}
+
+async function runImport(){
+  const newItems=_impItems.filter(r=>!r.isDupe);
+  document.getElementById('imp-btn').style.display='none';
+  document.getElementById('imp-prog-bar').style.display='block';
+  let done=0;const BATCH=20;
+  for(let i=0;i<newItems.length;i+=BATCH){
+    const batch=newItems.slice(i,i+BATCH).map((item,idx)=>({
+      id:Math.random().toString(36).slice(2,13),
+      name:item.title,brand:item.brand||null,
+      link:item.shortUrl,link2:item.destUrl,
+      cat:item.cat,list_id:null,sort_order:i+idx
+    }));
+    let _impOk=false;try{await sbFetch('items',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(batch)});_impOk=true;}catch(e){_impOk=false;}
+    if(_impOk){
+      done+=batch.length;
+      // Add to local D.unassigned so dedup works immediately
+      batch.forEach(b=>(D.unassigned=D.unassigned||[]).push(b));
+      batch.forEach(b=>_impLog('✓ '+b.name+' · '+b.cat,'ok'));
+    } else {
+      _impLog('✗ batch '+(i)+'–'+(i+BATCH)+' failed','err');
+    }
+    document.getElementById('imp-n-done').textContent=done;
+    document.getElementById('imp-prog-fill').style.width=Math.min(100,Math.round((i+BATCH)/newItems.length*100))+'%';
+  }
+  document.getElementById('imp-prog-fill').style.width='100%';
+  _impLog('Done — '+done+' items imported to Latest Finds.','ok');
+  if(done>0&&activeT1==='latest')render();
+}
+
 window.addEventListener('DOMContentLoaded',()=>{
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
