@@ -1069,54 +1069,59 @@ async function sbFetch(path,opts={}){
 }
 
 // ══ LOAD from Supabase ══
+function normalizeLookItems(item_ids,allItems){
+  if(!item_ids||!item_ids.length)return[];
+  return item_ids.map(entry=>{
+    if(typeof entry==='string')return allItems.find(it=>it.id===entry)||null;
+    const full=allItems.find(it=>it.id===entry.id);
+    return full?{...entry,image:full.image||entry.image||''}:entry;
+  }).filter(Boolean);
+}
+function mapItem(it){
+  return{id:it.id,name:it.name,brand:it.brand,price:it.price,note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat,created_at:it.created_at,list_id:it.list_id};
+}
 async function loadFromCloud(){
+  // Step 1: Render Posts immediately (no Supabase needed)
+  const params=new URLSearchParams(location.search);
+  const initialTab=params.get('tab')||'journal';
+  if(initialTab==='journal'||!params.get('tab')){
+    renderJournal();
+  }
+  // Step 2: Load lists + looks quickly (small payloads)
   try{
-    showLoading(true);
-    const [lists,items,looks]=await Promise.all([
+    const [lists,looks]=await Promise.all([
       sbFetch('lists?select=*&order=sort_order.asc,created_at.desc'),
-      sbFetch('items?select=*&order=sort_order.asc,created_at.desc'),
       sbFetch('looks?select=*&order=created_at.desc')
     ]);
-
-    console.log('Loaded from Supabase:',lists?.length,'lists,',items?.length,'items');
-
-    const listsWithItems=(lists||[]).map(l=>({
-      ...l,
-      items:(items||[]).filter(it=>it.list_id===l.id).map(it=>({
-        id:it.id,name:it.name,brand:it.brand,price:it.price,
-        note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat
-      }))
-    }));
-    // item_ids stores minimal objects (no image) — rehydrate images from allItems pool
-    const allItems=(items||[]);
-    const normalizeLookItems=(item_ids)=>{
-      if(!item_ids||!item_ids.length)return[];
-      return item_ids.map(entry=>{
-        if(typeof entry==='string'){
-          // Legacy: plain ID string
-          return allItems.find(it=>it.id===entry)||null;
-        }
-        // Object entry — merge with full item data from allItems to get image back
-        const full=allItems.find(it=>it.id===entry.id);
-        return full?{...entry,image:full.image||entry.image||''}:entry;
-      }).filter(Boolean);
-    };
-    const unassigned=(items||[]).filter(it=>!it.list_id).map(it=>({id:it.id,name:it.name,brand:it.brand,price:it.price,note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat,created_at:it.created_at}));
-    D={lists:listsWithItems,looks:(looks||[]).map(l=>({...l,items:normalizeLookItems(l.item_ids)})),unassigned};
-    showLoading(false);
-    restoreFromURL();
+    D={lists:(lists||[]).map(l=>({...l,items:[]})),looks:(looks||[]).map(l=>({...l,items:[]})),unassigned:[]};
+    // If not on journal, render current tab with what we have so far
+    if(activeT1!=='journal')restoreFromURL();
   }catch(e){
     console.error('Load failed:',e);
-    showLoading(false);
-    // Show retry button instead of just a toast
-    const feed=document.getElementById('feed');
-    if(feed){
-      feed.innerHTML=`<div class="empty" style="padding:60px 20px;text-align:center;">
-        <h3 style="margin-bottom:8px;">Could not connect</h3>
-        <p style="margin-bottom:20px;color:var(--soft);">Check your internet connection and try again.</p>
-        <button onclick="loadFromCloud()" style="padding:10px 24px;border:1px solid var(--ink);background:none;font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Retry</button>
-      </div>`;
+    if(activeT1!=='journal'){
+      const feed=document.getElementById('feed');
+      if(feed)feed.innerHTML=`<div class="empty" style="padding:60px 20px;text-align:center;"><h3 style="margin-bottom:8px;">Could not connect</h3><p style="margin-bottom:20px;color:var(--soft);">Check your internet connection and try again.</p><button onclick="loadFromCloud()" style="padding:10px 24px;border:1px solid var(--ink);background:none;font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;">Retry</button></div>`;
     }
+    return;
+  }
+  // Step 3: Load items in background pages
+  try{
+    const PAGE=200;let offset=0;let allItems=[];let keepGoing=true;
+    while(keepGoing){
+      const batch=await sbFetch(`items?select=*&order=created_at.desc&limit=${PAGE}&offset=${offset}`);
+      if(!Array.isArray(batch)||!batch.length){keepGoing=false;break;}
+      allItems=allItems.concat(batch);
+      // Update D incrementally so switching to Latest Finds shows data as it loads
+      D.lists=D.lists.map(l=>({...l,items:allItems.filter(it=>it.list_id===l.id).map(mapItem)}));
+      D.looks=D.looks.map(l=>({...l,items:normalizeLookItems(l.item_ids,allItems)}));
+      D.unassigned=allItems.filter(it=>!it.list_id).map(mapItem);
+      if(activeT1==='latest')render();
+      if(batch.length<PAGE){keepGoing=false;}else{offset+=PAGE;}
+    }
+    // Final render if on a tab that uses items
+    if(activeT1!=='journal')restoreFromURL();
+  }catch(e){
+    console.error('Items load failed:',e);
   }
 }
 
@@ -2904,13 +2909,54 @@ document.addEventListener('keydown',e=>{
 });
 
 // ══ ITEM PREVIEW POPUP ══
+async function autoFetchImage(item){
+  const url=item.link2||item.link||'';
+  if(!url||!url.startsWith('http'))return;
+  const proxies=[
+    `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+    `https://corsproxy.io/?${encodeURIComponent(url)}`
+  ];
+  for(const proxy of proxies){
+    try{
+      const res=await fetch(proxy,{signal:AbortSignal.timeout(8000)});
+      const data=await res.json().catch(()=>null);
+      const html=data?data.contents:await res.text();
+      if(!html)continue;
+      const m=html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+             ||html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+      if(m&&m[1]){
+        const imgUrl=m[1].replace(/&amp;/g,'&');
+        // Save to Supabase
+        try{
+          await sbFetch('items',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:item.id,name:item.name,brand:item.brand||null,link:item.link,link2:item.link2||'',cat:item.cat||'clothing',list_id:item.list_id||null,image:imgUrl})});
+        }catch(e){console.warn('Image save failed:',e);}
+        // Update in-memory
+        item.image=imgUrl;
+        // Update in D.lists and D.unassigned
+        for(const l of D.lists){const it=l.items.find(x=>x.id===item.id);if(it)it.image=imgUrl;}
+        const u=(D.unassigned||[]).find(x=>x.id===item.id);if(u)u.image=imgUrl;
+        // Update popup if still open
+        const pop=document.getElementById('ip-pop');
+        if(pop.classList.contains('open')&&pop.dataset.itemId===item.id){
+          document.getElementById('ip-img-col').innerHTML=`<img src="${imgUrl}" alt="${h(item.name||'')}">`;
+        }
+        // Refresh grid cell if visible
+        const cell=document.querySelector(`.lf-cell[data-item-id="${item.id}"] .lf-img-wrap`);
+        if(cell)cell.innerHTML=`<img src="${imgUrl}" alt="${h(item.name||'')}" onerror="this.style.display='none'">`;
+        return;
+      }
+    }catch(e){continue;}
+  }
+}
+
 function openItemPop(itemId){
-  // Find item across all lists
+  // Find item across all lists and unassigned
   let item=null;
   for(const l of D.lists){
     const found=l.items.find(it=>it.id===itemId);
     if(found){item=found;break;}
   }
+  if(!item)item=(D.unassigned||[]).find(it=>it.id===itemId);
   if(!item)return;
 
   // Store current item id for copy link
@@ -2920,11 +2966,17 @@ function openItemPop(itemId){
   const copyRow=document.getElementById('ip-copy-link-row');
   if(copyRow)copyRow.style.display=isCreator?'flex':'none';
 
-  // Image
+  // Image — show placeholder, auto-fetch if missing
   const imgCol=document.getElementById('ip-img-col');
-  imgCol.innerHTML=item.image
-    ?`<img src="${h(item.image)}" alt="${h(item.name)}">`
-    :`<div class="ip-img-ph">${h((item.brand||'?')[0])}</div>`;
+  if(item.image){
+    imgCol.innerHTML=`<img src="${h(item.image)}" alt="${h(item.name)}">`;
+  } else {
+    imgCol.innerHTML=`<div class="ip-img-ph" style="flex-direction:column;gap:8px;">
+      <span style="font-size:40px;">${h((item.brand||'?')[0])}</span>
+      <span style="font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);">Loading image…</span>
+    </div>`;
+    autoFetchImage(item);
+  }
 
   // Info
   document.getElementById('ip-brand').textContent=item.brand||'';
