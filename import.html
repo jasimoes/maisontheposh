@@ -265,9 +265,10 @@ function inferCat(title, brand, url) {
   if (/bag|tote|clutch|purse|pouch|satchel|shoulder.?bag/.test(t)) return 'handbags';
   if (/shoe|boot|loafer|heel|pump|sneaker|sandal|flat|mule|slingback/.test(t)) return 'shoes';
   if (/necklace|ring|earring|bracelet|pendant|jewel|bangle|cuff|watch/.test(t)) return 'jewelry';
-  if (/scarf|belt|hat|cap|sunglass|glove|hairbrush|hair/.test(t)) return 'accessories';
+  if (/scarf|belt|hat|cap|sunglass|glove|hairbrush|hair|tassel/.test(t)) return 'accessories';
   if (/cream|serum|moisturizer|lipstick|perfume|fragrance|skincare|beauty|makeup|mascara/.test(t)) return 'beauty';
-  if (/candle|vase|pillow|throw|decor|furniture|rug|lamp|linen|home/.test(t)) return 'home';
+  if (/coat|jacket|dress|skirt|pant|trouser|top|shirt|sweater|cardigan|blazer|jean|shorts|suit|blouse|cape|vest|knitwear|t-shirt|tee|pullover|hoodie|romper|jumpsuit|legging|bodysuit/.test(t)) return 'clothing';
+  if (/candle|vase|pillow|throw|furniture|rug|lamp|curtain|bedding/.test(t)) return 'home';
   return 'clothing';
 }
 
