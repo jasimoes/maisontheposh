@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Import — MaisonThePosh</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream: #F7F5F0;
+    --taupe: #E8E4DC;
+    --charcoal: #1C1B19;
+    --muted: #7A776F;
+    --border: #D6D2C8;
+    --success: #3A7D5A;
+    --danger: #A33030;
+    --info: #2B5C8A;
+  }
+
+  body {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    background: var(--cream);
+    color: var(--charcoal);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1.5rem 5rem;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .logo {
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: 0.05em;
+  }
+
+  .subtitle {
+    font-size: 1rem;
+    color: var(--muted);
+    margin-top: 0.4rem;
+    font-style: italic;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 2rem;
+    width: 100%;
+    max-width: 740px;
+    margin-bottom: 1.25rem;
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1.25rem;
+  }
+
+  /* Auth gate */
+  #authGate { display: flex; flex-direction: column; gap: 1rem; }
+  #authGate p { font-size: 1rem; color: var(--muted); font-style: italic; }
+  #pwInput {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 1rem;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: 0.6rem 0.9rem;
+    width: 100%;
+    background: var(--cream);
+    color: var(--charcoal);
+    outline: none;
+  }
+  #pwInput:focus { border-color: var(--charcoal); }
+  #authError { font-size: 0.85rem; color: var(--danger); display: none; }
+
+  /* Drop zone */
+  .drop-zone {
+    border: 1.5px dashed var(--border);
+    border-radius: 2px;
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .drop-zone.over { background: var(--taupe); border-color: var(--muted); }
+  .drop-zone input { display: none; }
+  .drop-icon { font-size: 1.75rem; color: var(--muted); margin-bottom: 0.6rem; }
+  .drop-label { font-size: 1rem; color: var(--muted); }
+  .drop-label span { color: var(--charcoal); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+
+  /* Stats */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 1.5rem;
+  }
+  .stat {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: 0.75rem 1rem;
+  }
+  .stat-n { font-size: 1.75rem; font-weight: 300; color: var(--charcoal); }
+  .stat-l { font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+  /* Preview table */
+  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+  th { text-align: left; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); padding: 6px 10px; border-bottom: 1px solid var(--border); font-weight: 400; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--taupe); color: var(--charcoal); max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .cat-badge {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    color: var(--muted);
+  }
+
+  /* Buttons */
+  .actions { display: flex; gap: 10px; margin-top: 1.5rem; }
+  .btn {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-size: 0.9rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.6rem 1.5rem;
+    border-radius: 1px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-primary { background: var(--charcoal); color: var(--cream); border: 1px solid var(--charcoal); }
+  .btn-primary:not(:disabled):hover { opacity: 0.8; }
+  .btn-ghost { background: transparent; color: var(--charcoal); border: 1px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--charcoal); }
+
+  /* Progress */
+  .progress-bar { height: 2px; background: var(--taupe); margin-top: 1.25rem; border-radius: 1px; overflow: hidden; display: none; }
+  .progress-fill { height: 100%; background: var(--charcoal); width: 0%; transition: width 0.3s; }
+
+  /* Log */
+  .log {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    border-radius: 1px;
+    padding: 1rem;
+    max-height: 220px;
+    overflow-y: auto;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1rem;
+    display: none;
+  }
+  .log-line { padding: 2px 0; border-bottom: 1px solid var(--taupe); }
+  .log-line.ok { color: var(--success); }
+  .log-line.err { color: var(--danger); }
+  .log-line.info { color: var(--muted); }
+
+  #mainContent { display: none; width: 100%; max-width: 740px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">MTP — MaisonThePosh</div>
+  <h1>ShopMy Importer</h1>
+  <p class="subtitle">Import your affiliate links to Latest Finds</p>
+</header>
+
+<!-- Auth gate -->
+<div class="card" id="authCard">
+  <div class="card-title">Creator access</div>
+  <div id="authGate">
+    <p>Enter your creator password to continue.</p>
+    <input type="password" id="pwInput" placeholder="Password" onkeydown="if(event.key==='Enter')checkAuth()">
+    <div id="authError">Incorrect password.</div>
+    <button class="btn btn-primary" onclick="checkAuth()">Enter</button>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="mainContent">
+
+  <!-- Drop zone -->
+  <div class="card">
+    <div class="card-title">Upload ShopMy export</div>
+    <div class="drop-zone" id="dropZone">
+      <div class="drop-icon">↑</div>
+      <div class="drop-label">Drop CSV here, or <span onclick="document.getElementById('fileInput').click()">browse</span></div>
+      <input type="file" id="fileInput" accept=".csv">
+    </div>
+  </div>
+
+  <!-- Stats + preview -->
+  <div class="card" id="resultsCard" style="display:none">
+    <div class="card-title">Import summary</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="statTotal">0</div><div class="stat-l">total rows</div></div>
+      <div class="stat"><div class="stat-n" id="statNew">0</div><div class="stat-l">new items</div></div>
+      <div class="stat"><div class="stat-n" id="statDupe">0</div><div class="stat-l">duplicates</div></div>
+      <div class="stat"><div class="stat-n" id="statDone">0</div><div class="stat-l">imported</div></div>
+    </div>
+
+    <div class="card-title">Preview — first 5 new items</div>
+    <div style="overflow-x:auto">
+      <table>
+        <thead><tr><th>Title</th><th>Brand</th><th>Category</th><th>ShopMy link</th></tr></thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="importBtn" disabled>Import to Latest Finds</button>
+      <button class="btn btn-ghost" id="resetBtn">Start over</button>
+    </div>
+
+    <div class="progress-bar" id="progressBar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="log" id="log"></div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://epfabylszufvjnubyvnj.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZmFieWxzenVmdmpudWJ5dm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTMxNjcsImV4cCI6MjA4OTQyOTE2N30.2e9EtH0iDJbklgIT0__ypH87K-5MpuPqVK2hQMwkjIE';
+
+// Match your existing creator password from index.html
+const CREATOR_PASSWORD = 'mtp2024';
+
+function checkAuth() {
+  const pw = document.getElementById('pwInput').value;
+  if (pw === CREATOR_PASSWORD) {
+    document.getElementById('authCard').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+  } else {
+    document.getElementById('authError').style.display = 'block';
+  }
+}
+
+function inferCat(title, brand, url) {
+  const t = (title + ' ' + brand + ' ' + url).toLowerCase();
+  if (/bag|tote|clutch|purse|pouch|satchel|shoulder.?bag/.test(t)) return 'handbags';
+  if (/shoe|boot|loafer|heel|pump|sneaker|sandal|flat|mule|slingback/.test(t)) return 'shoes';
+  if (/necklace|ring|earring|bracelet|pendant|jewel|bangle|cuff|watch/.test(t)) return 'jewelry';
+  if (/scarf|belt|hat|cap|sunglass|glove|hairbrush|hair/.test(t)) return 'accessories';
+  if (/cream|serum|moisturizer|lipstick|perfume|fragrance|skincare|beauty|makeup|mascara/.test(t)) return 'beauty';
+  if (/candle|vase|pillow|throw|decor|furniture|rug|lamp|linen|home/.test(t)) return 'home';
+  return 'clothing';
+}
+
+function parseCSV(text) {
+  const lines = [];
+  let cur = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { inQ = !inQ; }
+    else if (c === '\n' && !inQ) { lines.push(cur); cur = ''; }
+    else { cur += c; }
+  }
+  if (cur) lines.push(cur);
+  const rows = lines.map(line => {
+    const cols = []; let field = '', q = false;
+    for (let i = 0; i < line.length; i++) {
+      const c = line[i];
+      if (c === '"') { q = !q; }
+      else if (c === ',' && !q) { cols.push(field.trim()); field = ''; }
+      else { field += c; }
+    }
+    cols.push(field.trim());
+    return cols;
+  });
+  if (!rows.length) return [];
+  const header = rows[0].map(h => h.toLowerCase().replace(/\s+/g,'_'));
+  return rows.slice(1).filter(r => r.length > 1 && r.some(c => c)).map(r => {
+    const obj = {};
+    header.forEach((h, i) => obj[h] = (r[i] || '').trim());
+    return obj;
+  });
+}
+
+function logLine(msg, type = 'info') {
+  const log = document.getElementById('log');
+  log.style.display = 'block';
+  const div = document.createElement('div');
+  div.className = 'log-line ' + type;
+  div.textContent = msg;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+async function fetchExisting() {
+  let all = [], page = 0, pageSize = 1000;
+  while (true) {
+    const res = await fetch(
+      `${SUPABASE_URL}/rest/v1/items?select=link2,brand&limit=${pageSize}&offset=${page * pageSize}`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}`, Accept: 'application/json' } }
+    );
+    if (!res.ok) { logLine('Could not fetch existing items: ' + await res.text(), 'err'); break; }
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) break;
+    all = all.concat(data);
+    if (data.length < pageSize) break;
+    page++;
+  }
+  return new Set(all.map(r => `${(r.link2||'').toLowerCase().split('?')[0]}|${(r.brand||'').toLowerCase()}`));
+}
+
+function genId() { return Math.random().toString(36).slice(2, 13); }
+
+let parsedItems = [];
+
+async function handleFile(file) {
+  document.getElementById('resultsCard').style.display = 'block';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('log').style.display = 'none';
+  document.getElementById('progressBar').style.display = 'none';
+  document.getElementById('importBtn').disabled = true;
+  ['statTotal','statNew','statDupe','statDone'].forEach(id => document.getElementById(id).textContent = '…');
+
+  const text = await file.text();
+  const rows = parseCSV(text);
+  document.getElementById('statTotal').textContent = rows.length;
+
+  const existing = await fetchExisting();
+
+  parsedItems = rows.map(r => {
+    const title = (r.title || r.name || '').replace(/\s+/g,' ').trim();
+    const brand = (r.affiliate_merchant || '').trim();
+    const shortUrl = (r.short_url || '').trim();
+    const destUrl = (r.url || '').trim();
+    const cat = inferCat(title, brand, destUrl);
+    // dedup on dest URL (strip query string) + brand
+    const key = `${destUrl.toLowerCase().split('?')[0]}|${brand.toLowerCase()}`;
+    const isDupe = existing.has(key);
+    return { title, brand, shortUrl, destUrl, cat, isDupe };
+  }).filter(r => r.title && r.shortUrl);
+
+  const newItems = parsedItems.filter(r => !r.isDupe);
+  const dupes = parsedItems.filter(r => r.isDupe);
+
+  document.getElementById('statNew').textContent = newItems.length;
+  document.getElementById('statDupe').textContent = dupes.length;
+  document.getElementById('statDone').textContent = 0;
+
+  const tbody = document.getElementById('previewBody');
+  tbody.innerHTML = '';
+  newItems.slice(0, 5).forEach(item => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td title="${item.title}">${item.title.slice(0,38)}${item.title.length>38?'…':''}</td>
+      <td>${item.brand || '—'}</td>
+      <td><span class="cat-badge">${item.cat}</span></td>
+      <td style="color:#7A776F;font-size:11px">${item.shortUrl.replace('https://','')}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  if (newItems.length > 0) document.getElementById('importBtn').disabled = false;
+}
+
+document.getElementById('importBtn').addEventListener('click', async () => {
+  const newItems = parsedItems.filter(r => !r.isDupe);
+  document.getElementById('importBtn').disabled = true;
+  document.getElementById('progressBar').style.display = 'block';
+
+  let done = 0;
+  const BATCH = 20;
+
+  for (let i = 0; i < newItems.length; i += BATCH) {
+    const batch = newItems.slice(i, i + BATCH).map((item, idx) => ({
+      id: genId(),
+      name: item.title,
+      brand: item.brand || null,
+      link: item.shortUrl,
+      link2: item.destUrl,
+      cat: item.cat,
+      list_id: null,
+      sort_order: i + idx
+    }));
+
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/items`, {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify(batch)
+    });
+
+    if (res.ok) {
+      done += batch.length;
+      batch.forEach(b => logLine(`✓ ${b.name} · ${b.cat}`, 'ok'));
+    } else {
+      logLine(`✗ batch ${i}–${i+BATCH}: ${await res.text()}`, 'err');
+    }
+
+    document.getElementById('statDone').textContent = done;
+    document.getElementById('progressFill').style.width =
+      Math.min(100, Math.round((i + BATCH) / newItems.length * 100)) + '%';
+  }
+
+  document.getElementById('progressFill').style.width = '100%';
+  logLine(`Done — ${done} of ${newItems.length} items imported to Latest Finds.`, 'ok');
+});
+
+document.getElementById('resetBtn').addEventListener('click', () => {
+  parsedItems = [];
+  document.getElementById('resultsCard').style.display = 'none';
+  document.getElementById('log').innerHTML = '';
+  document.getElementById('fileInput').value = '';
+});
+
+const dz = document.getElementById('dropZone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  const f = e.dataTransfer.files[0];
+  if (f) handleFile(f);
+});
+document.getElementById('fileInput').addEventListener('change', e => {
+  if (e.target.files[0]) handleFile(e.target.files[0]);
+});
+</script>
+</body>
+</html>
