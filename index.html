@@ -1846,7 +1846,7 @@ async function renderJournal(){
   }
   // Step 1: Load from Supabase instantly
   try{
-    const dbPosts=await sbFetch('posts?select=*&eq.source=substack&order=published_at.desc');
+    const dbPosts=await sbFetch('posts?select=*&source=eq.substack&order=published_at.desc');
     const supabasePosts=Array.isArray(dbPosts)&&dbPosts.length?dbPosts:null;
     if(supabasePosts&&supabasePosts.length){
       // Map Supabase posts to journal card format
