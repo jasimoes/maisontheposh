@@ -1120,6 +1120,8 @@ async function loadFromCloud(){
     }
     // Final render if on a tab that uses items
     if(activeT1!=='journal')restoreFromURL();
+    // Background image sweep for unimaged items
+    setTimeout(()=>sweepMissingImages(),2000);
   }catch(e){
     console.error('Items load failed:',e);
   }
@@ -1745,42 +1747,100 @@ async function loadPosts(){
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
 }
 
+const JOURNAL_CACHE_KEY='mtp_journal_v1';
+const JOURNAL_CACHE_TTL=3600000; // 1 hour
+
+function _getCachedPosts(){
+  try{
+    const raw=localStorage.getItem(JOURNAL_CACHE_KEY);
+    if(!raw)return null;
+    const {posts,ts}=JSON.parse(raw);
+    if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;
+    return posts;
+  }catch{return null;}
+}
+
+function _setCachedPosts(posts){
+  try{localStorage.setItem(JOURNAL_CACHE_KEY,JSON.stringify({posts,ts:Date.now()}));}catch{}
+}
+
+function _renderJournalCards(posts,wrap){
+  posts.forEach(p=>{
+    const title=(p.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
+    const link='https://maisontheposh.substack.com/p/'+p.slug;
+    const img=p.cover_image||'';
+    const excerpt=(p.subtitle||'').slice(0,180);
+    const date=p.post_date?new Date(p.post_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+    const el=document.createElement('article');
+    el.className='journal-card';
+    el.addEventListener('click',()=>window.open(link,'_blank'));
+    if(img){const d=document.createElement('div');d.className='journal-img';const i=new Image();i.src=img;i.alt='';i.loading='lazy';i.onerror=()=>d.style.display='none';d.appendChild(i);el.appendChild(d);}
+    const body=document.createElement('div');body.className='journal-body';
+    body.innerHTML='<p class="journal-date">'+date+'</p><h2 class="journal-title">'+title+'</h2>'+(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')+'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener">Read on Substack →</a>';
+    body.querySelector('.journal-read').addEventListener('click',e=>e.stopPropagation());
+    el.appendChild(body);
+    wrap.appendChild(el);
+  });
+}
+
+function _buildJournalShell(feed){
+  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>';
+  return feed.querySelector('.journal-feed');
+}
+
+async function _fetchAllSubstackPosts(){
+  const allPosts=[];
+  const limit=50;let offset=0;
+  const proxies=['https://corsproxy.io/?','https://api.allorigins.win/get?url='];
+  while(true){
+    const apiUrl='https://maisontheposh.substack.com/api/v1/posts?limit='+limit+'&offset='+offset;
+    let batch=null;
+    for(const proxy of proxies){
+      try{
+        const res=await fetch(proxy+encodeURIComponent(apiUrl),{signal:AbortSignal.timeout(10000)});
+        const data=await res.json();
+        batch=Array.isArray(data)?data:(data&&data.contents?JSON.parse(data.contents):null);
+        if(Array.isArray(batch)&&batch.length)break;
+      }catch{}
+    }
+    if(!Array.isArray(batch)||!batch.length)break;
+    allPosts.push(...batch);
+    if(batch.length<limit)break;
+    offset+=limit;
+  }
+  return allPosts;
+}
+
 async function renderJournal(){
   const feed=document.getElementById('feed');
-  feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
+  // Show cached posts instantly if available
+  const cached=_getCachedPosts();
+  if(cached&&cached.length){
+    const wrap=_buildJournalShell(feed);
+    _renderJournalCards(cached,wrap);
+    // Refresh in background silently
+    _fetchAllSubstackPosts().then(posts=>{
+      if(posts&&posts.length){
+        _setCachedPosts(posts);
+        // Only re-render if still on journal tab
+        if(activeT1==='journal'&&posts.length!==cached.length){
+          const w=document.querySelector('.journal-feed');
+          if(w){w.innerHTML='';_renderJournalCards(posts,w);}
+        }
+      }
+    }).catch(()=>{});
+    return;
+  }
+  // No cache — show spinner and fetch
+  feed.innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>';
   try{
-    const allPosts=[];
-    const limit=50;let offset=0;let keepGoing=true;
-    while(keepGoing){
-      const url='https://api.allorigins.win/get?url='+encodeURIComponent('https://maisontheposh.substack.com/api/v1/posts?limit='+limit+'&offset='+offset);
-      const res=await fetch(url);const data=await res.json();
-      let batch;try{batch=JSON.parse(data.contents);}catch{break;}
-      if(!Array.isArray(batch)||!batch.length){keepGoing=false;break;}
-      allPosts.push(...batch);
-      if(batch.length<limit){keepGoing=false;}else{offset+=limit;}
-    }
-    if(!allPosts.length){feed.innerHTML=`<div class="sales-empty"><h3>No posts yet</h3><p>Check back soon.</p></div>`;return;}
-    function postCard(p){
-      const title=(p.title||'').replace(/'/g,'&#39;').replace(/"/g,'&quot;');
-      const link='https://maisontheposh.substack.com/p/'+p.slug;
-      const img=p.cover_image||'';
-      const excerpt=(p.subtitle||'').slice(0,180);
-      const date=p.post_date?new Date(p.post_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
-      const el=document.createElement('article');
-      el.className='journal-card';
-      el.style.cursor='pointer';
-      el.addEventListener('click',()=>window.open(link,'_blank'));
-      if(img){const d=document.createElement('div');d.className='journal-img';const i=document.createElement('img');i.src=img;i.alt='';i.loading='lazy';i.onerror=()=>d.style.display='none';d.appendChild(i);el.appendChild(d);}
-      const body=document.createElement('div');body.className='journal-body';
-      body.innerHTML=(date?'<p class="journal-date">'+date+'</p>':'')+'<h2 class="journal-title">'+title+'</h2>'+(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')+'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener">Read on Substack →</a>';
-      body.querySelector('.journal-read').addEventListener('click',e=>e.stopPropagation());
-      el.appendChild(body);
-      return el.outerHTML;
-    }
-    const cards=allPosts.map(postCard).join('');
-    feed.innerHTML=`<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed">${cards}</div></div>`;
+    const posts=await _fetchAllSubstackPosts();
+    if(!posts||!posts.length){feed.innerHTML='<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>';return;}
+    _setCachedPosts(posts);
+    const wrap=_buildJournalShell(feed);
+    _renderJournalCards(posts,wrap);
   }catch(e){
-    feed.innerHTML=`<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>`;
+    feed.innerHTML='<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>';
   }
 }
 
@@ -2909,6 +2969,18 @@ document.addEventListener('keydown',e=>{
 });
 
 // ══ ITEM PREVIEW POPUP ══
+async function sweepMissingImages(){
+  const unimaged=(D.unassigned||[]).filter(it=>!it.image&&(it.link2||it.link));
+  if(!unimaged.length)return;
+  console.log('[MTP] Sweeping images for',unimaged.length,'items');
+  // Process 5 at a time to avoid overwhelming proxies
+  for(let i=0;i<Math.min(unimaged.length,50);i+=5){
+    const batch=unimaged.slice(i,i+5);
+    await Promise.allSettled(batch.map(item=>autoFetchImage(item)));
+    await new Promise(r=>setTimeout(r,500));
+  }
+}
+
 async function autoFetchImage(item){
   const url=item.link2||item.link||'';
   if(!url||!url.startsWith('http'))return;
