@@ -1081,13 +1081,7 @@ function mapItem(it){
   return{id:it.id,name:it.name,brand:it.brand,price:it.price,note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat,created_at:it.created_at,list_id:it.list_id};
 }
 async function loadFromCloud(){
-  // Step 1: Render Posts immediately (no Supabase needed)
-  const params=new URLSearchParams(location.search);
-  const initialTab=params.get('tab')||'journal';
-  if(initialTab==='journal'||!params.get('tab')){
-    renderJournal();
-  }
-  // Step 2: Load lists + looks quickly (small payloads)
+  // Step 1: Load lists + looks quickly (small payloads)
   try{
     const [lists,looks]=await Promise.all([
       sbFetch('lists?select=*&order=sort_order.asc,created_at.desc'),
@@ -1831,6 +1825,25 @@ async function _syncSubstackToSupabase(){
 
 async function renderJournal(){
   const feed=document.getElementById('feed');
+  // Step 0: Show localStorage cache INSTANTLY (zero network)
+  const cached=_getCachedPosts();
+  if(cached&&cached.length){
+    const wrap=_buildJournalShell(feed);
+    _renderJournalCards(cached,wrap);
+    // Refresh from Supabase in background
+    sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
+      if(Array.isArray(fresh)&&fresh.length&&activeT1==='journal'){
+        const mapped=fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at}));
+        if(mapped.length!==cached.length){
+          const w=document.querySelector('.journal-feed');
+          if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
+          _setCachedPosts(mapped);
+        }
+      }
+    }).catch(()=>{});
+    _syncSubstackToSupabase().catch(()=>{});
+    return;
+  }
   // Step 1: Load from Supabase instantly
   try{
     const dbPosts=await sbFetch('posts?select=*&eq.source=substack&order=published_at.desc');
@@ -1858,14 +1871,8 @@ async function renderJournal(){
       return;
     }
   }catch(e){console.warn('Supabase journal load failed:',e);}
-  // Step 2: Fallback — try localStorage cache
-  const cached=_getCachedPosts();
-  if(cached&&cached.length){
-    const wrap=_buildJournalShell(feed);
-    _renderJournalCards(cached,wrap);
-    _syncSubstackToSupabase().catch(()=>{});
-    return;
-  }
+  // Step 2: Fallback — try localStorage cache (already checked in Step 0)
+  // Step 2 skipped — handled at top of function
   // Step 3: Fetch from Substack directly (first ever visit)
   feed.innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>';
   try{
@@ -3395,8 +3402,13 @@ window.addEventListener('DOMContentLoaded',()=>{
   trackPageView();
   // Seed initial history entry so back works from the first page
   const _initParams=new URLSearchParams(location.search);
-  const _initTab=_initParams.get('tab')||_initParams.get('list')?'':'latest';
   if(!location.search)history.replaceState({tab:'journal'},'','/?tab=journal');
+  // Render Posts immediately — no Supabase needed for cached posts
+  const _initTab=(_initParams.get('tab')||'journal');
+  if(_initTab==='journal'||!_initParams.get('tab')){
+    renderJournal();
+  }
+  // Load everything else in background
   loadFromCloud();
 });
 </script>
