@@ -1748,18 +1748,11 @@ async function loadPosts(){
 }
 
 const JOURNAL_CACHE_KEY='mtp_journal_v1';
-const JOURNAL_CACHE_TTL=3600000; // 1 hour
+const JOURNAL_CACHE_TTL=3600000;
 
 function _getCachedPosts(){
-  try{
-    const raw=localStorage.getItem(JOURNAL_CACHE_KEY);
-    if(!raw)return null;
-    const {posts,ts}=JSON.parse(raw);
-    if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;
-    return posts;
-  }catch{return null;}
+  try{const raw=localStorage.getItem(JOURNAL_CACHE_KEY);if(!raw)return null;const{posts,ts}=JSON.parse(raw);if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;return posts;}catch{return null;}
 }
-
 function _setCachedPosts(posts){
   try{localStorage.setItem(JOURNAL_CACHE_KEY,JSON.stringify({posts,ts:Date.now()}));}catch{}
 }
@@ -1811,32 +1804,75 @@ async function _fetchAllSubstackPosts(){
   return allPosts;
 }
 
+async function _syncSubstackToSupabase(){
+  try{
+    const posts=await _fetchAllSubstackPosts();
+    if(!posts||!posts.length)return;
+    // Upsert each post into Supabase posts table by slug
+    const rows=posts.map(p=>({
+      id:p.id?String(p.id):p.slug,
+      title:p.title||'',
+      subtitle:p.subtitle||'',
+      body:'',
+      slug:p.slug||'',
+      image:p.cover_image||'',
+      excerpt:p.subtitle||'',
+      source:'substack',
+      published_at:p.post_date||new Date().toISOString(),
+      sort_order:0
+    }));
+    // Batch upsert in groups of 20
+    for(let i=0;i<rows.length;i+=20){
+      await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+20))});
+    }
+    _setCachedPosts(posts);
+  }catch(e){console.warn('Substack sync failed:',e);}
+}
+
 async function renderJournal(){
   const feed=document.getElementById('feed');
-  // Show cached posts instantly if available
+  // Step 1: Load from Supabase instantly
+  try{
+    const dbPosts=await sbFetch('posts?select=*&eq.source=substack&order=published_at.desc');
+    const supabasePosts=Array.isArray(dbPosts)&&dbPosts.length?dbPosts:null;
+    if(supabasePosts&&supabasePosts.length){
+      // Map Supabase posts to journal card format
+      const mapped=supabasePosts.map(p=>({
+        title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',
+        cover_image:p.image||'',post_date:p.published_at
+      }));
+      const wrap=_buildJournalShell(feed);
+      _renderJournalCards(mapped,wrap);
+      // Sync from Substack in background
+      _syncSubstackToSupabase().then(()=>{
+        // Reload from Supabase after sync if still on journal
+        if(activeT1==='journal'){
+          sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
+            if(Array.isArray(fresh)&&fresh.length){
+              const w=document.querySelector('.journal-feed');
+              if(w){w.innerHTML='';_renderJournalCards(fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at})),w);}
+            }
+          }).catch(()=>{});
+        }
+      }).catch(()=>{});
+      return;
+    }
+  }catch(e){console.warn('Supabase journal load failed:',e);}
+  // Step 2: Fallback — try localStorage cache
   const cached=_getCachedPosts();
   if(cached&&cached.length){
     const wrap=_buildJournalShell(feed);
     _renderJournalCards(cached,wrap);
-    // Refresh in background silently
-    _fetchAllSubstackPosts().then(posts=>{
-      if(posts&&posts.length){
-        _setCachedPosts(posts);
-        // Only re-render if still on journal tab
-        if(activeT1==='journal'&&posts.length!==cached.length){
-          const w=document.querySelector('.journal-feed');
-          if(w){w.innerHTML='';_renderJournalCards(posts,w);}
-        }
-      }
-    }).catch(()=>{});
+    _syncSubstackToSupabase().catch(()=>{});
     return;
   }
-  // No cache — show spinner and fetch
+  // Step 3: Fetch from Substack directly (first ever visit)
   feed.innerHTML='<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>';
   try{
     const posts=await _fetchAllSubstackPosts();
     if(!posts||!posts.length){feed.innerHTML='<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>';return;}
     _setCachedPosts(posts);
+    _syncSubstackToSupabase().catch(()=>{});
     const wrap=_buildJournalShell(feed);
     _renderJournalCards(posts,wrap);
   }catch(e){
