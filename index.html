@@ -616,8 +616,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   </div>
   <!-- Row 3: Nav centered -->
   <nav class="site-nav" id="nav1">
-    <button class="t1"    data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
-    <button class="t1 on" data-t1="latest"      onclick="setT1('latest',this)">Latest Finds</button>
+    <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
+    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">Latest Finds</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
@@ -1046,7 +1046,8 @@ async function loadFromCloud(){
         return full?{...entry,image:full.image||entry.image||''}:entry;
       }).filter(Boolean);
     };
-    D={lists:listsWithItems,looks:(looks||[]).map(l=>({...l,items:normalizeLookItems(l.item_ids)}))};
+    const unassigned=(items||[]).filter(it=>!it.list_id).map(it=>({id:it.id,name:it.name,brand:it.brand,price:it.price,note:it.note,link:it.link,link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||'',image:it.image,cat:it.cat,created_at:it.created_at}));
+    D={lists:listsWithItems,looks:(looks||[]).map(l=>({...l,items:normalizeLookItems(l.item_ids)})),unassigned};
     showLoading(false);
     restoreFromURL();
   }catch(e){
@@ -1138,7 +1139,7 @@ async function saveLookToCloud(look){
 function save(){try{localStorage.setItem('mtp_cache',JSON.stringify(D));}catch(e){}}
 
 let D={lists:[],looks:[]};
-let activeT1='latest',activeCat='all',currentListId=null,nlT1='',nlCat='',aTab='auto',upVal='',lookImgVal='';
+let activeT1='journal',activeCat='all',currentListId=null,nlT1='',nlCat='',aTab='auto',upVal='',lookImgVal='';
 let isCreator=false;
 let detailAllItems=[];
 let lookManualItems=[];
@@ -1258,11 +1259,11 @@ function handleLogoTap(e){
 
 function goHome(){
   closeDetail(true);
-  activeT1='latest';activeCat='all';
-  document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1==='latest'));
-  document.getElementById('nav2')&&document.getElementById('nav2').classList.remove('hide');
+  activeT1='journal';activeCat='all';
+  document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1==='journal'));
+  document.getElementById('nav2')&&document.getElementById('nav2').classList.add('hide');
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
-  history.pushState({tab:'latest'},'','/?tab=latest');
+  history.pushState({tab:'journal'},'','/?tab=journal');
   render();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -1621,6 +1622,7 @@ function filterDetailItems(q){
 function renderLatest(){
   const feed=document.getElementById('feed');
   let items=[];
+  // Items assigned to latest/weekly lists
   D.lists.filter(l=>l.t1==='latest'||l.t1==='weekly').forEach(l=>{
     l.items.forEach(it=>{
       const cat=it.cat||l.cat||'all';
@@ -1629,12 +1631,24 @@ function renderLatest(){
       }
     });
   });
+  // Unassigned items (imported via ShopMy CSV)
+  (D.unassigned||[]).forEach(it=>{
+    const cat=it.cat||'all';
+    if(activeCat==='all'||cat===activeCat){
+      items.push({...it,_listName:'',_listId:null});
+    }
+  });
   if(!items.length){
-    feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds or Weekly Curation lists.':'Add items and select '+activeCat+' as their category.'}</p></div>`;
+    feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds lists.':'No '+activeCat+' items found.'}</p></div>`;
     return;
   }
-  // Sort newest first
-  items.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
+  // Sort newest first by created_at, fallback to id sort
+  items.sort((a,b)=>{
+    const da=a.created_at?new Date(a.created_at):0;
+    const db=b.created_at?new Date(b.created_at):0;
+    if(da&&db)return db-da;
+    try{return parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36);}catch{return 0;}
+  });
   // Deduplicate — keep only the first (newest) occurrence of each item by name+brand
   const seen=new Set();
   items=items.filter(it=>{
@@ -1643,7 +1657,6 @@ function renderLatest(){
     seen.add(key);
     return true;
   });
-  items=items.slice(0,102);
   const cells=items.map(it=>{
     const img=it.image
       ?`<div class="lf-img-wrap"><img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'"></div>`
@@ -1676,34 +1689,33 @@ async function renderJournal(){
   const feed=document.getElementById('feed');
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   try{
-    const rss=await fetch('https://api.allorigins.win/get?url='+encodeURIComponent('https://maisontheposh.substack.com/feed'));
-    const data=await rss.json();
-    const xml=new DOMParser().parseFromString(data.contents,'text/xml');
-    const items=[...xml.querySelectorAll('item')];
-    if(!items.length){feed.innerHTML=`<div class="sales-empty"><h3>No posts yet</h3><p>Check back soon.</p></div>`;return;}
-    const cards=items.map(item=>{
-      const title=item.querySelector('title')?.textContent||'';
-      const link=item.querySelector('link')?.textContent||'';
-      const pubDate=item.querySelector('pubDate')?.textContent||'';
-      const desc=item.querySelector('description')?.textContent||'';
-      // Extract first image from content
-      const content=item.querySelector('encoded')?.textContent||desc;
-      const imgMatch=content.match(/<img[^>]+src=["']([^"']+)["']/i);
-      const img=imgMatch?imgMatch[1]:'';
-      // Strip HTML from description
-      const tmp=document.createElement('div');tmp.innerHTML=desc;
-      const excerpt=(tmp.textContent||'').replace(/\s+/g,' ').trim().slice(0,180);
-      const date=pubDate?new Date(pubDate).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
-      return `<article class="journal-card" onclick="window.open('${link}','_blank')">
-        ${img?`<div class="journal-img"><img src="${img}" alt="${title}" loading="lazy" onerror="this.parentElement.style.display='none'"></div>`:''}
-        <div class="journal-body">
-          <p class="journal-date">${date}</p>
-          <h2 class="journal-title">${title}</h2>
-          <p class="journal-excerpt">${excerpt}${excerpt.length>=180?'…':''}</p>
-          <a class="journal-read" href="${link}" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Substack →</a>
-        </div>
-      </article>`;
-    }).join('');
+    const allPosts=[];
+    const limit=50;let offset=0;let keepGoing=true;
+    while(keepGoing){
+      const url='https://api.allorigins.win/get?url='+encodeURIComponent('https://maisontheposh.substack.com/api/v1/posts?limit='+limit+'&offset='+offset);
+      const res=await fetch(url);const data=await res.json();
+      let batch;try{batch=JSON.parse(data.contents);}catch{break;}
+      if(!Array.isArray(batch)||!batch.length){keepGoing=false;break;}
+      allPosts.push(...batch);
+      if(batch.length<limit){keepGoing=false;}else{offset+=limit;}
+    }
+    if(!allPosts.length){feed.innerHTML=`<div class="sales-empty"><h3>No posts yet</h3><p>Check back soon.</p></div>`;return;}
+    function postCard(p){
+      const title=p.title||'';
+      const link='https://maisontheposh.substack.com/p/'+p.slug;
+      const img=p.cover_image||'';
+      const excerpt=(p.subtitle||'').slice(0,180);
+      const date=p.post_date?new Date(p.post_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+      return '<article class="journal-card" onclick="window.open(''+link+'','_blank')">'
+        +(img?'<div class="journal-img"><img src="'+img+'" alt="" loading="lazy" onerror="this.parentElement.style.display='none'"></div>':'')
+        +'<div class="journal-body">'
+        +'<p class="journal-date">'+date+'</p>'
+        +'<h2 class="journal-title">'+title+'</h2>'
+        +(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')
+        +'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener" onclick="event.stopPropagation()">Read on Substack →</a>'
+        +'</div></article>';
+    }
+    const cards=allPosts.map(postCard).join('');
     feed.innerHTML=`<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed">${cards}</div></div>`;
   }catch(e){
     feed.innerHTML=`<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>`;
@@ -2938,7 +2950,7 @@ function restoreFromURL(){
   const lookId=params.get('look');
   // Set active tab
   const validTabs=['latest','weekly','collections','journal','sales','widgets'];
-  const t=validTabs.includes(tab)?tab:'latest';
+  const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
   document.querySelectorAll('.t1').forEach(b=>{
     const match=b.dataset.t1===t;
@@ -3006,7 +3018,7 @@ window.addEventListener('popstate',function(e){
     document.getElementById('feed').style.display='block';
     currentListId=null;
     const validTabs=['latest','weekly','collections','journal','sales','widgets'];
-    activeT1=validTabs.includes(tab)?tab:'latest';
+    activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
     document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(activeT1));
@@ -3060,7 +3072,7 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Seed initial history entry so back works from the first page
   const _initParams=new URLSearchParams(location.search);
   const _initTab=_initParams.get('tab')||_initParams.get('list')?'':'latest';
-  if(!location.search)history.replaceState({tab:'latest'},'','/?tab=latest');
+  if(!location.search)history.replaceState({tab:'journal'},'','/?tab=journal');
   loadFromCloud();
 });
 </script>
