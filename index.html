@@ -565,6 +565,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <div class="creator-bar-left">
     <div class="creator-dot"></div>
     <span>Creator Mode — only you see this</span>
+    <span id="img-counter" style="opacity:.5;font-size:10px;margin-left:6px;"></span>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
     <button class="btn-toggle-mode" onclick="openImporter()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">↑ Import ShopMy</button>
@@ -1695,11 +1696,12 @@ function renderLatest(){
       items.push({...it,_listName:'',_listId:null});
     }
   });
+  // Filter: hide items with no image from public view
+  if(!isCreator) items=items.filter(it=>it.image);
   if(!items.length){
     feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds lists.':'No '+activeCat+' items found.'}</p></div>`;
     return;
   }
-  // Sort newest first by created_at, fallback to id sort
   items.sort((a,b)=>{
     const da=a.created_at?new Date(a.created_at):0;
     const db=b.created_at?new Date(b.created_at):0;
@@ -1725,6 +1727,7 @@ function renderLatest(){
     </a>`;
   }).join('');
   feed.innerHTML=`<div class="lf-grid">${cells}</div>`;
+  updateImageCounter();
 }
 
 // ══ ON SALE NOW ══
@@ -3417,6 +3420,15 @@ window.addEventListener('DOMContentLoaded',()=>{
   loadFromCloud();
 });
 
+function updateImageCounter(){
+  if(!isCreator)return;
+  const all=[...(D.items||[]),...(D.unassigned||[])];
+  const total=all.length;
+  const withImg=all.filter(it=>it.image).length;
+  const el=document.getElementById('img-counter');
+  if(el)el.textContent=`${withImg}/${total} images`;
+}
+
 async function runFetchImages(){
   const btn=document.getElementById('btn-fetch-images');
   btn.textContent='⟳ Fetching...';btn.disabled=true;
@@ -3431,6 +3443,8 @@ async function runFetchImages(){
     });
     const data=await res.json();
     toast(`Images: ${data.updated||0} updated of ${data.processed||0} processed`);
+    await loadFromCloud();
+    updateImageCounter();
   }catch(e){toast('Fetch images failed');}
   btn.textContent='⟳ Fetch Images';btn.disabled=false;
 }
