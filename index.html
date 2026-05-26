@@ -1776,26 +1776,30 @@ function _buildJournalShell(feed){
 }
 
 async function _fetchAllSubstackPosts(){
-  const allPosts=[];
-  const limit=50;let offset=0;
-  const proxies=['https://corsproxy.io/?','https://api.allorigins.win/get?url='];
-  while(true){
-    const apiUrl='https://maisontheposh.substack.com/api/v1/posts?limit='+limit+'&offset='+offset;
-    let batch=null;
-    for(const proxy of proxies){
-      try{
-        const res=await fetch(proxy+encodeURIComponent(apiUrl),{signal:AbortSignal.timeout(10000)});
-        const data=await res.json();
-        batch=Array.isArray(data)?data:(data&&data.contents?JSON.parse(data.contents):null);
-        if(Array.isArray(batch)&&batch.length)break;
-      }catch{}
-    }
-    if(!Array.isArray(batch)||!batch.length)break;
-    allPosts.push(...batch);
-    if(batch.length<limit)break;
-    offset+=limit;
+  try{
+    const rssUrl='https://maisontheposh.substack.com/feed';
+    const proxy='https://api.rss2json.com/v1/api.json?rss_url=';
+    const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
+    const data=await res.json();
+    if(!data||!data.items||!data.items.length)return[];
+    return data.items.map(item=>{
+      // Extract slug from link: https://maisontheposh.substack.com/p/slug
+      const slug=(item.link||'').split('/p/')[1]||item.guid||item.link||'';
+      // cover_image: thumbnail from RSS or enclosure
+      const img=item.thumbnail||item.enclosure?.link||'';
+      return{
+        id:item.guid||slug,
+        title:item.title||'',
+        slug:slug,
+        subtitle:item.description?item.description.replace(/<[^>]+>/g,'').slice(0,200):'',
+        cover_image:img,
+        post_date:item.pubDate||new Date().toISOString()
+      };
+    });
+  }catch(e){
+    console.warn('RSS fetch failed:',e);
+    return[];
   }
-  return allPosts;
 }
 
 async function _syncSubstackToSupabase(){
