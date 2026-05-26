@@ -1778,7 +1778,7 @@ function _buildJournalShell(feed){
 async function _fetchAllSubstackPosts(){
   try{
     const rssUrl='https://maisontheposh.substack.com/feed';
-    const proxy='https://api.rss2json.com/v1/api.json?rss_url=';
+    const proxy='https://api.rss2json.com/v1/api.json?count=100&rss_url=';
     const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
     const data=await res.json();
     if(!data||!data.items||!data.items.length)return[];
