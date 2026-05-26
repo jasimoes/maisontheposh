@@ -1720,9 +1720,9 @@ function renderLatest(){
     const hasImg=it.image&&it.image!=='none';
     const img=hasImg
       ?`<div class="lf-img-wrap"><img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'"></div>`
-      :`<div class="lf-img-wrap" style="position:relative;"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>${isCreator?`<button onclick="event.preventDefault();event.stopPropagation();quickAddImage('${h(it.id)}')" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);">+ Image</button>`:''}`;
+      :`<div class="lf-img-wrap" style="position:relative;"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>${isCreator?`<button onclick="event.preventDefault();event.stopPropagation();quickAddImage('${h(it.id)}')" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);">+ Image</button>`:''}</div>`;
     return `<a class="lf-cell" href="#" data-item-id="${h(it.id)}">
-      ${img}</div>
+      ${img}
       <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${it.price?'$'+h(it.price):''}</div></div>
       ${it.note?`<div class="note-badge" title="${h(it.note)}">✦</div>`:''}
     </a>`;
