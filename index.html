@@ -568,6 +568,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
     <button class="btn-toggle-mode" onclick="openImporter()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">↑ Import ShopMy</button>
+    <button class="btn-toggle-mode" id="btn-fetch-images" onclick="runFetchImages()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">⟳ Fetch Images</button>
     <button class="btn-toggle-mode" onclick="toggleMode()">Preview as Visitor</button>
   </div>
 </div>
@@ -3415,6 +3416,24 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Load everything else in background
   loadFromCloud();
 });
+
+async function runFetchImages(){
+  const btn=document.getElementById('btn-fetch-images');
+  btn.textContent='⟳ Fetching...';btn.disabled=true;
+  try{
+    const res=await fetch('https://epfabylszufvjnubyvnj.supabase.co/functions/v1/super-action',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZmFieWxzenVmdmpudWJ5dm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTMxNjcsImV4cCI6MjA4OTQyOTE2N30.2e9EtH0iDJbklgIT0__ypH87K-5MpuPqVK2hQMwkjIE',
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({})
+    });
+    const data=await res.json();
+    toast(`Images: ${data.updated||0} updated of ${data.processed||0} processed`);
+  }catch(e){toast('Fetch images failed');}
+  btn.textContent='⟳ Fetch Images';btn.disabled=false;
+}
 </script>
 <!-- ON SALE NOW: POST EDITOR -->
 <div class="fov" id="sp-ov">
