@@ -1737,7 +1737,7 @@ let _posts=[];
 async function loadPosts(){
   try{
     const [posts,images]=await Promise.all([
-      sbFetch('posts?select=*&order=sort_order.asc,published_at.desc'),
+      sbFetch('posts?select=*&source=neq.substack&order=sort_order.asc,published_at.desc'),
       sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
     ]);
     console.log('[MTP] posts from Supabase:', posts);
