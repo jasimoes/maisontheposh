@@ -151,10 +151,24 @@ body.creator .btn-new{display:flex;}
 /* ══ FEED ══ */
 .feed{max-width:1280px;margin:0 auto;padding-bottom:120px;padding-top:32px;}
 
-/* ══ WEEKLY CURATION SHOPMY CAROUSEL ══ */
-.wc-carousel-wrap{padding:32px 40px 0;}
-.wc-carousel-label{font-family:var(--serif);font-size:13px;font-style:italic;color:var(--soft);letter-spacing:.04em;margin-bottom:12px;}
-@media(max-width:700px){.wc-carousel-wrap{padding:24px 16px 0;}}
+/* ══ WEEKLY CURATION — SHOPMY CAROUSEL SYSTEM ══ */
+.wc-feed{max-width:1280px;margin:0 auto;padding-bottom:120px;}
+.wc-item{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
+.wc-item.wc-drag-over{border-top:2px solid var(--ink);}
+.wc-item.wc-dragging{opacity:.4;}
+.wc-carousel-wrap{padding:28px 40px 20px;}
+.wc-carousel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.wc-carousel-label{font-family:var(--serif);font-size:15px;font-weight:400;color:var(--ink);letter-spacing:.02em;}
+.wc-carousel-acts{display:flex;gap:7px;align-items:center;}
+.wc-drag-handle{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:grab;display:none;align-items:center;justify-content:center;font-size:14px;color:var(--mid);border-radius:2px;}
+body.creator .wc-drag-handle{display:flex;}
+.wc-del-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px;color:var(--mid);border-radius:2px;transition:all .15s;}
+.wc-del-btn:hover{border-color:#B03030;color:#B03030;}
+body.creator .wc-del-btn{display:flex;}
+.wc-add-row{display:flex;align-items:center;justify-content:center;padding:30px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--border);transition:all .18s;}
+.wc-add-row:hover{background:var(--surf);color:var(--mid);}
+.wc-empty{text-align:center;padding:80px 40px;color:var(--soft);font-family:var(--serif);font-size:16px;font-style:italic;}
+@media(max-width:700px){.wc-carousel-wrap{padding:20px 16px 16px;}}
 
 /* ══ STRIP VIEW (Collections / Weekly) ══ */
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
@@ -1353,15 +1367,81 @@ function render(){
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
-  let lists=D.lists.filter(l=>activeT1==='weekly'?(l.t1==='weekly'||l.t1==='collections'):l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
-  if(!lists.length&&activeT1!=='weekly'){
+  if(activeT1==='weekly'){renderWeekly();return;}
+  let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  if(!lists.length){
     feed.innerHTML=`<div class="empty"><h3>Nothing here yet</h3><p>Create a new list to get started.</p></div>`+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
     return;
   }
-  const weeklyCarousel=activeT1==='weekly'?`<div class="wc-carousel-wrap"><p class="wc-carousel-label">Week 22, 2026</p><iframe loading="lazy" title="Substack Week 22, 2026" src="https://shopmy.us/collections/embed/5347632?" style="width:100%;min-height:340px;border:none;"></iframe></div>`:'';
-  feed.innerHTML=weeklyCarousel+lists.map(l=>stripCard(l)).join('')+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
+  feed.innerHTML=lists.map(l=>stripCard(l)).join('')+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
   document.addEventListener('click',closeAllCtx,{once:true});
   if(isCreator)initListDrag();
+}
+
+// ══ WEEKLY CURATION — CAROUSEL SYSTEM ══
+const WC_KEY='mtp_wc_carousels';
+function wcLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
+function wcSave(arr){localStorage.setItem(WC_KEY,JSON.stringify(arr));}
+
+function renderWeekly(){
+  const feed=document.getElementById('feed');
+  const carousels=wcLoad();
+  if(!carousels.length&&!isCreator){
+    feed.innerHTML=`<div class="wc-empty">No collections yet.</div>`;return;
+  }
+  const items=carousels.map((c,i)=>`
+    <div class="wc-item" data-wc-i="${i}" draggable="${isCreator}">
+      <div class="wc-carousel-wrap">
+        <div class="wc-carousel-header">
+          <span class="wc-carousel-label">${h(c.title)}</span>
+          <div class="wc-carousel-acts">
+            <div class="wc-drag-handle" title="Drag to reorder">⠿</div>
+            <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
+          </div>
+        </div>
+        <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
+      </div>
+    </div>`).join('');
+  const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
+  feed.innerHTML=`<div class="wc-feed">${items}${addRow}</div>`;
+  if(isCreator)wcInitDrag();
+}
+
+function wcDelete(i){
+  if(!confirm('Remove this carousel?'))return;
+  const arr=wcLoad();arr.splice(i,1);wcSave(arr);renderWeekly();
+}
+
+function wcOpenAdd(){
+  const title=prompt('Collection name (e.g. Substack: Week 23, 2026):');
+  if(!title||!title.trim())return;
+  const raw=prompt('Paste the full ShopMy iframe embed code or just the src URL:');
+  if(!raw||!raw.trim())return;
+  const match=raw.match(/src="([^"]+)"/);
+  const cleanSrc=match?match[1]:raw.trim();
+  const arr=wcLoad();
+  arr.push({title:title.trim(),src:cleanSrc});
+  wcSave(arr);renderWeekly();
+}
+
+let _wcDragSrc=null;
+function wcInitDrag(){
+  const feed=document.getElementById('feed');
+  if(!feed)return;
+  feed.querySelectorAll('.wc-item').forEach(el=>{
+    el.addEventListener('dragstart',e=>{_wcDragSrc=parseInt(el.dataset.wcI);el.classList.add('wc-dragging');e.dataTransfer.effectAllowed='move';});
+    el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));});
+    el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
+    el.addEventListener('dragleave',()=>el.classList.remove('wc-drag-over'));
+    el.addEventListener('drop',e=>{
+      e.preventDefault();el.classList.remove('wc-drag-over');
+      const ti=parseInt(el.dataset.wcI);
+      if(_wcDragSrc===null||_wcDragSrc===ti)return;
+      const arr=wcLoad();
+      const [moved]=arr.splice(_wcDragSrc,1);arr.splice(ti,0,moved);
+      wcSave(arr);renderWeekly();_wcDragSrc=null;
+    });
+  });
 }
 
 // ══ DRAG-TO-REORDER LISTS ══
@@ -1397,7 +1477,7 @@ function initListDrag(){
 }
 async function reorderList(srcId,targetId){
   // Work only within the current t1 group
-  const group=D.lists.filter(l=>activeT1==='weekly'?(l.t1==='weekly'||l.t1==='collections'):l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  const group=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
   const si=group.findIndex(x=>x.id===srcId);
   const ti=group.findIndex(x=>x.id===targetId);
   if(si<0||ti<0)return;
@@ -1469,7 +1549,7 @@ function openDetail(id){
   document.getElementById('list-detail').classList.add('open');
   // Show "Pick from Collections" button for weekly AND collection lists (creator mode only)
   const pickBtn=document.getElementById('pick-from-col-btn');
-  if(pickBtn) pickBtn.style.display=(isCreator&&(l.t1==='weekly'||l.t1==='collections'))?'flex':'none';
+  if(pickBtn) pickBtn.style.display=(isCreator&&l.t1==='collections')?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
@@ -2388,7 +2468,7 @@ let _savedNLHTML=null;
 function openMove(id){
   currentListId=id;const l=D.lists.find(x=>x.id===id);if(!l)return;
   _savedNLHTML=document.getElementById('nl-fp').innerHTML;
-  const secs=[{v:'latest',lbl:'Latest Finds'},{v:'collections',lbl:'Collections'},{v:'weekly',lbl:'Weekly Curation'},{v:'sales',lbl:'On Sale Now'}];
+  const secs=[{v:'latest',lbl:'Latest Finds'},{v:'collections',lbl:'Collections'},{v:'sales',lbl:'On Sale Now'}];
   const cur=secs.find(s=>s.v===l.t1);
   const opts=secs.filter(s=>s.v!==l.t1).map(s=>`<button class="btn-g" style="margin-top:8px" onclick="doMove('${id}','${s.v}')">${s.lbl}</button>`).join('');
   document.getElementById('nl-fp').innerHTML=`<h3 class="ftitle">Move List</h3><p style="font-size:13px;color:var(--mid);margin-bottom:16px">Currently: <strong>${cur?cur.lbl:l.t1}</strong></p>${opts}<button class="btn-g" style="margin-top:10px" onclick="closeNL()">Cancel</button>`;
@@ -3382,6 +3462,13 @@ async function runImport(){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
+  // Seed default carousels if none saved yet
+  if(!localStorage.getItem('mtp_wc_carousels')){
+    localStorage.setItem('mtp_wc_carousels',JSON.stringify([
+      {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
+      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'}
+    ]));
+  }
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
   const dz=document.getElementById('dropz');
