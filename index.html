@@ -1833,27 +1833,57 @@ function renderLatest(){
   feed.innerHTML=`<div class="tl-feed">${cards}${addRow}</div>`;
 }
 
+let _tlEditIdx=null;
+let _tlImgIdx=null;
+
 function tlOpenAdd(){
-  const title=prompt('Title (e.g. Restaurant name, book title, product):');
-  if(!title||!title.trim())return;
-  const tag=prompt('Tag (optional — e.g. Restaurant, Book, Store, Product, Travel):');
-  const note=prompt('Your write-up — why you love it:');
-  const link=prompt('Link (optional — URL):');
-  const linkLabel=link?prompt('Link label (e.g. "Book a table", "Shop now") — leave blank for "Visit →"'):'';
-  const arr=tlLoad();
-  arr.unshift({title:title.trim(),tag:(tag||'').trim(),note:(note||'').trim(),link:(link||'').trim(),linkLabel:(linkLabel||'').trim(),images:[],created_at:new Date().toISOString()});
-  tlSave(arr);renderLatest();
+  _tlEditIdx=null;
+  document.getElementById('tl-form-title').textContent='New Entry';
+  document.getElementById('tl-f-title').value='';
+  document.getElementById('tl-f-tag').value='';
+  document.getElementById('tl-f-note').value='';
+  document.getElementById('tl-f-link').value='';
+  document.getElementById('tl-f-linklabel').value='';
+  document.getElementById('tl-ov').classList.add('open');
+  document.getElementById('tl-f-title').focus();
 }
 
 function tlEdit(i){
   const arr=tlLoad();const e=arr[i];if(!e)return;
-  const title=prompt('Title:',e.title)||e.title;
-  const tag=prompt('Tag:',e.tag||'');
-  const note=prompt('Write-up:',e.note||'');
-  const link=prompt('Link:',e.link||'');
-  const linkLabel=prompt('Link label:',e.linkLabel||'');
-  arr[i]={...e,title:title.trim(),tag:(tag||'').trim(),note:(note||'').trim(),link:(link||'').trim(),linkLabel:(linkLabel||'').trim()};
-  tlSave(arr);renderLatest();
+  _tlEditIdx=i;
+  document.getElementById('tl-form-title').textContent='Edit Entry';
+  document.getElementById('tl-f-title').value=e.title||'';
+  document.getElementById('tl-f-tag').value=e.tag||'';
+  document.getElementById('tl-f-note').value=e.note||'';
+  document.getElementById('tl-f-link').value=e.link||'';
+  document.getElementById('tl-f-linklabel').value=e.linkLabel||'';
+  document.getElementById('tl-ov').classList.add('open');
+  document.getElementById('tl-f-title').focus();
+}
+
+function tlSaveForm(){
+  const title=document.getElementById('tl-f-title').value.trim();
+  if(!title){document.getElementById('tl-f-title').focus();return;}
+  const entry={
+    title,
+    tag:document.getElementById('tl-f-tag').value.trim(),
+    note:document.getElementById('tl-f-note').value.trim(),
+    link:document.getElementById('tl-f-link').value.trim(),
+    linkLabel:document.getElementById('tl-f-linklabel').value.trim(),
+  };
+  const arr=tlLoad();
+  if(_tlEditIdx!==null){
+    arr[_tlEditIdx]={...arr[_tlEditIdx],...entry};
+  } else {
+    arr.unshift({...entry,images:[],created_at:new Date().toISOString()});
+  }
+  tlSave(arr);
+  document.getElementById('tl-ov').classList.remove('open');
+  renderLatest();
+}
+
+function tlCloseFom(){
+  document.getElementById('tl-ov').classList.remove('open');
 }
 
 function tlDelete(i){
@@ -1862,13 +1892,27 @@ function tlDelete(i){
 }
 
 function tlAddImage(entryIdx,imgIdx){
-  const url=prompt('Paste image URL:');
-  if(!url||!url.trim())return;
+  _tlEditIdx=entryIdx;_tlImgIdx=imgIdx;
+  document.getElementById('tl-img-preview').style.display='none';
+  document.getElementById('tl-img-preview').src='';
+  document.getElementById('tl-img-url').value='';
+  document.getElementById('tl-img-ov').classList.add('open');
+}
+
+function tlSaveImage(){
+  const url=document.getElementById('tl-img-url').value.trim();
+  if(!url)return;
   const arr=tlLoad();
-  if(!arr[entryIdx])return;
-  if(!arr[entryIdx].images)arr[entryIdx].images=[];
-  arr[entryIdx].images.splice(imgIdx,0,url.trim());
-  tlSave(arr);renderLatest();
+  if(!arr[_tlEditIdx])return;
+  if(!arr[_tlEditIdx].images)arr[_tlEditIdx].images=[];
+  arr[_tlEditIdx].images.splice(_tlImgIdx,0,url);
+  tlSave(arr);
+  document.getElementById('tl-img-ov').classList.remove('open');
+  renderLatest();
+}
+
+function tlCloseImg(){
+  document.getElementById('tl-img-ov').classList.remove('open');
 }
 
 // ══ ON SALE NOW ══
@@ -3658,6 +3702,37 @@ async function runFetchImages(){
     <button class="btn-g" id="sp-copy-link-btn" onclick="(function(){const v=document.getElementById('sp-f-link').value.trim();if(!v)return;navigator.clipboard.writeText(v).then(()=>{const b=document.getElementById('sp-copy-link-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy Image Link',1800);});})()" style="font-size:10px;letter-spacing:.12em;">Copy Image Link</button>
     <button class="btn-p" onclick="saveImageForm()">Save</button>
     <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- THE LIST: ENTRY EDITOR -->
+<div class="fov" id="tl-ov" onclick="if(event.target===this)tlCloseFom()">
+  <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle" id="tl-form-title">New Entry</h3>
+    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="tl-f-title" placeholder="e.g. Via Carota, The White Album, Khaite..."></div>
+    <div class="fg">
+      <label class="fl">Tag <span class="flh">(optional — e.g. Restaurant, Book, Store, Travel, Product)</span></label>
+      <input type="text" class="fi" id="tl-f-tag" placeholder="Restaurant">
+    </div>
+    <div class="fg"><label class="fl">Why you love it</label><textarea class="fi fta" id="tl-f-note" rows="5" placeholder="Your write-up..." style="font-style:normal;min-height:110px;"></textarea></div>
+    <div class="fg"><label class="fl">Link <span class="flh">(optional)</span></label><input type="url" class="fi" id="tl-f-link" placeholder="https://…"></div>
+    <div class="fg"><label class="fl">Link label <span class="flh">(optional — e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
+    <button class="btn-p" onclick="tlSaveForm()">Save</button>
+    <button class="btn-g" onclick="tlCloseFom()">Cancel</button>
+  </div>
+</div>
+
+<!-- THE LIST: IMAGE ADDER -->
+<div class="fov" id="tl-img-ov" onclick="if(event.target===this)tlCloseImg()">
+  <div class="fp" style="max-width:480px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Add Image</h3>
+    <div class="fg">
+      <label class="fl">Image URL</label>
+      <img id="tl-img-preview" src="" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;margin-bottom:8px;border-radius:2px;">
+      <input type="url" class="fi" id="tl-img-url" placeholder="https://…" oninput="(function(v){const p=document.getElementById('tl-img-preview');if(v){p.src=v;p.style.display='block';}else{p.style.display='none';}})(this.value.trim())">
+    </div>
+    <button class="btn-p" onclick="tlSaveImage()">Add Image</button>
+    <button class="btn-g" onclick="tlCloseImg()">Cancel</button>
   </div>
 </div>
 
