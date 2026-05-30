@@ -1930,8 +1930,8 @@ async function loadPosts(){
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
 }
 
-const JOURNAL_CACHE_KEY='mtp_journal_v1';
-const JOURNAL_CACHE_TTL=300000; // 5 minutes
+const JOURNAL_CACHE_KEY='mtp_journal_v2';
+const JOURNAL_CACHE_TTL=3600000;
 
 function _getCachedPosts(){
   try{const raw=localStorage.getItem(JOURNAL_CACHE_KEY);if(!raw)return null;const{posts,ts}=JSON.parse(raw);if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;return posts;}catch{return null;}
@@ -1967,8 +1967,7 @@ function _buildJournalShell(feed){
 async function _fetchAllSubstackPosts(){
   try{
     const rssUrl='https://maisontheposh.substack.com/feed';
-    const cb=Math.floor(Date.now()/60000); // changes every minute
-    const proxy='https://api.rss2json.com/v1/api.json?count=100&_cb='+cb+'&rss_url=';
+    const proxy='https://api.rss2json.com/v1/api.json?count=100&rss_url=';
     const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
     const data=await res.json();
     if(!data||!data.items||!data.items.length)return[];
@@ -2028,11 +2027,10 @@ async function renderJournal(){
     sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
       if(Array.isArray(fresh)&&fresh.length&&activeT1==='journal'){
         const mapped=fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at}));
-        if(mapped.length!==cached.length){
-          const w=document.querySelector('.journal-feed');
-          if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
-          _setCachedPosts(mapped);
-        }
+        // Always re-render from fresh Supabase data
+        const w=document.querySelector('.journal-feed');
+        if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
+        _setCachedPosts(mapped);
       }
     }).catch(()=>{});
     _syncSubstackToSupabase().catch(()=>{});
