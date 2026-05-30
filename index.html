@@ -3463,11 +3463,27 @@ async function runImport(){
 
 window.addEventListener('DOMContentLoaded',()=>{
   // Seed default carousels if none saved yet
+  // Seed carousels — only if not already saved (preserves user reordering)
   if(!localStorage.getItem('mtp_wc_carousels')){
     localStorage.setItem('mtp_wc_carousels',JSON.stringify([
       {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'}
+      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
+      {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
+      {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
+      {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'}
     ]));
+  } else {
+    // Merge in any new carousels not already saved
+    const _saved=JSON.parse(localStorage.getItem('mtp_wc_carousels')||'[]');
+    const _defaults=[
+      {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
+      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
+      {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
+      {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
+      {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'}
+    ];
+    _defaults.forEach(d=>{if(!_saved.find(s=>s.src===d.src))_saved.push(d);});
+    localStorage.setItem('mtp_wc_carousels',JSON.stringify(_saved));
   }
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
