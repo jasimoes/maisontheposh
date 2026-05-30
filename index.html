@@ -3463,27 +3463,11 @@ async function runImport(){
 
 window.addEventListener('DOMContentLoaded',()=>{
   // Seed default carousels if none saved yet
-  // Seed carousels — only if not already saved (preserves user reordering)
   if(!localStorage.getItem('mtp_wc_carousels')){
     localStorage.setItem('mtp_wc_carousels',JSON.stringify([
       {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
-      {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
-      {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
-      {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'}
+      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'}
     ]));
-  } else {
-    // Merge in any new carousels not already saved
-    const _saved=JSON.parse(localStorage.getItem('mtp_wc_carousels')||'[]');
-    const _defaults=[
-      {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
-      {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
-      {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
-      {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'}
-    ];
-    _defaults.forEach(d=>{if(!_saved.find(s=>s.src===d.src))_saved.push(d);});
-    localStorage.setItem('mtp_wc_carousels',JSON.stringify(_saved));
   }
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
@@ -3521,10 +3505,22 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Seed initial history entry so back works from the first page
   const _initParams=new URLSearchParams(location.search);
   if(!location.search)history.replaceState({tab:'journal'},'','/?tab=journal');
-  // Render Posts immediately — no Supabase needed for cached posts
+  // Render the correct tab immediately on load
   const _initTab=(_initParams.get('tab')||'journal');
-  if(_initTab==='journal'||!_initParams.get('tab')){
+  // Mark the correct nav tab as active
+  document.querySelectorAll('.t1').forEach(b=>{
+    if(b.dataset.t1===_initTab)b.classList.add('on');
+    else b.classList.remove('on');
+  });
+  activeT1=_initTab;
+  if(_initTab==='journal'){
     renderJournal();
+  } else if(_initTab==='weekly'){
+    renderWeekly();
+  } else {
+    // Other tabs need cloud data — show spinner then load
+    const feed=document.getElementById('feed');
+    if(feed)feed.innerHTML='<div class="empty" style="padding:60px 20px;text-align:center;"><p style="color:var(--soft);font-size:13px;">Loading…</p></div>';
   }
   // Load everything else in background
   loadFromCloud();
