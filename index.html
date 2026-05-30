@@ -1968,8 +1968,10 @@ async function _fetchAllSubstackPosts(){
   const rssUrl='https://maisontheposh.substack.com/feed';
   // Try multiple proxies in sequence
   const proxies=[
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
     u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
+    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
+    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
+    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
   ];
   for(const makeProxy of proxies){
     try{
@@ -2022,6 +2024,14 @@ async function _syncSubstackToSupabase(){
     // Batch upsert in groups of 20
     for(let i=0;i<rows.length;i+=20){
       await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+20))});
+    }
+    // Also patch any existing posts missing images
+    const postsWithImg=posts.filter(p=>p.cover_image);
+    if(postsWithImg.length){
+      for(const p of postsWithImg){
+        const id=p.id?String(p.id):p.slug;
+        sbFetch(`posts?id=eq.${encodeURIComponent(id)}&image=eq.`,{method:'PATCH',body:JSON.stringify({image:p.cover_image,slug:p.slug||''})}).catch(()=>{});
+      }
     }
     _setCachedPosts(posts);
   }catch(e){console.warn('Substack sync failed:',e);}
