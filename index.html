@@ -208,16 +208,46 @@ body.creator .wl-drag-handle{display:flex;}
 .new-row:hover{background:var(--surf);color:var(--mid);}
 
 /* ══ IG/LF GRID ══ */
-.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;align-items:start;}
-.lf-cell{display:flex;flex-direction:column;cursor:pointer;background:var(--white);text-decoration:none;position:relative;}
-.lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--white);}
-.lf-cell .lf-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
-.lf-cell:hover .lf-img-wrap img{transform:scale(1.04);}
+/* ══ THE LIST — Editorial layout ══ */
+.tl-feed{max-width:960px;margin:0 auto;padding:40px 40px 120px;}
+.tl-entry{display:flex;gap:40px;padding:48px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.tl-entry:first-child{padding-top:0;}
+.tl-imgs{flex:0 0 420px;display:grid;gap:6px;}
+.tl-imgs.one{grid-template-columns:1fr;}
+.tl-imgs.two{grid-template-columns:1fr 1fr;}
+.tl-imgs.three{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;}
+.tl-imgs.three .tl-img:first-child{grid-column:1/-1;}
+.tl-imgs.many{grid-template-columns:1fr 1fr;}
+.tl-img{width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--bg);position:relative;}
+.tl-imgs.two .tl-img,.tl-imgs.many .tl-img{aspect-ratio:1/1;}
+.tl-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
+.tl-entry:hover .tl-img img{transform:scale(1.03);}
+.tl-img-add{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 12px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);display:none;}
+body.creator .tl-img-add{display:block;}
+.tl-ph{width:100%;aspect-ratio:4/5;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:32px;color:var(--faint);position:relative;}
+.tl-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;padding-top:4px;}
+.tl-tag{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);}
+.tl-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.2;}
+.tl-note{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--mid);line-height:1.75;}
+.tl-link{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:1px;transition:opacity .18s;}
+.tl-link:hover{opacity:.6;}
+.tl-acts{display:flex;gap:8px;margin-top:16px;}
+.tl-act-btn{padding:6px 14px;border:1px solid var(--border);background:none;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);cursor:pointer;transition:all .15s;display:none;}
+body.creator .tl-act-btn{display:block;}
+.tl-act-btn:hover{border-color:var(--ink);color:var(--ink);}
+.tl-act-btn.red:hover{border-color:#B03030;color:#B03030;}
+.tl-add-row{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;transition:all .18s;display:none;}
+body.creator .tl-add-row{display:flex;}
+.tl-add-row:hover{color:var(--ink);}
+@media(max-width:700px){
+  .tl-feed{padding:24px 18px 80px;}
+  .tl-entry{flex-direction:column;gap:20px;padding:32px 0;}
+  .tl-imgs{flex:none;width:100%;}
+  .tl-title{font-size:22px;}
+  .tl-note{font-size:14px;}
+}
+/* legacy lf classes kept for other references */
 .lf-over{display:none;}
-.lf-info{padding:10px 2px 6px;background:var(--white);}
-.lf-brand{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:3px;}
-.lf-name{font-family:var(--serif);font-size:13px;color:var(--ink);line-height:1.35;margin-bottom:3px;}
-.lf-price{font-size:11px;color:var(--mid);}
 .lf-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:var(--bg);}
 .lf-ph-l{font-family:var(--serif);font-size:28px;color:var(--faint);}
 .lf-ph-n{font-size:10px;color:var(--soft);text-align:center;padding:0 8px;}
@@ -567,7 +597,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   .t1{font-size:9px;letter-spacing:.08em;padding:11px 12px;}
   .detail-hdr,.detail-search-wrap,.detail-grid,.detail-add-btn{padding-left:18px;padding-right:18px;}
   .panel{width:100%;border-left:none;}
-  .lf-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 18px;}
+  /* tl mobile handled above */
   .detail-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .panel-items-g{grid-template-columns:repeat(2,1fr);}
   .widgets-wrap{padding:20px 18px;}
@@ -693,8 +723,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Row 3: Nav centered -->
   <nav class="site-nav" id="nav1">
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
-    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">Latest Finds</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
+    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
@@ -1350,7 +1380,7 @@ function setT1(val,btn){
   activeT1=val;activeCat='all';
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(val));
+  document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
   closeDetail(true);
   render();
@@ -1763,58 +1793,82 @@ function filterDetailItems(q){
 }
 
 // ══ LATEST FINDS GRID ══
+// ══ THE LIST — localStorage-based editorial entries ══
+const TL_KEY='mtp_thelist';
+function tlLoad(){try{return JSON.parse(localStorage.getItem(TL_KEY))||[];}catch{return[];}}
+function tlSave(arr){localStorage.setItem(TL_KEY,JSON.stringify(arr));}
+
 function renderLatest(){
   const feed=document.getElementById('feed');
-  let items=[];
-  // Items assigned to latest/weekly lists
-  D.lists.filter(l=>l.t1==='latest'||l.t1==='weekly').forEach(l=>{
-    l.items.forEach(it=>{
-      const cat=it.cat||l.cat||'all';
-      if(activeCat==='all'||cat===activeCat){
-        items.push({...it,_listName:l.name,_listId:l.id});
-      }
-    });
-  });
-  // Unassigned items (imported via ShopMy CSV)
-  (D.unassigned||[]).forEach(it=>{
-    const cat=it.cat||'all';
-    if(activeCat==='all'||cat===activeCat){
-      items.push({...it,_listName:'',_listId:null});
-    }
-  });
-  // Filter: hide items with no image from public view
-  if(!isCreator) items=items.filter(it=>it.image&&it.image!=='none');
-  if(!items.length){
-    feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds lists.':'No '+activeCat+' items found.'}</p></div>`;
+  const entries=tlLoad();
+  const addRow=isCreator?`<div class="tl-add-row" onclick="tlOpenAdd()">＋ Add to The List</div>`:'';
+  if(!entries.length){
+    feed.innerHTML=`<div class="tl-feed">${addRow}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>Your personal collection of things you truly love.</p></div></div>`;
     return;
   }
-  items.sort((a,b)=>{
-    const da=a.created_at?new Date(a.created_at):0;
-    const db=b.created_at?new Date(b.created_at):0;
-    if(da&&db)return db-da;
-    try{return parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36);}catch{return 0;}
-  });
-  // Deduplicate — keep only the first (newest) occurrence of each item by name+brand
-  const seen=new Set();
-  items=items.filter(it=>{
-    const key=(it.name||'').toLowerCase().trim()+'|'+(it.brand||'').toLowerCase().trim();
-    if(seen.has(key))return false;
-    seen.add(key);
-    return true;
-  });
-  const cells=items.map(it=>{
-    const hasImg=it.image&&it.image!=='none';
-    const img=hasImg
-      ?`<div class="lf-img-wrap"><img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'"></div>`
-      :`<div class="lf-img-wrap" style="position:relative;"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>${isCreator?`<button onclick="event.preventDefault();event.stopPropagation();quickAddImage('${h(it.id)}')" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);">+ Image</button>`:''}</div>`;
-    return `<a class="lf-cell" href="#" data-item-id="${h(it.id)}">
-      ${img}
-      <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${it.price?'$'+h(it.price):''}</div></div>
-      ${it.note?`<div class="note-badge" title="${h(it.note)}">✦</div>`:''}
-    </a>`;
+  const cards=entries.map((e,i)=>{
+    const imgs=e.images||[];
+    const imgCount=imgs.length;
+    const gridClass=imgCount===0?'one':imgCount===1?'one':imgCount===2?'two':imgCount===3?'three':'many';
+    let imgHTML='';
+    if(imgCount===0){
+      imgHTML=`<div class="tl-imgs one"><div class="tl-ph">✦<button class="tl-img-add" onclick="tlAddImage(${i},0)">+ Image</button></div></div>`;
+    } else {
+      const imgTags=imgs.map((src,j)=>`<div class="tl-img"><img src="${h(src)}" alt="" onerror="this.style.display='none'"><button class="tl-img-add" onclick="tlAddImage(${i},${j+1})">+ Image</button></div>`).join('');
+      imgHTML=`<div class="tl-imgs ${gridClass}">${imgTags}<button class="tl-img-add" style="position:relative;display:none;" onclick="tlAddImage(${i},${imgCount})">+ Image</button></div>`;
+    }
+    const linkHTML=e.link?`<a class="tl-link" href="${h(e.link)}" target="_blank" rel="noopener">${h(e.linkLabel||'Visit →')}</a>`:'';
+    const actHTML=isCreator?`<div class="tl-acts"><button class="tl-act-btn" onclick="tlEdit(${i})">Edit</button><button class="tl-act-btn" onclick="tlAddImage(${i},${imgCount})">+ Image</button><button class="tl-act-btn red" onclick="tlDelete(${i})">Delete</button></div>`:'';
+    return `<div class="tl-entry">
+      ${imgHTML}
+      <div class="tl-body">
+        ${e.tag?`<div class="tl-tag">${h(e.tag)}</div>`:''}
+        <div class="tl-title">${h(e.title)}</div>
+        ${e.note?`<div class="tl-note">${h(e.note)}</div>`:''}
+        ${linkHTML}
+        ${actHTML}
+      </div>
+    </div>`;
   }).join('');
-  feed.innerHTML=`<div class="lf-grid">${cells}</div>`;
-  updateImageCounter();
+  feed.innerHTML=`<div class="tl-feed">${cards}${addRow}</div>`;
+}
+
+function tlOpenAdd(){
+  const title=prompt('Title (e.g. Restaurant name, book title, product):');
+  if(!title||!title.trim())return;
+  const tag=prompt('Tag (optional — e.g. Restaurant, Book, Store, Product, Travel):');
+  const note=prompt('Your write-up — why you love it:');
+  const link=prompt('Link (optional — URL):');
+  const linkLabel=link?prompt('Link label (e.g. "Book a table", "Shop now") — leave blank for "Visit →"'):'';
+  const arr=tlLoad();
+  arr.unshift({title:title.trim(),tag:(tag||'').trim(),note:(note||'').trim(),link:(link||'').trim(),linkLabel:(linkLabel||'').trim(),images:[],created_at:new Date().toISOString()});
+  tlSave(arr);renderLatest();
+}
+
+function tlEdit(i){
+  const arr=tlLoad();const e=arr[i];if(!e)return;
+  const title=prompt('Title:',e.title)||e.title;
+  const tag=prompt('Tag:',e.tag||'');
+  const note=prompt('Write-up:',e.note||'');
+  const link=prompt('Link:',e.link||'');
+  const linkLabel=prompt('Link label:',e.linkLabel||'');
+  arr[i]={...e,title:title.trim(),tag:(tag||'').trim(),note:(note||'').trim(),link:(link||'').trim(),linkLabel:(linkLabel||'').trim()};
+  tlSave(arr);renderLatest();
+}
+
+function tlDelete(i){
+  if(!confirm('Delete this entry?'))return;
+  const arr=tlLoad();arr.splice(i,1);tlSave(arr);renderLatest();
+}
+
+function tlAddImage(entryIdx,imgIdx){
+  const url=prompt('Paste image URL:');
+  if(!url||!url.trim())return;
+  const arr=tlLoad();
+  if(!arr[entryIdx])return;
+  if(!arr[entryIdx].images)arr[entryIdx].images=[];
+  arr[entryIdx].images.splice(imgIdx,0,url.trim());
+  tlSave(arr);renderLatest();
 }
 
 // ══ ON SALE NOW ══
@@ -3275,7 +3329,7 @@ function restoreFromURL(){
     const match=b.dataset.t1===t;
     b.classList.toggle('on',match);
   });
-  document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(t));
+  document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(t));
   // Open list if specified
   if(listId&&D.lists.find(x=>x.id===listId)){
     const l=D.lists.find(x=>x.id===listId);
@@ -3340,7 +3394,7 @@ window.addEventListener('popstate',function(e){
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
-    document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(activeT1));
+    document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(activeT1));
     document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
     render();
     window.scrollTo({top:0});
