@@ -1931,7 +1931,7 @@ async function loadPosts(){
 }
 
 const JOURNAL_CACHE_KEY='mtp_journal_v2';
-const JOURNAL_CACHE_TTL=3600000;
+const JOURNAL_CACHE_TTL=300000; // 5 minutes
 
 function _getCachedPosts(){
   try{const raw=localStorage.getItem(JOURNAL_CACHE_KEY);if(!raw)return null;const{posts,ts}=JSON.parse(raw);if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;return posts;}catch{return null;}
@@ -2027,7 +2027,6 @@ async function renderJournal(){
     sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
       if(Array.isArray(fresh)&&fresh.length&&activeT1==='journal'){
         const mapped=fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at}));
-        // Always re-render from fresh Supabase data
         const w=document.querySelector('.journal-feed');
         if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
         _setCachedPosts(mapped);
