@@ -3580,12 +3580,21 @@ async function runImport(){
 
 window.addEventListener('DOMContentLoaded',()=>{
   // Seed default carousels if none saved yet
-  if(!localStorage.getItem('mtp_wc_carousels')){
-    localStorage.setItem('mtp_wc_carousels',JSON.stringify([
-      {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-      {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'}
-    ]));
-  }
+  // Seed carousels — merge new ones in without losing user order
+  const _wcDefaults=[
+    {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
+    {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
+    {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
+    {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
+    {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'},
+    {title:'Summer Bags',src:'https://shopmy.us/collections/embed/5559343?'},
+    {title:'TOTEME',src:'https://shopmy.us/collections/embed/5372748?'}
+  ];
+  try{
+    const _wsSaved=JSON.parse(localStorage.getItem('mtp_wc_carousels')||'[]');
+    _wcDefaults.forEach(d=>{if(!_wsSaved.find(s=>s.src===d.src))_wsSaved.push(d);});
+    localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wsSaved));
+  }catch(e){localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wcDefaults));}
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
   const dz=document.getElementById('dropz');
