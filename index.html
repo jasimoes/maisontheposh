@@ -1931,7 +1931,7 @@ async function loadPosts(){
 }
 
 const JOURNAL_CACHE_KEY='mtp_journal_v1';
-const JOURNAL_CACHE_TTL=3600000;
+const JOURNAL_CACHE_TTL=300000; // 5 minutes
 
 function _getCachedPosts(){
   try{const raw=localStorage.getItem(JOURNAL_CACHE_KEY);if(!raw)return null;const{posts,ts}=JSON.parse(raw);if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;return posts;}catch{return null;}
@@ -1967,7 +1967,8 @@ function _buildJournalShell(feed){
 async function _fetchAllSubstackPosts(){
   try{
     const rssUrl='https://maisontheposh.substack.com/feed';
-    const proxy='https://api.rss2json.com/v1/api.json?count=100&rss_url=';
+    const cb=Math.floor(Date.now()/60000); // changes every minute
+    const proxy='https://api.rss2json.com/v1/api.json?count=100&_cb='+cb+'&rss_url=';
     const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
     const data=await res.json();
     if(!data||!data.items||!data.items.length)return[];
