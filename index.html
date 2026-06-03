@@ -1567,6 +1567,7 @@ function stripCard(l){
 }
 
 // ══ LIST DETAIL (full-page Collective style) ══
+const SHOPMY_EMBEDS={'Phoebe Philo':'<iframe title="Phoebe Philo" src="https://shopmy.us/collections/embed/5380494?" style="width:100%;min-height:340px;border:none;"></iframe>'};
 function openDetail(id){
   currentListId=id;
   const l=D.lists.find(x=>x.id===id);if(!l)return;
@@ -1575,6 +1576,11 @@ function openDetail(id){
   document.getElementById('search-hint').textContent='';
   detailAllItems=[...l.items];
   renderDetailItems(l.items);
+  const embedHtml=SHOPMY_EMBEDS[l.name]||null;
+  let embedEl=document.getElementById('shopmy-embed-wrap');
+  if(!embedEl){embedEl=document.createElement('div');embedEl.id='shopmy-embed-wrap';embedEl.style.cssText='margin-bottom:24px;';document.getElementById('detail-grid').before(embedEl);}
+  embedEl.innerHTML=embedHtml||'';
+  embedEl.style.display=embedHtml?'block':'none';
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
   // Show "Pick from Collections" button for weekly AND collection lists (creator mode only)
