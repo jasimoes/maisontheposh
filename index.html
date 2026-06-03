@@ -1410,12 +1410,26 @@ function render(){
 
 // ══ WEEKLY CURATION — CAROUSEL SYSTEM ══
 const WC_KEY='mtp_wc_carousels';
-function wcLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
-function wcSave(arr){localStorage.setItem(WC_KEY,JSON.stringify(arr));}
+let _wcCache=null;
+async function wcLoad(){
+  if(_wcCache)return _wcCache;
+  try{
+    const rows=await sbFetch('config?key=eq.wc_carousels&select=value');
+    if(rows&&rows.length&&rows[0].value){_wcCache=rows[0].value;return _wcCache;}
+  }catch{}
+  try{const ls=JSON.parse(localStorage.getItem(WC_KEY));if(ls&&ls.length){_wcCache=ls;return _wcCache;}}catch{}
+  return[];
+}
+async function wcSave(arr){
+  _wcCache=arr;
+  try{
+    await sbFetch('config',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({key:'wc_carousels',value:arr})});
+  }catch(e){console.error('wcSave failed:',e);}
+}
 
-function renderWeekly(){
+async function renderWeekly(){
   const feed=document.getElementById('feed');
-  const carousels=wcLoad();
+  const carousels=await wcLoad();
   if(!carousels.length&&!isCreator){
     feed.innerHTML=`<div class="wc-empty">No collections yet.</div>`;return;
   }
@@ -1426,32 +1440,31 @@ function renderWeekly(){
           <span class="wc-carousel-label">${h(c.title)}</span>
           <div class="wc-carousel-acts">
             <div class="wc-drag-handle" title="Drag to reorder">⠿</div>
-            <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
+            <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">\u2715</button>
           </div>
         </div>
         <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
       </div>
     </div>`).join('');
-  const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
+  const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">\uFF0B Add Carousel</div>`:'';
   feed.innerHTML=`<div class="wc-feed">${items}${addRow}</div>`;
   if(isCreator)wcInitDrag();
 }
 
-function wcDelete(i){
-  if(!confirm('Remove this carousel?'))return;
-  const arr=wcLoad();arr.splice(i,1);wcSave(arr);renderWeekly();
+async function wcDelete(i){
+  const arr=await wcLoad();arr.splice(i,1);await wcSave(arr);renderWeekly();
 }
 
-function wcOpenAdd(){
+async function wcOpenAdd(){
   const title=prompt('Collection name (e.g. Substack: Week 23, 2026):');
   if(!title||!title.trim())return;
   const raw=prompt('Paste the full ShopMy iframe embed code or just the src URL:');
   if(!raw||!raw.trim())return;
   const match=raw.match(/src="([^"]+)"/);
   const cleanSrc=match?match[1]:raw.trim();
-  const arr=wcLoad();
+  const arr=await wcLoad();
   arr.push({title:title.trim(),src:cleanSrc});
-  wcSave(arr);renderWeekly();
+  await wcSave(arr);renderWeekly();
 }
 
 let _wcDragSrc=null;
@@ -1463,13 +1476,13 @@ function wcInitDrag(){
     el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));});
     el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
     el.addEventListener('dragleave',()=>el.classList.remove('wc-drag-over'));
-    el.addEventListener('drop',e=>{
+    el.addEventListener('drop',async e=>{
       e.preventDefault();el.classList.remove('wc-drag-over');
       const ti=parseInt(el.dataset.wcI);
       if(_wcDragSrc===null||_wcDragSrc===ti)return;
-      const arr=wcLoad();
+      const arr=await wcLoad();
       const [moved]=arr.splice(_wcDragSrc,1);arr.splice(ti,0,moved);
-      wcSave(arr);renderWeekly();_wcDragSrc=null;
+      await wcSave(arr);renderWeekly();_wcDragSrc=null;
     });
   });
 }
@@ -1960,48 +1973,33 @@ function _renderJournalCards(posts,wrap){
 }
 
 function _buildJournalShell(feed){
-  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>';
+  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div><div style="margin:48px auto;max-width:480px;text-align:center;"><iframe src="https://maisontheposh.substack.com/embed" width="480" height="320" style="border:1px solid #EEE;background:white;max-width:100%;" frameborder="0" scrolling="no"></iframe></div></div>';
   return feed.querySelector('.journal-feed');
 }
 
 async function _fetchAllSubstackPosts(){
-  const rssUrl='https://maisontheposh.substack.com/feed';
-  // Try multiple proxies in sequence
-  const proxies=[
-    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
-    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  ];
-  for(const makeProxy of proxies){
-    try{
-      const res=await fetch(makeProxy(rssUrl),{signal:AbortSignal.timeout(10000)});
-      if(!res.ok)continue;
-      const xml=await res.text();
-      const doc=new DOMParser().parseFromString(xml,'application/xml');
-      const items=[...doc.querySelectorAll('item')];
-      if(!items.length)continue;
-      return items.map(item=>{
-        const get=tag=>item.querySelector(tag)?.textContent?.trim()||'';
-        const link=get('link');
-        const slug=link.split('/p/')[1]||link||'';
-        const encImg=item.querySelector('enclosure')?.getAttribute('url')||'';
-        const mediaImg=item.querySelector('content')?.getAttribute('url')||'';
-        const thumbImg=[...item.querySelectorAll('*')].find(el=>el.tagName.includes('thumbnail'))?.getAttribute('url')||'';
-        const img=encImg||mediaImg||thumbImg||'';
-        return{
-          id:link||slug,
-          title:get('title'),
-          slug,
-          subtitle:get('description').replace(/<[^>]+>/g,'').slice(0,200),
-          cover_image:img,
-          post_date:get('pubDate')||new Date().toISOString()
-        };
-      });
-    }catch(e){console.warn('RSS proxy failed:',e);}
+  try{
+    const rssUrl='https://maisontheposh.substack.com/feed';
+    const proxy='https://api.rss2json.com/v1/api.json?count=100&rss_url=';
+    const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
+    const data=await res.json();
+    if(!data||!data.items||!data.items.length)return[];
+    return data.items.map(item=>{
+      const slug=(item.link||'').split('/p/')[1]||item.guid||item.link||'';
+      const img=item.thumbnail||item.enclosure?.link||'';
+      return{
+        id:item.guid||slug,
+        title:item.title||'',
+        slug:slug,
+        subtitle:item.description?item.description.replace(/<[^>]+>/g,'').slice(0,200):'',
+        cover_image:img,
+        post_date:item.pubDate||new Date().toISOString()
+      };
+    });
+  }catch(e){
+    console.warn('RSS fetch failed:',e);
+    return[];
   }
-  console.warn('All RSS proxies failed');
-  return[];
 }
 
 async function _syncSubstackToSupabase(){
