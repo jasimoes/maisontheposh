@@ -151,25 +151,6 @@ body.creator .btn-new{display:flex;}
 /* ══ FEED ══ */
 .feed{max-width:1280px;margin:0 auto;padding-bottom:120px;padding-top:32px;}
 
-/* ══ WEEKLY CURATION — SHOPMY CAROUSEL SYSTEM ══ */
-.wc-feed{max-width:1280px;margin:0 auto;padding-bottom:120px;}
-.wc-item{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
-.wc-item.wc-drag-over{border-top:2px solid var(--ink);}
-.wc-item.wc-dragging{opacity:.4;}
-.wc-carousel-wrap{padding:28px 40px 20px;}
-.wc-carousel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.wc-carousel-label{font-family:var(--serif);font-size:15px;font-weight:400;color:var(--ink);letter-spacing:.02em;}
-.wc-carousel-acts{display:flex;gap:7px;align-items:center;}
-.wc-drag-handle{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:grab;display:none;align-items:center;justify-content:center;font-size:14px;color:var(--mid);border-radius:2px;}
-body.creator .wc-drag-handle{display:flex;}
-.wc-del-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:13px;color:var(--mid);border-radius:2px;transition:all .15s;}
-.wc-del-btn:hover{border-color:#B03030;color:#B03030;}
-body.creator .wc-del-btn{display:flex;}
-.wc-add-row{display:flex;align-items:center;justify-content:center;padding:30px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--border);transition:all .18s;}
-.wc-add-row:hover{background:var(--surf);color:var(--mid);}
-.wc-empty{text-align:center;padding:80px 40px;color:var(--soft);font-family:var(--serif);font-size:16px;font-style:italic;}
-@media(max-width:700px){.wc-carousel-wrap{padding:20px 16px 16px;}}
-
 /* ══ STRIP VIEW (Collections / Weekly) ══ */
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
 .wl.clickable{cursor:pointer;}
@@ -208,46 +189,16 @@ body.creator .wl-drag-handle{display:flex;}
 .new-row:hover{background:var(--surf);color:var(--mid);}
 
 /* ══ IG/LF GRID ══ */
-/* ══ THE LIST — Editorial layout ══ */
-.tl-feed{max-width:960px;margin:0 auto;padding:40px 40px 120px;}
-.tl-entry{display:flex;gap:40px;padding:48px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
-.tl-entry:first-child{padding-top:0;}
-.tl-imgs{flex:0 0 420px;display:grid;gap:6px;}
-.tl-imgs.one{grid-template-columns:1fr;}
-.tl-imgs.two{grid-template-columns:1fr 1fr;}
-.tl-imgs.three{grid-template-columns:1fr 1fr;grid-template-rows:auto auto;}
-.tl-imgs.three .tl-img:first-child{grid-column:1/-1;}
-.tl-imgs.many{grid-template-columns:1fr 1fr;}
-.tl-img{width:100%;aspect-ratio:4/5;overflow:hidden;background:var(--bg);position:relative;}
-.tl-imgs.two .tl-img,.tl-imgs.many .tl-img{aspect-ratio:1/1;}
-.tl-img img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
-.tl-entry:hover .tl-img img{transform:scale(1.03);}
-.tl-img-add{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 12px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);display:none;}
-body.creator .tl-img-add{display:block;}
-.tl-ph{width:100%;aspect-ratio:4/5;background:var(--bg);display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-size:32px;color:var(--faint);position:relative;}
-.tl-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px;padding-top:4px;}
-.tl-tag{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);}
-.tl-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.2;}
-.tl-note{font-family:var(--serif);font-size:15px;font-style:italic;color:var(--mid);line-height:1.75;}
-.tl-link{display:inline-block;margin-top:8px;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:1px;transition:opacity .18s;}
-.tl-link:hover{opacity:.6;}
-.tl-acts{display:flex;gap:8px;margin-top:16px;}
-.tl-act-btn{padding:6px 14px;border:1px solid var(--border);background:none;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--mid);cursor:pointer;transition:all .15s;display:none;}
-body.creator .tl-act-btn{display:block;}
-.tl-act-btn:hover{border-color:var(--ink);color:var(--ink);}
-.tl-act-btn.red:hover{border-color:#B03030;color:#B03030;}
-.tl-add-row{display:flex;align-items:center;justify-content:center;padding:40px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;transition:all .18s;display:none;}
-body.creator .tl-add-row{display:flex;}
-.tl-add-row:hover{color:var(--ink);}
-@media(max-width:700px){
-  .tl-feed{padding:24px 18px 80px;}
-  .tl-entry{flex-direction:column;gap:20px;padding:32px 0;}
-  .tl-imgs{flex:none;width:100%;}
-  .tl-title{font-size:22px;}
-  .tl-note{font-size:14px;}
-}
-/* legacy lf classes kept for other references */
+.lf-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;background:var(--white);padding:0 40px;align-items:start;}
+.lf-cell{display:flex;flex-direction:column;cursor:pointer;background:var(--white);text-decoration:none;position:relative;}
+.lf-cell .lf-img-wrap{width:100%;aspect-ratio:3/4;overflow:hidden;flex-shrink:0;background:var(--white);}
+.lf-cell .lf-img-wrap img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .45s;}
+.lf-cell:hover .lf-img-wrap img{transform:scale(1.04);}
 .lf-over{display:none;}
+.lf-info{padding:10px 2px 6px;background:var(--white);}
+.lf-brand{font-size:8px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);margin-bottom:3px;}
+.lf-name{font-family:var(--serif);font-size:13px;color:var(--ink);line-height:1.35;margin-bottom:3px;}
+.lf-price{font-size:11px;color:var(--mid);}
 .lf-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;background:var(--bg);}
 .lf-ph-l{font-family:var(--serif);font-size:28px;color:var(--faint);}
 .lf-ph-n{font-size:10px;color:var(--soft);text-align:center;padding:0 8px;}
@@ -597,7 +548,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   .t1{font-size:9px;letter-spacing:.08em;padding:11px 12px;}
   .detail-hdr,.detail-search-wrap,.detail-grid,.detail-add-btn{padding-left:18px;padding-right:18px;}
   .panel{width:100%;border-left:none;}
-  /* tl mobile handled above */
+  .lf-grid{grid-template-columns:repeat(2,1fr);gap:12px;padding:0 18px;}
   .detail-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
   .panel-items-g{grid-template-columns:repeat(2,1fr);}
   .widgets-wrap{padding:20px 18px;}
@@ -723,8 +674,8 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Row 3: Nav centered -->
   <nav class="site-nav" id="nav1">
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
+    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">Latest Finds</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
-    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
@@ -1380,7 +1331,7 @@ function setT1(val,btn){
   activeT1=val;activeCat='all';
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
-  document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
+  document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
   closeDetail(true);
   render();
@@ -1397,8 +1348,7 @@ function render(){
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
-  if(activeT1==='weekly'){renderWeekly();return;}
-  let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  let lists=D.lists.filter(l=>activeT1==='weekly'?(l.t1==='weekly'||l.t1==='collections'):l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
   if(!lists.length){
     feed.innerHTML=`<div class="empty"><h3>Nothing here yet</h3><p>Create a new list to get started.</p></div>`+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
     return;
@@ -1406,72 +1356,6 @@ function render(){
   feed.innerHTML=lists.map(l=>stripCard(l)).join('')+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
   document.addEventListener('click',closeAllCtx,{once:true});
   if(isCreator)initListDrag();
-}
-
-// ══ WEEKLY CURATION — CAROUSEL SYSTEM ══
-const WC_KEY='mtp_wc_carousels';
-function wcLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
-function wcSave(arr){localStorage.setItem(WC_KEY,JSON.stringify(arr));}
-
-function renderWeekly(){
-  const feed=document.getElementById('feed');
-  const carousels=wcLoad();
-  if(!carousels.length&&!isCreator){
-    feed.innerHTML=`<div class="wc-empty">No collections yet.</div>`;return;
-  }
-  const items=carousels.map((c,i)=>`
-    <div class="wc-item" data-wc-i="${i}" draggable="${isCreator}">
-      <div class="wc-carousel-wrap">
-        <div class="wc-carousel-header">
-          <span class="wc-carousel-label">${h(c.title)}</span>
-          <div class="wc-carousel-acts">
-            <div class="wc-drag-handle" title="Drag to reorder">⠿</div>
-            <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
-          </div>
-        </div>
-        <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
-      </div>
-    </div>`).join('');
-  const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
-  feed.innerHTML=`<div class="wc-feed">${items}${addRow}</div>`;
-  if(isCreator)wcInitDrag();
-}
-
-function wcDelete(i){
-  if(!confirm('Remove this carousel?'))return;
-  const arr=wcLoad();arr.splice(i,1);wcSave(arr);renderWeekly();
-}
-
-function wcOpenAdd(){
-  const title=prompt('Collection name (e.g. Substack: Week 23, 2026):');
-  if(!title||!title.trim())return;
-  const raw=prompt('Paste the full ShopMy iframe embed code or just the src URL:');
-  if(!raw||!raw.trim())return;
-  const match=raw.match(/src="([^"]+)"/);
-  const cleanSrc=match?match[1]:raw.trim();
-  const arr=wcLoad();
-  arr.push({title:title.trim(),src:cleanSrc});
-  wcSave(arr);renderWeekly();
-}
-
-let _wcDragSrc=null;
-function wcInitDrag(){
-  const feed=document.getElementById('feed');
-  if(!feed)return;
-  feed.querySelectorAll('.wc-item').forEach(el=>{
-    el.addEventListener('dragstart',e=>{_wcDragSrc=parseInt(el.dataset.wcI);el.classList.add('wc-dragging');e.dataTransfer.effectAllowed='move';});
-    el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));});
-    el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
-    el.addEventListener('dragleave',()=>el.classList.remove('wc-drag-over'));
-    el.addEventListener('drop',e=>{
-      e.preventDefault();el.classList.remove('wc-drag-over');
-      const ti=parseInt(el.dataset.wcI);
-      if(_wcDragSrc===null||_wcDragSrc===ti)return;
-      const arr=wcLoad();
-      const [moved]=arr.splice(_wcDragSrc,1);arr.splice(ti,0,moved);
-      wcSave(arr);renderWeekly();_wcDragSrc=null;
-    });
-  });
 }
 
 // ══ DRAG-TO-REORDER LISTS ══
@@ -1507,7 +1391,7 @@ function initListDrag(){
 }
 async function reorderList(srcId,targetId){
   // Work only within the current t1 group
-  const group=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
+  const group=D.lists.filter(l=>activeT1==='weekly'?(l.t1==='weekly'||l.t1==='collections'):l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
   const si=group.findIndex(x=>x.id===srcId);
   const ti=group.findIndex(x=>x.id===targetId);
   if(si<0||ti<0)return;
@@ -1567,7 +1451,6 @@ function stripCard(l){
 }
 
 // ══ LIST DETAIL (full-page Collective style) ══
-const SHOPMY_EMBEDS={'Phoebe Philo':'<iframe title="Phoebe Philo" src="https://shopmy.us/collections/embed/5380494?" style="width:100%;min-height:340px;border:none;"></iframe>'};
 function openDetail(id){
   currentListId=id;
   const l=D.lists.find(x=>x.id===id);if(!l)return;
@@ -1576,16 +1459,11 @@ function openDetail(id){
   document.getElementById('search-hint').textContent='';
   detailAllItems=[...l.items];
   renderDetailItems(l.items);
-  const embedHtml=SHOPMY_EMBEDS[l.name]||null;
-  let embedEl=document.getElementById('shopmy-embed-wrap');
-  if(!embedEl){embedEl=document.createElement('div');embedEl.id='shopmy-embed-wrap';embedEl.style.cssText='margin-bottom:24px;';document.getElementById('detail-grid').before(embedEl);}
-  embedEl.innerHTML=embedHtml||'';
-  embedEl.style.display=embedHtml?'block':'none';
   document.getElementById('feed').style.display='none';
   document.getElementById('list-detail').classList.add('open');
   // Show "Pick from Collections" button for weekly AND collection lists (creator mode only)
   const pickBtn=document.getElementById('pick-from-col-btn');
-  if(pickBtn) pickBtn.style.display=(isCreator&&l.t1==='collections')?'flex':'none';
+  if(pickBtn) pickBtn.style.display=(isCreator&&(l.t1==='weekly'||l.t1==='collections'))?'flex':'none';
   window.scrollTo({top:0,behavior:'smooth'});
   history.pushState({tab:activeT1,list:id},'',`/?list=${id}`);
 }
@@ -1799,126 +1677,58 @@ function filterDetailItems(q){
 }
 
 // ══ LATEST FINDS GRID ══
-// ══ THE LIST — localStorage-based editorial entries ══
-const TL_KEY='mtp_thelist';
-function tlLoad(){try{return JSON.parse(localStorage.getItem(TL_KEY))||[];}catch{return[];}}
-function tlSave(arr){localStorage.setItem(TL_KEY,JSON.stringify(arr));}
-
 function renderLatest(){
   const feed=document.getElementById('feed');
-  const entries=tlLoad();
-  const addRow=isCreator?`<div class="tl-add-row" onclick="tlOpenAdd()">＋ Add to The List</div>`:'';
-  if(!entries.length){
-    feed.innerHTML=`<div class="tl-feed">${addRow}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>Your personal collection of things you truly love.</p></div></div>`;
+  let items=[];
+  // Items assigned to latest/weekly lists
+  D.lists.filter(l=>l.t1==='latest'||l.t1==='weekly').forEach(l=>{
+    l.items.forEach(it=>{
+      const cat=it.cat||l.cat||'all';
+      if(activeCat==='all'||cat===activeCat){
+        items.push({...it,_listName:l.name,_listId:l.id});
+      }
+    });
+  });
+  // Unassigned items (imported via ShopMy CSV)
+  (D.unassigned||[]).forEach(it=>{
+    const cat=it.cat||'all';
+    if(activeCat==='all'||cat===activeCat){
+      items.push({...it,_listName:'',_listId:null});
+    }
+  });
+  // Filter: hide items with no image from public view
+  if(!isCreator) items=items.filter(it=>it.image&&it.image!=='none');
+  if(!items.length){
+    feed.innerHTML=`<div class="empty"><h3>${activeCat==='all'?'No items yet':'No '+activeCat+' yet'}</h3><p>${activeCat==='all'?'Add items to your Latest Finds lists.':'No '+activeCat+' items found.'}</p></div>`;
     return;
   }
-  const cards=entries.map((e,i)=>{
-    const imgs=e.images||[];
-    const imgCount=imgs.length;
-    const gridClass=imgCount===0?'one':imgCount===1?'one':imgCount===2?'two':imgCount===3?'three':'many';
-    let imgHTML='';
-    if(imgCount===0){
-      imgHTML=`<div class="tl-imgs one"><div class="tl-ph">✦<button class="tl-img-add" onclick="tlAddImage(${i},0)">+ Image</button></div></div>`;
-    } else {
-      const imgTags=imgs.map((src,j)=>`<div class="tl-img"><img src="${h(src)}" alt="" onerror="this.style.display='none'"><button class="tl-img-add" onclick="tlAddImage(${i},${j+1})">+ Image</button></div>`).join('');
-      imgHTML=`<div class="tl-imgs ${gridClass}">${imgTags}<button class="tl-img-add" style="position:relative;display:none;" onclick="tlAddImage(${i},${imgCount})">+ Image</button></div>`;
-    }
-    const linkHTML=e.link?`<a class="tl-link" href="${h(e.link)}" target="_blank" rel="noopener">${h(e.linkLabel||'Visit →')}</a>`:'';
-    const actHTML=isCreator?`<div class="tl-acts"><button class="tl-act-btn" onclick="tlEdit(${i})">Edit</button><button class="tl-act-btn" onclick="tlAddImage(${i},${imgCount})">+ Image</button><button class="tl-act-btn red" onclick="tlDelete(${i})">Delete</button></div>`:'';
-    return `<div class="tl-entry">
-      ${imgHTML}
-      <div class="tl-body">
-        ${e.tag?`<div class="tl-tag">${h(e.tag)}</div>`:''}
-        <div class="tl-title">${h(e.title)}</div>
-        ${e.note?`<div class="tl-note">${h(e.note)}</div>`:''}
-        ${linkHTML}
-        ${actHTML}
-      </div>
-    </div>`;
+  items.sort((a,b)=>{
+    const da=a.created_at?new Date(a.created_at):0;
+    const db=b.created_at?new Date(b.created_at):0;
+    if(da&&db)return db-da;
+    try{return parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36);}catch{return 0;}
+  });
+  // Deduplicate — keep only the first (newest) occurrence of each item by name+brand
+  const seen=new Set();
+  items=items.filter(it=>{
+    const key=(it.name||'').toLowerCase().trim()+'|'+(it.brand||'').toLowerCase().trim();
+    if(seen.has(key))return false;
+    seen.add(key);
+    return true;
+  });
+  const cells=items.map(it=>{
+    const hasImg=it.image&&it.image!=='none';
+    const img=hasImg
+      ?`<div class="lf-img-wrap"><img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'"></div>`
+      :`<div class="lf-img-wrap" style="position:relative;"><div class="lf-ph"><div class="lf-ph-l">${(it.brand||'?')[0]}</div><div class="lf-ph-n">${h(it.name)}</div></div>${isCreator?`<button onclick="event.preventDefault();event.stopPropagation();quickAddImage('${h(it.id)}')" style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:5px 10px;font-size:9px;letter-spacing:.1em;text-transform:uppercase;background:var(--ink);color:white;border:none;cursor:pointer;font-family:var(--sans);">+ Image</button>`:''}</div>`;
+    return `<a class="lf-cell" href="#" data-item-id="${h(it.id)}">
+      ${img}
+      <div class="lf-info"><div class="lf-brand">${h(it.brand)}</div><div class="lf-name">${h(it.name)}</div><div class="lf-price">${it.price?'$'+h(it.price):''}</div></div>
+      ${it.note?`<div class="note-badge" title="${h(it.note)}">✦</div>`:''}
+    </a>`;
   }).join('');
-  feed.innerHTML=`<div class="tl-feed">${cards}${addRow}</div>`;
-}
-
-let _tlEditIdx=null;
-let _tlImgIdx=null;
-
-function tlOpenAdd(){
-  _tlEditIdx=null;
-  document.getElementById('tl-form-title').textContent='New Entry';
-  document.getElementById('tl-f-title').value='';
-  document.getElementById('tl-f-tag').value='';
-  document.getElementById('tl-f-note').value='';
-  document.getElementById('tl-f-link').value='';
-  document.getElementById('tl-f-linklabel').value='';
-  document.getElementById('tl-ov').classList.add('open');
-  document.getElementById('tl-f-title').focus();
-}
-
-function tlEdit(i){
-  const arr=tlLoad();const e=arr[i];if(!e)return;
-  _tlEditIdx=i;
-  document.getElementById('tl-form-title').textContent='Edit Entry';
-  document.getElementById('tl-f-title').value=e.title||'';
-  document.getElementById('tl-f-tag').value=e.tag||'';
-  document.getElementById('tl-f-note').value=e.note||'';
-  document.getElementById('tl-f-link').value=e.link||'';
-  document.getElementById('tl-f-linklabel').value=e.linkLabel||'';
-  document.getElementById('tl-ov').classList.add('open');
-  document.getElementById('tl-f-title').focus();
-}
-
-function tlSaveForm(){
-  const title=document.getElementById('tl-f-title').value.trim();
-  if(!title){document.getElementById('tl-f-title').focus();return;}
-  const entry={
-    title,
-    tag:document.getElementById('tl-f-tag').value.trim(),
-    note:document.getElementById('tl-f-note').value.trim(),
-    link:document.getElementById('tl-f-link').value.trim(),
-    linkLabel:document.getElementById('tl-f-linklabel').value.trim(),
-  };
-  const arr=tlLoad();
-  if(_tlEditIdx!==null){
-    arr[_tlEditIdx]={...arr[_tlEditIdx],...entry};
-  } else {
-    arr.unshift({...entry,images:[],created_at:new Date().toISOString()});
-  }
-  tlSave(arr);
-  document.getElementById('tl-ov').classList.remove('open');
-  renderLatest();
-}
-
-function tlCloseFom(){
-  document.getElementById('tl-ov').classList.remove('open');
-}
-
-function tlDelete(i){
-  if(!confirm('Delete this entry?'))return;
-  const arr=tlLoad();arr.splice(i,1);tlSave(arr);renderLatest();
-}
-
-function tlAddImage(entryIdx,imgIdx){
-  _tlEditIdx=entryIdx;_tlImgIdx=imgIdx;
-  document.getElementById('tl-img-preview').style.display='none';
-  document.getElementById('tl-img-preview').src='';
-  document.getElementById('tl-img-url').value='';
-  document.getElementById('tl-img-ov').classList.add('open');
-}
-
-function tlSaveImage(){
-  const url=document.getElementById('tl-img-url').value.trim();
-  if(!url)return;
-  const arr=tlLoad();
-  if(!arr[_tlEditIdx])return;
-  if(!arr[_tlEditIdx].images)arr[_tlEditIdx].images=[];
-  arr[_tlEditIdx].images.splice(_tlImgIdx,0,url);
-  tlSave(arr);
-  document.getElementById('tl-img-ov').classList.remove('open');
-  renderLatest();
-}
-
-function tlCloseImg(){
-  document.getElementById('tl-img-ov').classList.remove('open');
+  feed.innerHTML=`<div class="lf-grid">${cells}</div>`;
+  updateImageCounter();
 }
 
 // ══ ON SALE NOW ══
@@ -1936,8 +1746,8 @@ async function loadPosts(){
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
 }
 
-const JOURNAL_CACHE_KEY='mtp_journal_v2';
-const JOURNAL_CACHE_TTL=300000; // 5 minutes
+const JOURNAL_CACHE_KEY='mtp_journal_v1';
+const JOURNAL_CACHE_TTL=3600000;
 
 function _getCachedPosts(){
   try{const raw=localStorage.getItem(JOURNAL_CACHE_KEY);if(!raw)return null;const{posts,ts}=JSON.parse(raw);if(Date.now()-ts>JOURNAL_CACHE_TTL)return null;return posts;}catch{return null;}
@@ -1971,43 +1781,30 @@ function _buildJournalShell(feed){
 }
 
 async function _fetchAllSubstackPosts(){
-  const rssUrl='https://maisontheposh.substack.com/feed';
-  // Try multiple proxies in sequence
-  const proxies=[
-    u=>`https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
-    u=>`https://corsproxy.io/?${encodeURIComponent(u)}`,
-    u=>`https://thingproxy.freeboard.io/fetch/${u}`,
-    u=>`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
-  ];
-  for(const makeProxy of proxies){
-    try{
-      const res=await fetch(makeProxy(rssUrl),{signal:AbortSignal.timeout(10000)});
-      if(!res.ok)continue;
-      const xml=await res.text();
-      const doc=new DOMParser().parseFromString(xml,'application/xml');
-      const items=[...doc.querySelectorAll('item')];
-      if(!items.length)continue;
-      return items.map(item=>{
-        const get=tag=>item.querySelector(tag)?.textContent?.trim()||'';
-        const link=get('link');
-        const slug=link.split('/p/')[1]||link||'';
-        const encImg=item.querySelector('enclosure')?.getAttribute('url')||'';
-        const mediaImg=item.querySelector('content')?.getAttribute('url')||'';
-        const thumbImg=[...item.querySelectorAll('*')].find(el=>el.tagName.includes('thumbnail'))?.getAttribute('url')||'';
-        const img=encImg||mediaImg||thumbImg||'';
-        return{
-          id:link||slug,
-          title:get('title'),
-          slug,
-          subtitle:get('description').replace(/<[^>]+>/g,'').slice(0,200),
-          cover_image:img,
-          post_date:get('pubDate')||new Date().toISOString()
-        };
-      });
-    }catch(e){console.warn('RSS proxy failed:',e);}
+  try{
+    const rssUrl='https://maisontheposh.substack.com/feed';
+    const proxy='https://api.rss2json.com/v1/api.json?count=100&rss_url=';
+    const res=await fetch(proxy+encodeURIComponent(rssUrl),{signal:AbortSignal.timeout(15000)});
+    const data=await res.json();
+    if(!data||!data.items||!data.items.length)return[];
+    return data.items.map(item=>{
+      // Extract slug from link: https://maisontheposh.substack.com/p/slug
+      const slug=(item.link||'').split('/p/')[1]||item.guid||item.link||'';
+      // cover_image: thumbnail from RSS or enclosure
+      const img=item.thumbnail||item.enclosure?.link||'';
+      return{
+        id:item.guid||slug,
+        title:item.title||'',
+        slug:slug,
+        subtitle:item.description?item.description.replace(/<[^>]+>/g,'').slice(0,200):'',
+        cover_image:img,
+        post_date:item.pubDate||new Date().toISOString()
+      };
+    });
+  }catch(e){
+    console.warn('RSS fetch failed:',e);
+    return[];
   }
-  console.warn('All RSS proxies failed');
-  return[];
 }
 
 async function _syncSubstackToSupabase(){
@@ -2031,14 +1828,6 @@ async function _syncSubstackToSupabase(){
     for(let i=0;i<rows.length;i+=20){
       await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+20))});
     }
-    // Also patch any existing posts missing images
-    const postsWithImg=posts.filter(p=>p.cover_image);
-    if(postsWithImg.length){
-      for(const p of postsWithImg){
-        const id=p.id?String(p.id):p.slug;
-        sbFetch(`posts?id=eq.${encodeURIComponent(id)}&image=eq.`,{method:'PATCH',body:JSON.stringify({image:p.cover_image,slug:p.slug||''})}).catch(()=>{});
-      }
-    }
     _setCachedPosts(posts);
   }catch(e){console.warn('Substack sync failed:',e);}
 }
@@ -2054,9 +1843,11 @@ async function renderJournal(){
     sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
       if(Array.isArray(fresh)&&fresh.length&&activeT1==='journal'){
         const mapped=fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at}));
-        const w=document.querySelector('.journal-feed');
-        if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
-        _setCachedPosts(mapped);
+        if(mapped.length!==cached.length){
+          const w=document.querySelector('.journal-feed');
+          if(w){w.innerHTML='';_renderJournalCards(mapped,w);}
+          _setCachedPosts(mapped);
+        }
       }
     }).catch(()=>{});
     _syncSubstackToSupabase().catch(()=>{});
@@ -2591,7 +2382,7 @@ let _savedNLHTML=null;
 function openMove(id){
   currentListId=id;const l=D.lists.find(x=>x.id===id);if(!l)return;
   _savedNLHTML=document.getElementById('nl-fp').innerHTML;
-  const secs=[{v:'latest',lbl:'Latest Finds'},{v:'collections',lbl:'Collections'},{v:'sales',lbl:'On Sale Now'}];
+  const secs=[{v:'latest',lbl:'Latest Finds'},{v:'collections',lbl:'Collections'},{v:'weekly',lbl:'Weekly Curation'},{v:'sales',lbl:'On Sale Now'}];
   const cur=secs.find(s=>s.v===l.t1);
   const opts=secs.filter(s=>s.v!==l.t1).map(s=>`<button class="btn-g" style="margin-top:8px" onclick="doMove('${id}','${s.v}')">${s.lbl}</button>`).join('');
   document.getElementById('nl-fp').innerHTML=`<h3 class="ftitle">Move List</h3><p style="font-size:13px;color:var(--mid);margin-bottom:16px">Currently: <strong>${cur?cur.lbl:l.t1}</strong></p>${opts}<button class="btn-g" style="margin-top:10px" onclick="closeNL()">Cancel</button>`;
@@ -3398,7 +3189,7 @@ function restoreFromURL(){
     const match=b.dataset.t1===t;
     b.classList.toggle('on',match);
   });
-  document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(t));
+  document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(t));
   // Open list if specified
   if(listId&&D.lists.find(x=>x.id===listId)){
     const l=D.lists.find(x=>x.id===listId);
@@ -3463,7 +3254,7 @@ window.addEventListener('popstate',function(e){
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
-    document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(activeT1));
+    document.getElementById('nav2').classList.toggle('hide',!['latest','foryou'].includes(activeT1));
     document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
     render();
     window.scrollTo({top:0});
@@ -3585,22 +3376,6 @@ async function runImport(){
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
-  // Seed default carousels if none saved yet
-  // Seed carousels — merge new ones in without losing user order
-  const _wcDefaults=[
-    {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-    {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
-    {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
-    {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
-    {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'},
-    {title:'Summer Bags',src:'https://shopmy.us/collections/embed/5559343?'},
-    {title:'TOTEME',src:'https://shopmy.us/collections/embed/5372748?'}
-  ];
-  try{
-    const _wsSaved=JSON.parse(localStorage.getItem('mtp_wc_carousels')||'[]');
-    _wcDefaults.forEach(d=>{if(!_wsSaved.find(s=>s.src===d.src))_wsSaved.push(d);});
-    localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wsSaved));
-  }catch(e){localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wcDefaults));}
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
   const dz=document.getElementById('dropz');
@@ -3637,22 +3412,10 @@ window.addEventListener('DOMContentLoaded',()=>{
   // Seed initial history entry so back works from the first page
   const _initParams=new URLSearchParams(location.search);
   if(!location.search)history.replaceState({tab:'journal'},'','/?tab=journal');
-  // Render the correct tab immediately on load
+  // Render Posts immediately — no Supabase needed for cached posts
   const _initTab=(_initParams.get('tab')||'journal');
-  // Mark the correct nav tab as active
-  document.querySelectorAll('.t1').forEach(b=>{
-    if(b.dataset.t1===_initTab)b.classList.add('on');
-    else b.classList.remove('on');
-  });
-  activeT1=_initTab;
-  if(_initTab==='journal'){
+  if(_initTab==='journal'||!_initParams.get('tab')){
     renderJournal();
-  } else if(_initTab==='weekly'){
-    renderWeekly();
-  } else {
-    // Other tabs need cloud data — show spinner then load
-    const feed=document.getElementById('feed');
-    if(feed)feed.innerHTML='<div class="empty" style="padding:60px 20px;text-align:center;"><p style="color:var(--soft);font-size:13px;">Loading…</p></div>';
   }
   // Load everything else in background
   loadFromCloud();
@@ -3736,37 +3499,6 @@ async function runFetchImages(){
     <button class="btn-g" id="sp-copy-link-btn" onclick="(function(){const v=document.getElementById('sp-f-link').value.trim();if(!v)return;navigator.clipboard.writeText(v).then(()=>{const b=document.getElementById('sp-copy-link-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy Image Link',1800);});})()" style="font-size:10px;letter-spacing:.12em;">Copy Image Link</button>
     <button class="btn-p" onclick="saveImageForm()">Save</button>
     <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
-  </div>
-</div>
-
-<!-- THE LIST: ENTRY EDITOR -->
-<div class="fov" id="tl-ov" onclick="if(event.target===this)tlCloseFom()">
-  <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
-    <h3 class="ftitle" id="tl-form-title">New Entry</h3>
-    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="tl-f-title" placeholder="e.g. Via Carota, The White Album, Khaite..."></div>
-    <div class="fg">
-      <label class="fl">Tag <span class="flh">(optional — e.g. Restaurant, Book, Store, Travel, Product)</span></label>
-      <input type="text" class="fi" id="tl-f-tag" placeholder="Restaurant">
-    </div>
-    <div class="fg"><label class="fl">Why you love it</label><textarea class="fi fta" id="tl-f-note" rows="5" placeholder="Your write-up..." style="font-style:normal;min-height:110px;"></textarea></div>
-    <div class="fg"><label class="fl">Link <span class="flh">(optional)</span></label><input type="url" class="fi" id="tl-f-link" placeholder="https://…"></div>
-    <div class="fg"><label class="fl">Link label <span class="flh">(optional — e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
-    <button class="btn-p" onclick="tlSaveForm()">Save</button>
-    <button class="btn-g" onclick="tlCloseFom()">Cancel</button>
-  </div>
-</div>
-
-<!-- THE LIST: IMAGE ADDER -->
-<div class="fov" id="tl-img-ov" onclick="if(event.target===this)tlCloseImg()">
-  <div class="fp" style="max-width:480px;" onclick="event.stopPropagation()">
-    <h3 class="ftitle">Add Image</h3>
-    <div class="fg">
-      <label class="fl">Image URL</label>
-      <img id="tl-img-preview" src="" alt="" style="display:none;width:100%;max-height:220px;object-fit:cover;margin-bottom:8px;border-radius:2px;">
-      <input type="url" class="fi" id="tl-img-url" placeholder="https://…" oninput="(function(v){const p=document.getElementById('tl-img-preview');if(v){p.src=v;p.style.display='block';}else{p.style.display='none';}})(this.value.trim())">
-    </div>
-    <button class="btn-p" onclick="tlSaveImage()">Add Image</button>
-    <button class="btn-g" onclick="tlCloseImg()">Cancel</button>
   </div>
 </div>
 
