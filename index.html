@@ -1965,74 +1965,45 @@ function _buildJournalShell(feed){
 }
 
 async function _fetchAllSubstackPosts(){
-  const rssUrl='https://maisontheposh.substack.com/feed';
-  let xml=null;
-  const proxies=[
-    `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`,
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(rssUrl)}`,
-    `https://thingproxy.freeboard.io/fetch/${rssUrl}`,
-  ];
-  for(const url of proxies){
+  // Browser-side CORS proxies are dead/unreliable — sync server-side, then read back.
+  await _syncSubstackToSupabase();
+  try{
+    const rows=await sbFetch('posts?select=*&source=eq.substack&order=published_at.desc');
+    if(Array.isArray(rows)&&rows.length){
+      return rows.map(p=>({
+        id:p.slug||p.id,
+        title:p.title,
+        slug:p.slug,
+        subtitle:p.excerpt||p.subtitle||'',
+        cover_image:p.image||'',
+        post_date:p.published_at
+      }));
+    }
+    // Diagnostic: sync reported OK but nothing matched the source filter.
     try{
-      const r=await fetch(url,{signal:AbortSignal.timeout(12000)});
-      if(r.ok){const t=await r.text();if(t.includes('<item>')){xml=t;break;}}
+      const all=await sbFetch('posts?select=id,slug,source&order=published_at.desc&limit=5');
+      console.warn('[MTP] No substack-sourced posts. Sample rows:',all);
     }catch{}
-  }
-  if(!xml){console.warn('RSS fetch failed');return[];}
-  const doc=new DOMParser().parseFromString(xml,'application/xml');
-  const items=[...doc.querySelectorAll('item')];
-  if(!items.length)return[];
-  return items.map(item=>{
-    const get=tag=>item.querySelector(tag)?.textContent?.trim()||'';
-    const link=get('link');
-    const slug=link.split('/p/')[1]||link||'';
-    const encImg=item.querySelector('enclosure')?.getAttribute('url')||'';
-    const mediaImg=item.querySelector('content')?.getAttribute('url')||'';
-    const thumbImg=[...item.querySelectorAll('*')].find(el=>el.tagName.includes('thumbnail'))?.getAttribute('url')||'';
-    const img=encImg||mediaImg||thumbImg||'';
-    return{
-      id:link||slug,
-      title:get('title'),
-      slug,
-      subtitle:get('description').replace(/<[^>]+>/g,'').slice(0,200),
-      cover_image:img,
-      post_date:get('pubDate')||new Date().toISOString()
-    };
-  });
+  }catch(e){console.warn('[MTP] Journal re-query failed:',e);}
+  return[];
 }
 
 async function _syncSubstackToSupabase(){
   try{
-    const posts=await _fetchAllSubstackPosts();
-    if(!posts||!posts.length)return;
-    // Upsert each post into Supabase posts table by slug
-    const rows=posts.map(p=>({
-      id:p.id?String(p.id):p.slug,
-      title:p.title||'',
-      subtitle:p.subtitle||'',
-      body:'',
-      slug:p.slug||'',
-      image:p.cover_image||'',
-      excerpt:p.subtitle||'',
-      source:'substack',
-      published_at:p.post_date||new Date().toISOString(),
-      sort_order:0
-    }));
-    // Batch upsert in groups of 20
-    for(let i=0;i<rows.length;i+=20){
-      await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows.slice(i,i+20))});
-    }
-    // Also patch any existing posts missing images
-    const postsWithImg=posts.filter(p=>p.cover_image);
-    if(postsWithImg.length){
-      for(const p of postsWithImg){
-        const id=p.id?String(p.id):p.slug;
-        sbFetch(`posts?id=eq.${encodeURIComponent(id)}&image=eq.`,{method:'PATCH',body:JSON.stringify({image:p.cover_image,slug:p.slug||''})}).catch(()=>{});
-      }
-    }
-    _setCachedPosts(posts);
+    // Use Edge Function server-side — no CORS issues
+    const res=await fetch('https://epfabylszufvjnubyvnj.supabase.co/functions/v1/super-action',{
+      method:'POST',
+      headers:{
+        'Authorization':'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVwZmFieWxzenVmdmpudWJ5dm5qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM4NTMxNjcsImV4cCI6MjA4OTQyOTE2N30.2e9EtH0iDJbklgIT0__ypH87K-5MpuPqVK2hQMwkjIE',
+        'Content-Type':'application/json'
+      },
+      body:JSON.stringify({action:'sync-posts'})
+    });
+    const data=await res.json();
+    console.log('[MTP] Substack sync via Edge Function:',res.status,data);
+    return data;
   }catch(e){console.warn('Substack sync failed:',e);}
+  return null;
 }
 
 async function renderJournal(){
