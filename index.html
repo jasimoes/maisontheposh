@@ -741,6 +741,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <nav class="site-nav" id="nav1">
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
+    <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
     <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
@@ -1414,7 +1415,7 @@ function render(){
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
-  if(activeT1==='weekly'){renderWeekly();return;}
+  if(wcIsTab(activeT1)){renderWeekly();return;}
   let lists=D.lists.filter(l=>l.t1===activeT1).sort((a,b)=>(a.sort_order??999)-(b.sort_order??999)||new Date(b.created_at||0)-new Date(a.created_at||0));
   if(!lists.length){
     feed.innerHTML=`<div class="empty"><h3>Nothing here yet</h3><p>Create a new list to get started.</p></div>`+(isCreator?`<div class="new-row" onclick="openNewList()">＋ New List</div>`:'');
@@ -1429,17 +1430,25 @@ function render(){
 // Source of truth is the Supabase table wc_carousels.
 // localStorage is only a cache so the tab paints instantly on repeat visits;
 // it never adds a collection, and the cloud always overwrites it.
-const WC_KEY='mtp_wc_carousels';
-let _wcData=null,_wcLoaded=false,_wcFetching=false;
+// One table serves every carousel tab; the `tab` column says which one a row
+// belongs to ('weekly' or 'stockist'). Adding another carousel tab later means
+// a nav button and a name here, nothing more.
+const WC_TAB_LABELS={weekly:'Weekly Curation',stockist:'Stockist'};
+function wcIsTab(t){return Object.prototype.hasOwnProperty.call(WC_TAB_LABELS,t);}
+function wcTab(){return wcIsTab(activeT1)?activeT1:'weekly';}
+// Keep the original cache key for weekly so returning readers still paint instantly
+function wcCacheKey(t){return t==='weekly'?'mtp_wc_carousels':'mtp_wc_'+t;}
 
-function wcCacheLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
-function wcCacheSave(arr){try{localStorage.setItem(WC_KEY,JSON.stringify(arr));}catch(e){}}
-function wcList(){return _wcData||wcCacheLoad();}
+let _wcData={},_wcLoaded={},_wcFetching={};
 
-async function wcFetchCloud(){
-  const rows=await sbFetch('wc_carousels?select=*&order=sort_order.asc,created_at.asc');
+function wcCacheLoad(t){try{return JSON.parse(localStorage.getItem(wcCacheKey(t)))||[];}catch{return[];}}
+function wcCacheSave(t,arr){try{localStorage.setItem(wcCacheKey(t),JSON.stringify(arr));}catch(e){}}
+function wcList(t){t=t||wcTab();return _wcData[t]||wcCacheLoad(t);}
+
+async function wcFetchCloud(t){
+  const rows=await sbFetch(`wc_carousels?select=*&tab=eq.${encodeURIComponent(t)}&order=sort_order.asc,created_at.asc`);
   const arr=(rows||[]).map(r=>({id:r.id,title:r.title,src:r.src}));
-  _wcData=arr;wcCacheSave(arr);return arr;
+  _wcData[t]=arr;wcCacheSave(t,arr);return arr;
 }
 
 // Normalize whatever gets pasted (full <iframe> embed, or a bare URL) into a src
@@ -1457,9 +1466,10 @@ function wcCleanSrc(raw){
 
 function renderWeekly(){
   const feed=document.getElementById('feed');
-  const carousels=wcList();
+  const tab=wcTab();
+  const carousels=wcList(tab);
   if(!carousels.length&&!isCreator){
-    feed.innerHTML=`<div class="wc-empty">${_wcLoaded?'No collections yet.':'Loading…'}</div>`;
+    feed.innerHTML=`<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`;
   }else{
     const bar=isCreator?`
       <div class="wc-bar">
@@ -1488,15 +1498,15 @@ function renderWeekly(){
     feed.innerHTML=`<div class="wc-feed">${bar}${items}${addRow}</div>`;
     if(isCreator)wcInitDrag();
   }
-  // First paint came from cache; pull the real list once, then repaint
-  if(!_wcLoaded&&!_wcFetching){
-    _wcFetching=true;
-    wcFetchCloud().then(()=>{
-      _wcLoaded=true;_wcFetching=false;
-      if(activeT1==='weekly')renderWeekly();
+  // First paint came from cache; pull the real list once per tab, then repaint
+  if(!_wcLoaded[tab]&&!_wcFetching[tab]){
+    _wcFetching[tab]=true;
+    wcFetchCloud(tab).then(()=>{
+      _wcLoaded[tab]=true;_wcFetching[tab]=false;
+      if(activeT1===tab)renderWeekly();
     }).catch(e=>{
-      _wcFetching=false;
-      console.error('Weekly Curation load failed:',e);
+      _wcFetching[tab]=false;
+      console.error(`${WC_TAB_LABELS[tab]} load failed:`,e);
       if(isCreator)toast('⚠ Could not reach the cloud — showing the last saved list');
     });
   }
@@ -1504,50 +1514,55 @@ function renderWeekly(){
 
 // Move one collection up (dir -1) or down (dir 1), and save the new order
 async function wcMove(i,dir){
-  const arr=wcList().slice();
+  const tab=wcTab();
+  const arr=wcList(tab).slice();
   const j=i+dir;
   if(j<0||j>=arr.length)return;
   const prev=arr.slice();
   [arr[i],arr[j]]=[arr[j],arr[i]];
-  _wcData=arr;renderWeekly();
+  _wcData[tab]=arr;renderWeekly();
   // keep the moved row in view so the page does not jump under her
   const el=document.querySelector(`.wc-item[data-wc-i="${j}"]`);
   if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});
-  try{await wcPersist(arr);toast(dir<0?'Moved up':'Moved down');}
-  catch(e){console.error('wcMove failed:',e);_wcData=prev;renderWeekly();toast('⚠ Could not save the new order');}
+  try{await wcPersist(tab,arr);toast(dir<0?'Moved up':'Moved down');}
+  catch(e){console.error('wcMove failed:',e);_wcData[tab]=prev;renderWeekly();toast('⚠ Could not save the new order');}
 }
 
 function wcRefresh(){
-  _wcLoaded=false;
-  wcFetchCloud().then(()=>{_wcLoaded=true;renderWeekly();toast('Up to date');})
+  const tab=wcTab();
+  _wcLoaded[tab]=false;
+  wcFetchCloud(tab).then(()=>{_wcLoaded[tab]=true;renderWeekly();toast('Up to date');})
     .catch(()=>toast('⚠ Could not reach the cloud'));
 }
 
 // Write the whole lineup back, with sort_order matching the on-page order
-async function wcPersist(arr){
-  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,sort_order:i}));
-  await sbFetch('wc_carousels',{
-    method:'POST',
-    headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify(rows)
-  });
-  _wcData=arr.map(c=>({id:c.id,title:c.title,src:c.src}));
-  wcCacheSave(_wcData);
+async function wcPersist(tab,arr){
+  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,tab:tab,sort_order:i}));
+  if(rows.length){
+    await sbFetch('wc_carousels',{
+      method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(rows)
+    });
+  }
+  _wcData[tab]=arr.map(c=>({id:c.id,title:c.title,src:c.src}));
+  wcCacheSave(tab,_wcData[tab]);
 }
 
 async function wcDelete(i){
-  const arr=wcList().slice();
+  const tab=wcTab();
+  const arr=wcList(tab).slice();
   const gone=arr[i];
   if(!gone)return;
-  if(!confirm(`Remove "${gone.title}" from Weekly Curation?`))return;
+  if(!confirm(`Remove "${gone.title}" from ${WC_TAB_LABELS[tab]}?`))return;
   arr.splice(i,1);
   try{
     await sbFetch(`wc_carousels?id=eq.${encodeURIComponent(gone.id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
-    await wcPersist(arr);
+    await wcPersist(tab,arr);
     renderWeekly();
     showToastUndo(`Removed "${gone.title}"`,async()=>{
-      const back=wcList().slice();back.splice(i,0,gone);
-      try{await wcPersist(back);renderWeekly();}catch(e){toast('⚠ Could not undo');}
+      const back=wcList(tab).slice();back.splice(i,0,gone);
+      try{await wcPersist(tab,back);renderWeekly();}catch(e){toast('⚠ Could not undo');}
     });
   }catch(e){
     console.error('wcDelete failed:',e);
@@ -1556,10 +1571,11 @@ async function wcDelete(i){
 }
 
 // ── Add / edit a carousel ──
-let _wcEditIdx=null;
+let _wcEditIdx=null,_wcFormTab='weekly';
 function wcOpenAdd(){
   _wcEditIdx=null;
-  document.getElementById('wc-form-title').textContent='Add Collection';
+  _wcFormTab=wcTab();
+  document.getElementById('wc-form-title').textContent=`Add to ${WC_TAB_LABELS[_wcFormTab]}`;
   document.getElementById('wc-f-title').value='';
   document.getElementById('wc-f-src').value='';
   document.getElementById('wc-save-btn').textContent='Add';
@@ -1568,6 +1584,7 @@ function wcOpenAdd(){
 }
 function wcOpenEdit(i){
   const c=wcList()[i];
+  _wcFormTab=wcTab();
   if(!c)return;
   _wcEditIdx=i;
   document.getElementById('wc-form-title').textContent='Edit Collection';
@@ -1584,18 +1601,19 @@ async function wcSaveForm(){
   const src=wcCleanSrc(document.getElementById('wc-f-src').value);
   if(!title){toast('Give the collection a name');return;}
   if(!src){toast('Paste the ShopMy embed code or collection link');return;}
-  const arr=wcList().slice();
+  const tab=_wcFormTab;
+  const arr=wcList(tab).slice();
   const btn=document.getElementById('wc-save-btn');
   const label=btn.textContent;btn.textContent='Saving…';btn.disabled=true;
   try{
     if(_wcEditIdx===null){
-      if(arr.some(c=>c.src===src)){toast('That collection is already on the page');return;}
+      if(arr.some(c=>c.src===src)){toast(`That collection is already on ${WC_TAB_LABELS[tab]}`);return;}
       arr.unshift({id:uid(),title,src});
-      await wcPersist(arr);
+      await wcPersist(tab,arr);
       wcCloseForm();renderWeekly();toast('Added to the top and saved');
     }else{
       arr[_wcEditIdx]={...arr[_wcEditIdx],title,src};
-      await wcPersist(arr);
+      await wcPersist(tab,arr);
       wcCloseForm();renderWeekly();toast('Saved');
     }
   }catch(e){
@@ -1619,13 +1637,14 @@ function wcInitDrag(){
       e.preventDefault();el.classList.remove('wc-drag-over');
       const ti=parseInt(el.dataset.wcI);
       if(_wcDragSrc===null||_wcDragSrc===ti)return;
-      const arr=wcList().slice();
+      const tab=wcTab();
+      const prev=wcList(tab).slice();
+      const arr=prev.slice();
       const [moved]=arr.splice(_wcDragSrc,1);arr.splice(ti,0,moved);
       _wcDragSrc=null;
-      const prev=wcList().slice();
-      _wcData=arr;renderWeekly();
-      try{await wcPersist(arr);toast('Order saved');}
-      catch(err){console.error('wc reorder failed:',err);_wcData=prev;renderWeekly();toast('⚠ Could not save the new order');}
+      _wcData[tab]=arr;renderWeekly();
+      try{await wcPersist(tab,arr);toast('Order saved');}
+      catch(err){console.error('wc reorder failed:',err);_wcData[tab]=prev;renderWeekly();toast('⚠ Could not save the new order');}
     });
   });
 }
