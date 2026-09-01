@@ -168,7 +168,24 @@ body.creator .wc-del-btn{display:flex;}
 .wc-add-row{display:flex;align-items:center;justify-content:center;padding:30px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--border);transition:all .18s;}
 .wc-add-row:hover{background:var(--surf);color:var(--mid);}
 .wc-empty{text-align:center;padding:80px 40px;color:var(--soft);font-family:var(--serif);font-size:16px;font-style:italic;}
-@media(max-width:700px){.wc-carousel-wrap{padding:20px 16px 16px;}}
+.wc-move-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:9px;color:var(--mid);border-radius:2px;transition:all .15s;font-family:var(--sans);line-height:1;padding:0;}
+.wc-move-btn:hover:not(:disabled){border-color:var(--ink);color:var(--ink);background:var(--surf);}
+.wc-move-btn:disabled{opacity:.25;cursor:default;}
+body.creator .wc-move-btn{display:flex;}
+.wc-edit-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:11px;color:var(--mid);border-radius:2px;transition:all .15s;}
+.wc-edit-btn:hover{border-color:var(--ink);color:var(--ink);}
+body.creator .wc-edit-btn{display:flex;}
+/* Creator toolbar for managing the published carousel list */
+.wc-bar{display:none;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:14px 40px;border-bottom:1px solid var(--border);background:var(--surf);}
+body.creator .wc-bar{display:flex;}
+.wc-bar-note{font-size:10px;letter-spacing:.06em;color:var(--soft);line-height:1.5;}
+.wc-bar-note b{font-weight:500;color:var(--mid);}
+.wc-bar-acts{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+.wc-bar-btn{padding:7px 14px;border:1px solid var(--ink);background:none;color:var(--ink);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:all .16s;}
+.wc-bar-btn:hover{background:var(--ink);color:white;}
+.wc-bar-btn.ghost{border-color:var(--border);color:var(--soft);}
+.wc-bar-btn.ghost:hover{background:none;border-color:var(--mid);color:var(--mid);}
+@media(max-width:700px){.wc-carousel-wrap{padding:20px 16px 16px;}.wc-bar{padding:12px 16px;}}
 
 /* ══ STRIP VIEW (Collections / Weekly) ══ */
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
@@ -1409,49 +1426,184 @@ function render(){
 }
 
 // ══ WEEKLY CURATION — CAROUSEL SYSTEM ══
+// Source of truth is the Supabase table wc_carousels.
+// localStorage is only a cache so the tab paints instantly on repeat visits;
+// it never adds a collection, and the cloud always overwrites it.
 const WC_KEY='mtp_wc_carousels';
-function wcLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
-function wcSave(arr){localStorage.setItem(WC_KEY,JSON.stringify(arr));}
+let _wcData=null,_wcLoaded=false,_wcFetching=false;
+
+function wcCacheLoad(){try{return JSON.parse(localStorage.getItem(WC_KEY))||[];}catch{return[];}}
+function wcCacheSave(arr){try{localStorage.setItem(WC_KEY,JSON.stringify(arr));}catch(e){}}
+function wcList(){return _wcData||wcCacheLoad();}
+
+async function wcFetchCloud(){
+  const rows=await sbFetch('wc_carousels?select=*&order=sort_order.asc,created_at.asc');
+  const arr=(rows||[]).map(r=>({id:r.id,title:r.title,src:r.src}));
+  _wcData=arr;wcCacheSave(arr);return arr;
+}
+
+// Normalize whatever gets pasted (full <iframe> embed, or a bare URL) into a src
+function wcCleanSrc(raw){
+  const s=String(raw||'').trim();
+  if(!s)return '';
+  const m=s.match(/src\s*=\s*["']([^"']+)["']/i);
+  let src=m?m[1]:s;
+  src=src.replace(/&amp;/g,'&').trim();
+  // Accept a plain collection URL and turn it into the embed form
+  const c=src.match(/shopmy\.us\/(?:shop\/)?collections\/(?:embed\/)?(\d+)/i);
+  if(c)return `https://shopmy.us/collections/embed/${c[1]}?`;
+  return src;
+}
 
 function renderWeekly(){
   const feed=document.getElementById('feed');
-  const carousels=wcLoad();
+  const carousels=wcList();
   if(!carousels.length&&!isCreator){
-    feed.innerHTML=`<div class="wc-empty">No collections yet.</div>`;return;
-  }
-  const items=carousels.map((c,i)=>`
-    <div class="wc-item" data-wc-i="${i}" draggable="${isCreator}">
-      <div class="wc-carousel-wrap">
-        <div class="wc-carousel-header">
-          <span class="wc-carousel-label">${h(c.title)}</span>
-          <div class="wc-carousel-acts">
-            <div class="wc-drag-handle" title="Drag to reorder">⠿</div>
-            <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
-          </div>
+    feed.innerHTML=`<div class="wc-empty">${_wcLoaded?'No collections yet.':'Loading…'}</div>`;
+  }else{
+    const bar=isCreator?`
+      <div class="wc-bar">
+        <div class="wc-bar-note"><b>${carousels.length} collection${carousels.length===1?'':'s'}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
+        <div class="wc-bar-acts">
+          <button class="wc-bar-btn" onclick="wcOpenAdd()">＋ Add collection</button>
+          <button class="wc-bar-btn ghost" onclick="wcRefresh()">Refresh</button>
         </div>
-        <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
-      </div>
-    </div>`).join('');
-  const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
-  feed.innerHTML=`<div class="wc-feed">${items}${addRow}</div>`;
-  if(isCreator)wcInitDrag();
+      </div>`:'';
+    const items=carousels.map((c,i)=>`
+      <div class="wc-item" data-wc-i="${i}" draggable="${isCreator}">
+        <div class="wc-carousel-wrap">
+          <div class="wc-carousel-header">
+            <span class="wc-carousel-label">${h(c.title)}</span>
+            <div class="wc-carousel-acts">
+              <button class="wc-move-btn" onclick="wcMove(${i},-1)" ${i===0?'disabled':''} title="Move up">▲</button>
+              <button class="wc-move-btn" onclick="wcMove(${i},1)" ${i===carousels.length-1?'disabled':''} title="Move down">▼</button>
+              <button class="wc-edit-btn" onclick="wcOpenEdit(${i})" title="Edit name or link">✎</button>
+              <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
+            </div>
+          </div>
+          <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
+        </div>
+      </div>`).join('');
+    const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
+    feed.innerHTML=`<div class="wc-feed">${bar}${items}${addRow}</div>`;
+    if(isCreator)wcInitDrag();
+  }
+  // First paint came from cache; pull the real list once, then repaint
+  if(!_wcLoaded&&!_wcFetching){
+    _wcFetching=true;
+    wcFetchCloud().then(()=>{
+      _wcLoaded=true;_wcFetching=false;
+      if(activeT1==='weekly')renderWeekly();
+    }).catch(e=>{
+      _wcFetching=false;
+      console.error('Weekly Curation load failed:',e);
+      if(isCreator)toast('⚠ Could not reach the cloud — showing the last saved list');
+    });
+  }
 }
 
-function wcDelete(i){
-  if(!confirm('Remove this carousel?'))return;
-  const arr=wcLoad();arr.splice(i,1);wcSave(arr);renderWeekly();
+// Move one collection up (dir -1) or down (dir 1), and save the new order
+async function wcMove(i,dir){
+  const arr=wcList().slice();
+  const j=i+dir;
+  if(j<0||j>=arr.length)return;
+  const prev=arr.slice();
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+  _wcData=arr;renderWeekly();
+  // keep the moved row in view so the page does not jump under her
+  const el=document.querySelector(`.wc-item[data-wc-i="${j}"]`);
+  if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});
+  try{await wcPersist(arr);toast(dir<0?'Moved up':'Moved down');}
+  catch(e){console.error('wcMove failed:',e);_wcData=prev;renderWeekly();toast('⚠ Could not save the new order');}
 }
 
+function wcRefresh(){
+  _wcLoaded=false;
+  wcFetchCloud().then(()=>{_wcLoaded=true;renderWeekly();toast('Up to date');})
+    .catch(()=>toast('⚠ Could not reach the cloud'));
+}
+
+// Write the whole lineup back, with sort_order matching the on-page order
+async function wcPersist(arr){
+  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,sort_order:i}));
+  await sbFetch('wc_carousels',{
+    method:'POST',
+    headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify(rows)
+  });
+  _wcData=arr.map(c=>({id:c.id,title:c.title,src:c.src}));
+  wcCacheSave(_wcData);
+}
+
+async function wcDelete(i){
+  const arr=wcList().slice();
+  const gone=arr[i];
+  if(!gone)return;
+  if(!confirm(`Remove "${gone.title}" from Weekly Curation?`))return;
+  arr.splice(i,1);
+  try{
+    await sbFetch(`wc_carousels?id=eq.${encodeURIComponent(gone.id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+    await wcPersist(arr);
+    renderWeekly();
+    showToastUndo(`Removed "${gone.title}"`,async()=>{
+      const back=wcList().slice();back.splice(i,0,gone);
+      try{await wcPersist(back);renderWeekly();}catch(e){toast('⚠ Could not undo');}
+    });
+  }catch(e){
+    console.error('wcDelete failed:',e);
+    toast('⚠ Could not remove — check your connection');
+  }
+}
+
+// ── Add / edit a carousel ──
+let _wcEditIdx=null;
 function wcOpenAdd(){
-  const title=prompt('Collection name (e.g. Substack: Week 23, 2026):');
-  if(!title||!title.trim())return;
-  const raw=prompt('Paste the full ShopMy iframe embed code or just the src URL:');
-  if(!raw||!raw.trim())return;
-  const match=raw.match(/src="([^"]+)"/);
-  const cleanSrc=match?match[1]:raw.trim();
-  const arr=wcLoad();
-  arr.push({title:title.trim(),src:cleanSrc});
-  wcSave(arr);renderWeekly();
+  _wcEditIdx=null;
+  document.getElementById('wc-form-title').textContent='Add Collection';
+  document.getElementById('wc-f-title').value='';
+  document.getElementById('wc-f-src').value='';
+  document.getElementById('wc-save-btn').textContent='Add';
+  document.getElementById('wc-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
+}
+function wcOpenEdit(i){
+  const c=wcList()[i];
+  if(!c)return;
+  _wcEditIdx=i;
+  document.getElementById('wc-form-title').textContent='Edit Collection';
+  document.getElementById('wc-f-title').value=c.title||'';
+  document.getElementById('wc-f-src').value=c.src||'';
+  document.getElementById('wc-save-btn').textContent='Save';
+  document.getElementById('wc-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
+}
+function wcCloseForm(){document.getElementById('wc-ov').classList.remove('open');_wcEditIdx=null;}
+
+async function wcSaveForm(){
+  const title=document.getElementById('wc-f-title').value.trim();
+  const src=wcCleanSrc(document.getElementById('wc-f-src').value);
+  if(!title){toast('Give the collection a name');return;}
+  if(!src){toast('Paste the ShopMy embed code or collection link');return;}
+  const arr=wcList().slice();
+  const btn=document.getElementById('wc-save-btn');
+  const label=btn.textContent;btn.textContent='Saving…';btn.disabled=true;
+  try{
+    if(_wcEditIdx===null){
+      if(arr.some(c=>c.src===src)){toast('That collection is already on the page');return;}
+      arr.unshift({id:uid(),title,src});
+      await wcPersist(arr);
+      wcCloseForm();renderWeekly();toast('Added to the top and saved');
+    }else{
+      arr[_wcEditIdx]={...arr[_wcEditIdx],title,src};
+      await wcPersist(arr);
+      wcCloseForm();renderWeekly();toast('Saved');
+    }
+  }catch(e){
+    console.error('wcSaveForm failed:',e);
+    toast('⚠ Could not save — check your connection');
+  }finally{
+    btn.textContent=label;btn.disabled=false;
+  }
 }
 
 let _wcDragSrc=null;
@@ -1463,13 +1615,17 @@ function wcInitDrag(){
     el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));});
     el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
     el.addEventListener('dragleave',()=>el.classList.remove('wc-drag-over'));
-    el.addEventListener('drop',e=>{
+    el.addEventListener('drop',async e=>{
       e.preventDefault();el.classList.remove('wc-drag-over');
       const ti=parseInt(el.dataset.wcI);
       if(_wcDragSrc===null||_wcDragSrc===ti)return;
-      const arr=wcLoad();
+      const arr=wcList().slice();
       const [moved]=arr.splice(_wcDragSrc,1);arr.splice(ti,0,moved);
-      wcSave(arr);renderWeekly();_wcDragSrc=null;
+      _wcDragSrc=null;
+      const prev=wcList().slice();
+      _wcData=arr;renderWeekly();
+      try{await wcPersist(arr);toast('Order saved');}
+      catch(err){console.error('wc reorder failed:',err);_wcData=prev;renderWeekly();toast('⚠ Could not save the new order');}
     });
   });
 }
@@ -3547,23 +3703,9 @@ async function runImport(){
   if(done>0&&activeT1==='latest')render();
 }
 
+
 window.addEventListener('DOMContentLoaded',()=>{
-  // Seed default carousels if none saved yet
-  // Seed carousels — merge new ones in without losing user order
-  const _wcDefaults=[
-    {title:'Substack: Week 22, 2026',src:'https://shopmy.us/collections/embed/5347632?'},
-    {title:'Substack: Memorial Day Sale Picks',src:'https://shopmy.us/collections/embed/5395074?'},
-    {title:'The Row SS 2026: My Full Edit (Updated Weekly)',src:'https://shopmy.us/collections/embed/5325275?'},
-    {title:'The Row Handbags: The Complete Edit',src:'https://shopmy.us/collections/embed/3478262?'},
-    {title:'The Chic Edit',src:'https://shopmy.us/collections/embed/5371901?'},
-    {title:'Summer Bags',src:'https://shopmy.us/collections/embed/5559343?'},
-    {title:'TOTEME',src:'https://shopmy.us/collections/embed/5372748?'}
-  ];
-  try{
-    const _wsSaved=JSON.parse(localStorage.getItem('mtp_wc_carousels')||'[]');
-    _wcDefaults.forEach(d=>{if(!_wsSaved.find(s=>s.src===d.src))_wsSaved.push(d);});
-    localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wsSaved));
-  }catch(e){localStorage.setItem('mtp_wc_carousels',JSON.stringify(_wcDefaults));}
+  // Weekly Curation loads from Supabase on first paint — nothing to seed here.
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
   const dz=document.getElementById('dropz');
@@ -3716,6 +3858,23 @@ async function runFetchImages(){
     <div class="fg"><label class="fl">Link label <span class="flh">(optional — e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
     <button class="btn-p" onclick="tlSaveForm()">Save</button>
     <button class="btn-g" onclick="tlCloseFom()">Cancel</button>
+  </div>
+</div>
+
+<!-- WEEKLY CURATION: ADD / EDIT COLLECTION -->
+<div class="fov" id="wc-ov" onclick="if(event.target===this)wcCloseForm()">
+  <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle" id="wc-form-title">Add Collection</h3>
+    <div class="fg">
+      <label class="fl">Collection name <span class="flh">(shows above the carousel)</span></label>
+      <input type="text" class="fi" id="wc-f-title" placeholder="e.g. Substack: Week 35, 2026" onkeydown="if(event.key==='Enter')document.getElementById('wc-f-src').focus()">
+    </div>
+    <div class="fg">
+      <label class="fl">ShopMy collection <span class="flh">(paste the embed code or just the collection link)</span></label>
+      <textarea class="fi fta" id="wc-f-src" rows="3" placeholder="&lt;iframe src=&quot;https://shopmy.us/collections/embed/5506942?&quot;&gt;&lt;/iframe&gt;&#10;or&#10;https://shopmy.us/shop/collections/5506942" style="font-style:normal;min-height:78px;font-size:12px;"></textarea>
+    </div>
+    <button class="btn-p" id="wc-save-btn" onclick="wcSaveForm()">Add</button>
+    <button class="btn-g" onclick="wcCloseForm()">Cancel</button>
   </div>
 </div>
 
