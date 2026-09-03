@@ -1654,14 +1654,24 @@ function wcCleanSrc(raw){
 // Twenty stacked carousels was ten screens of scrolling with no way to jump.
 // Collections now carry a group, the sub-nav filters by it, and everything past
 // the first two opens on demand so the page reads as an index you can scan.
-const WC_GROUPS=[
-  {key:'all',       label:'All'},
+// The four we started with keep tidy labels. Anything else she types becomes a
+// group in its own right, and the chips are built from whatever is actually in
+// use, so a group appears when the first collection joins it and disappears
+// when the last one leaves.
+const WC_SEED_GROUPS=[
   {key:'houses',    label:'Houses'},
   {key:'highstreet',label:'High Street'},
   {key:'category',  label:'By Category'},
   {key:'menswear',  label:'Menswear'}
 ];
-const WC_GROUP_LABEL=Object.fromEntries(WC_GROUPS.map(g=>[g.key,g.label]));
+const WC_SEED_LABEL=Object.fromEntries(WC_SEED_GROUPS.map(g=>[g.key,g.label]));
+const WC_SEED_ORDER=WC_SEED_GROUPS.map(g=>g.key);
+// Store groups by a stable slug so casing and spacing never split one in two
+function wcSlug(v){return String(v||'').trim().toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9\-]/g,'').slice(0,32);}
+function wcGroupLabel(key){
+  if(WC_SEED_LABEL[key])return WC_SEED_LABEL[key];
+  return String(key||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+}
 const WC_OPEN_BY_DEFAULT=2;   // how many sit open when the page loads
 const WC_FILTER_MIN=8;        // only show filters once a tab is long enough
 let _wcFilter='all';
@@ -1669,9 +1679,20 @@ let _wcOpen=null;             // Set of open collection ids, null until first re
 let _wcOpenInit=false;        // have the defaults been applied to real data yet
 let _wcAnchorId=null;         // a collection linked directly from outside
 
+// Groups in use, seeded ones first in their original order, then hers A to Z
 function wcGroupsPresent(list){
-  const seen=new Set(list.map(c=>c.group).filter(Boolean));
-  return WC_GROUPS.filter(g=>g.key==='all'||seen.has(g.key));
+  const seen=[...new Set(list.map(c=>c.group).filter(Boolean))];
+  const seeded=WC_SEED_ORDER.filter(k=>seen.includes(k));
+  const custom=seen.filter(k=>!WC_SEED_ORDER.includes(k)).sort((a,b)=>wcGroupLabel(a).localeCompare(wcGroupLabel(b)));
+  return [{key:'all',label:'All'}].concat([...seeded,...custom].map(k=>({key:k,label:wcGroupLabel(k)})));
+}
+// Every group currently in use, for the dropdown
+function wcKnownGroups(){
+  const inUse=new Set();
+  Object.values(_wcData||{}).forEach(arr=>(arr||[]).forEach(c=>{if(c.group)inUse.add(c.group);}));
+  const seeded=WC_SEED_ORDER.slice();
+  const custom=[...inUse].filter(k=>!seeded.includes(k)).sort((a,b)=>wcGroupLabel(a).localeCompare(wcGroupLabel(b)));
+  return [...seeded,...custom];
 }
 function wcVisible(list){
   return _wcFilter==='all'?list:list.filter(c=>(c.group||'')===_wcFilter);
@@ -1759,6 +1780,7 @@ function renderWeekly(){
     all.slice(0,WC_OPEN_BY_DEFAULT).forEach(c=>_wcOpen.add(c.id));
     if(_wcAnchorId)_wcOpen.add(_wcAnchorId);
   }
+  if(_wcFilter!=='all'&&all.length&&!all.some(c=>(c.group||'')===_wcFilter))_wcFilter='all';
   const carousels=wcVisible(all);
 
   if(!all.length&&!isCreator){
@@ -1776,7 +1798,7 @@ function renderWeekly(){
       </div>`:'';
     const tools=all.length>=WC_FILTER_MIN?`
       <div class="wc-tools">
-        <span class="wc-tools-count">${carousels.length} ${carousels.length===1?'edit':'edits'}${_wcFilter!=='all'?' in '+h(WC_GROUP_LABEL[_wcFilter]):''}</span>
+        <span class="wc-tools-count">${carousels.length} ${carousels.length===1?'edit':'edits'}${_wcFilter!=='all'?' in '+h(wcGroupLabel(_wcFilter)):''}</span>
         <div class="wc-tools-acts">
           <button class="wc-tool-btn" onclick="wcExpandAll(true)">Open all</button>
           <button class="wc-tool-btn" onclick="wcExpandAll(false)">Close all</button>
@@ -1792,7 +1814,7 @@ function renderWeekly(){
             <button class="wc-head-btn" onclick="wcToggle('${h(c.id)}',this)" aria-expanded="${open?'true':'false'}">
               <span class="wc-chev" aria-hidden="true"></span>
               <span class="wc-carousel-label">${h(c.title)}</span>
-              ${c.group&&_wcFilter==='all'?`<span class="wc-grp">${h(WC_GROUP_LABEL[c.group]||c.group)}</span>`:''}
+              ${c.group&&_wcFilter==='all'?`<span class="wc-grp">${h(wcGroupLabel(c.group))}</span>`:''}
             </button>
             <div class="wc-carousel-acts">
               <button class="wc-link-btn" onclick="event.stopPropagation();wcCopyLink('${h(c.id)}')" title="Copy a link straight to this edit">↗</button>
@@ -1807,7 +1829,7 @@ function renderWeekly(){
           </div>
         </div>
       </div>`;}).join('');
-    const empty=(!carousels.length&&all.length)?`<div class="wc-empty">Nothing in ${h(WC_GROUP_LABEL[_wcFilter]||'this group')} yet.</div>`:'';
+    const empty=(!carousels.length&&all.length)?`<div class="wc-empty">Nothing in ${h(wcGroupLabel(_wcFilter)||'this group')} yet.</div>`:'';
     const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
     feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${tools}${items}${empty}${addRow}</div>`+subscribeBlock();
     if(isCreator)wcInitDrag();
@@ -1894,7 +1916,7 @@ function wcOpenAdd(){
   document.getElementById('wc-form-title').textContent=`Add to ${WC_TAB_LABELS[_wcFormTab]}`;
   document.getElementById('wc-f-title').value='';
   document.getElementById('wc-f-src').value='';
-  document.getElementById('wc-f-group').value=_wcFilter==='all'?'':_wcFilter;
+  wcFillGroupSelect(_wcFilter==='all'?'':_wcFilter);
   document.getElementById('wc-save-btn').textContent='Add';
   document.getElementById('wc-ov').classList.add('open');
   setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
@@ -1907,17 +1929,47 @@ function wcOpenEdit(i){
   document.getElementById('wc-form-title').textContent='Edit Collection';
   document.getElementById('wc-f-title').value=c.title||'';
   document.getElementById('wc-f-src').value=c.src||'';
-  document.getElementById('wc-f-group').value=c.group||'';
+  wcFillGroupSelect(c.group||'');
   document.getElementById('wc-save-btn').textContent='Save';
   document.getElementById('wc-ov').classList.add('open');
   setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
 }
+// Rebuild the dropdown from the groups actually in use, plus a way to add one
+function wcFillGroupSelect(current){
+  const sel=document.getElementById('wc-f-group');
+  if(!sel)return;
+  const opts=['<option value="">Ungrouped</option>'];
+  const known=wcKnownGroups();
+  if(current&&!known.includes(current))known.push(current);
+  known.forEach(k=>opts.push(`<option value="${h(k)}"${k===current?' selected':''}>${h(wcGroupLabel(k))}</option>`));
+  opts.push('<option value="__new">＋ New group…</option>');
+  sel.innerHTML=opts.join('');
+  sel.value=current&&known.includes(current)?current:'';
+  const nw=document.getElementById('wc-f-group-new');
+  if(nw){nw.style.display='none';nw.value='';}
+}
+function wcGroupSelectChanged(sel){
+  const nw=document.getElementById('wc-f-group-new');
+  if(!nw)return;
+  const adding=sel.value==='__new';
+  nw.style.display=adding?'block':'none';
+  if(adding)setTimeout(()=>nw.focus(),40);else nw.value='';
+}
+// What the form should save: an existing group, or a slug of the new name
+function wcChosenGroup(){
+  const sel=document.getElementById('wc-f-group');
+  if(!sel)return '';
+  if(sel.value!=='__new')return sel.value;
+  return wcSlug(document.getElementById('wc-f-group-new').value);
+}
+
 function wcCloseForm(){document.getElementById('wc-ov').classList.remove('open');_wcEditIdx=null;}
 
 async function wcSaveForm(){
   const title=document.getElementById('wc-f-title').value.trim();
   const src=wcCleanSrc(document.getElementById('wc-f-src').value);
-  const group=document.getElementById('wc-f-group').value;
+  const group=wcChosenGroup();
+  if(document.getElementById('wc-f-group').value==='__new'&&!group){toast('Give the new group a name');return;}
   if(!title){toast('Give the collection a name');return;}
   if(!src){toast('Paste the ShopMy embed code or collection link');return;}
   const tab=_wcFormTab;
@@ -4813,13 +4865,8 @@ async function runFetchImages(){
     </div>
     <div class="fg">
       <label class="fl">Group <span class="flh">(optional, drives the filters across the top)</span></label>
-      <select class="fi" id="wc-f-group">
-        <option value="">Ungrouped</option>
-        <option value="houses">Houses</option>
-        <option value="highstreet">High Street</option>
-        <option value="category">By Category</option>
-        <option value="menswear">Menswear</option>
-      </select>
+      <select class="fi" id="wc-f-group" onchange="wcGroupSelectChanged(this)"></select>
+      <input type="text" class="fi" id="wc-f-group-new" placeholder="Name the new group, e.g. Jewellery" style="display:none;margin-top:8px;">
     </div>
     <button class="btn-p" id="wc-save-btn" onclick="wcSaveForm()">Add</button>
     <button class="btn-g" onclick="wcCloseForm()">Cancel</button>
