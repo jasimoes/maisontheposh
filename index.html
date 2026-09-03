@@ -337,6 +337,40 @@ body.creator .tl-add-row{display:flex;}
 .sp-past-line{flex:1;height:1px;background:var(--border);}
 .sp-past-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:7px 15px;cursor:pointer;transition:all .16s;white-space:nowrap;}
 .sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
+/* About & Partnerships */
+.ab-wrap{max-width:680px;margin:0 auto;padding:44px 40px 20px;}
+.ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:16px;}
+.ab-lead{font-family:var(--serif);font-size:24px;font-weight:300;line-height:1.5;color:var(--ink);margin-bottom:26px;}
+.ab-body p{font-size:13.5px;line-height:1.85;color:var(--mid);margin-bottom:16px;}
+.ab-body strong{color:var(--ink);font-weight:400;}
+.ab-sec{border-top:1px solid var(--border);margin-top:38px;padding-top:30px;}
+.ab-h{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:16px;}
+.ab-cover{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
+.ab-pill{border:1px solid var(--border);padding:6px 13px;font-family:var(--serif);font-size:13px;color:var(--ink);}
+.ab-pill.soft{color:var(--mid);font-family:var(--sans);font-size:11px;letter-spacing:.04em;}
+.ab-note{font-size:11.5px;color:var(--soft);line-height:1.7;margin-top:12px;font-style:italic;}
+.ab-slot{border:1px dashed var(--faint);background:var(--surf);padding:16px 18px;font-size:11.5px;color:var(--soft);line-height:1.7;}
+body:not(.creator) .ab-slot{display:none;}
+/* Contact form */
+.ab-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ab-form .ab-full{grid-column:1 / -1;}
+.ab-lbl{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:6px;}
+.ab-in{width:100%;border:1px solid var(--border);background:var(--white);padding:11px 12px;font-family:var(--sans);font-size:13px;color:var(--ink);}
+.ab-in:focus{outline:none;border-color:var(--ink);}
+textarea.ab-in{min-height:130px;resize:vertical;line-height:1.6;}
+.ab-send{grid-column:1 / -1;padding:13px;background:var(--ink);color:#fff;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;}
+.ab-send:hover{opacity:.82;}
+.ab-send:disabled{opacity:.45;cursor:default;}
+.ab-msg{grid-column:1 / -1;font-size:12px;line-height:1.7;color:var(--mid);}
+.ab-msg a{color:var(--ink);}
+.ab-thanks{border:1px solid var(--border);background:var(--surf);padding:30px 24px;text-align:center;}
+.ab-thanks h4{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);margin-bottom:7px;}
+.ab-thanks p{font-size:12.5px;color:var(--soft);line-height:1.7;}
+@media(max-width:700px){
+  .ab-wrap{padding:30px 18px 16px;}
+  .ab-lead{font-size:20px;}
+  .ab-form{grid-template-columns:1fr;}
+}
 /* The List: gifted label, ownership line, form checkbox */
 .tl-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
 .tl-gifted{display:inline-flex;align-items:center;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);padding:3px 8px;white-space:nowrap;}
@@ -816,6 +850,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
     <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
+    <button class="t1"    data-t1="about"       onclick="setT1('about',this)">About</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
 </header>
@@ -1485,6 +1520,7 @@ function render(){
   feed.style.display='block';
   if(activeT1==='widgets'){renderWidgets();return;}
   if(activeT1==='sales'){renderSales();return;}
+  if(activeT1==='about'){renderAbout();return;}
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
@@ -1530,6 +1566,7 @@ const TAB_META={
   stockist:{t:'Stockist — MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
   latest:{t:'The List — MaisonThePosh',d:'The things I actually love and keep going back to.'},
   sales:{t:'On Sale Now — MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
+  about:{t:'About & Partnerships — MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
   widgets:{t:'MaisonThePosh',d:''}
 };
 function applyTabMeta(tab){
@@ -2080,6 +2117,122 @@ function filterDetailItems(q){
 
 // ══ LATEST FINDS GRID ══
 // ══ THE LIST — localStorage-based editorial entries ══
+
+// ══ ABOUT & PARTNERSHIPS ══
+// Brand enquiries write into contact_messages. The anon key can INSERT but not
+// SELECT, so a submitted message cannot be read back from the browser by anyone.
+const MTP_CONTACT_EMAIL='maisontheposh@outlook.com';
+let _abSent=false;
+
+function renderAbout(){
+  const feed=document.getElementById('feed');
+  feed.innerHTML=`
+  <div class="ab-wrap">
+    <div class="ab-eyebrow">About</div>
+    <p class="ab-lead">MaisonThePosh looks at clothes the way an engineer would: construction, materials, what a piece costs you per wear, and whether it holds up after a season of real use.</p>
+    <div class="ab-body">
+      <p>I'm Juliana. I write MaisonThePosh, a fashion publication about <strong>the things I actually love</strong> and keep going back to. It runs as a weekly newsletter, a set of curated edits, and long-form collection analyses built from my own datasets rather than press releases.</p>
+      <p>It is not a luxury-only publication. The Row, Toteme and Phoebe Philo sit alongside <strong>Massimo Dutti, COS, Uniqlo and Mango</strong>, because the useful comparison is usually between the two. When I call something an alternative I mean the vibe, shape or a design detail, never equivalent construction, and I say so.</p>
+      <p>Everything is written from pieces I own or have handled. Reviews come with a scorecard and, increasingly, a short video. If something is not worth the money I say that too, which is the part readers tend to write in about.</p>
+    </div>
+
+    <div class="ab-sec">
+      <div class="ab-h">What I cover</div>
+      <div class="ab-cover">
+        <span class="ab-pill">The Row</span>
+        <span class="ab-pill">Toteme</span>
+        <span class="ab-pill">Phoebe Philo</span>
+      </div>
+      <div class="ab-cover" style="margin-top:9px;">
+        <span class="ab-pill soft">Collection analyses</span>
+        <span class="ab-pill soft">Weekly edits</span>
+        <span class="ab-pill soft">Affordable alternatives</span>
+        <span class="ab-pill soft">Materials &amp; construction</span>
+        <span class="ab-pill soft">Resale &amp; authentication</span>
+        <span class="ab-pill soft">Video reviews</span>
+      </div>
+      <p class="ab-note">Written since October 2025. Published weekly on Saturdays, plus collection coverage as it drops.</p>
+    </div>
+
+    <div class="ab-sec">
+      <div class="ab-h">Selected partners</div>
+      <div class="ab-cover">
+        <span class="ab-pill soft">COUTR</span>
+        <span class="ab-pill soft">Forme Science</span>
+        <span class="ab-pill soft">DIME</span>
+        <span class="ab-pill soft">ZIIP</span>
+      </div>
+      <div class="ab-slot" style="margin-top:20px;">
+        <strong>Only you can see this.</strong> When you want reach figures on the page, tell me what to publish and I will add a stats row here, subscribers, open rate, monthly clicks, countries, whatever you are comfortable with. Brands ask for these, so it is worth filling in before a pitch.
+      </div>
+    </div>
+
+    <div class="ab-sec" id="ab-contact">
+      <div class="ab-h">Work with me</div>
+      <p style="font-size:13.5px;line-height:1.85;color:var(--mid);margin-bottom:22px;">For partnerships, gifting, press or anything else, send a note here and it comes straight to me.</p>
+      <div id="ab-form-slot">${abFormHTML()}</div>
+    </div>
+  </div>`+subscribeBlock();
+}
+
+function abFormHTML(){
+  return `<form class="ab-form" onsubmit="abSubmit(event)">
+    <div><label class="ab-lbl" for="ab-name">Your name</label><input class="ab-in" id="ab-name" name="name" autocomplete="name" required></div>
+    <div><label class="ab-lbl" for="ab-brand">Brand or company</label><input class="ab-in" id="ab-brand" name="organization" autocomplete="organization"></div>
+    <div class="ab-full"><label class="ab-lbl" for="ab-email">Email</label><input class="ab-in" id="ab-email" name="email" type="email" autocomplete="email" required></div>
+    <div class="ab-full"><label class="ab-lbl" for="ab-note">What you have in mind</label><textarea class="ab-in" id="ab-note" name="message" required placeholder="A little about the brand, the product or campaign, and rough timing."></textarea></div>
+    <button class="ab-send" type="submit" id="ab-send">Send</button>
+    <div class="ab-msg" id="ab-err" style="display:none;"></div>
+  </form>`;
+}
+
+// Fire-and-forget email notification. Sends only the message id; the edge
+// function reads the row itself and mails Juliana, so this cannot be abused
+// to send mail to anyone else.
+function abNotify(id){
+  try{
+    fetch(`${SUPA_URL}/functions/v1/notify-contact`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json'},
+      body:JSON.stringify({id})
+    }).then(r=>{if(!r.ok)console.warn('[MTP] contact notification not sent:',r.status);})
+      .catch(err=>console.warn('[MTP] contact notification failed:',err));
+  }catch(err){console.warn('[MTP] contact notification failed:',err);}
+}
+
+async function abSubmit(e){
+  e.preventDefault();
+  if(_abSent)return;
+  const name=document.getElementById('ab-name').value.trim();
+  const email=document.getElementById('ab-email').value.trim();
+  const brand=document.getElementById('ab-brand').value.trim();
+  const message=document.getElementById('ab-note').value.trim();
+  const err=document.getElementById('ab-err');
+  if(!name||!email||!message){err.textContent='Please fill in your name, email and a message.';err.style.display='block';return;}
+  const btn=document.getElementById('ab-send');
+  btn.textContent='Sending…';btn.disabled=true;err.style.display='none';
+  try{
+    const msgId=uid();
+    await sbFetch('contact_messages',{
+      method:'POST',
+      headers:{'Prefer':'return=minimal'},
+      body:JSON.stringify({id:msgId,name,email,brand,message,created_at:new Date().toISOString()})
+    });
+    _abSent=true;
+    // The message is safely stored at this point. Nudge the email out too, but
+    // never let a mail problem turn a saved enquiry into an error for the sender.
+    abNotify(msgId);
+    document.getElementById('ab-form-slot').innerHTML=
+      `<div class="ab-thanks"><h4>Thank you, I have it.</h4><p>I read everything myself and will come back to you at ${h(email)}.</p></div>`;
+  }catch(ex){
+    console.error('contact form failed:',ex);
+    // Never swallow it — give them a way through that does not depend on my database
+    err.innerHTML=`Something went wrong sending that. Please email me directly at <a href="mailto:${MTP_CONTACT_EMAIL}?subject=${encodeURIComponent('Partnership enquiry — MaisonThePosh')}">${MTP_CONTACT_EMAIL}</a> and I will pick it up.`;
+    err.style.display='block';
+    btn.textContent='Try again';btn.disabled=false;
+  }
+}
+
 // ══ THE LIST ══
 // Source of truth is the Supabase table the_list. localStorage is only a cache
 // so the tab paints instantly; it never adds an entry of its own.
@@ -4097,7 +4250,7 @@ function restoreFromURL(){
   const itemId=params.get('item');
   const lookId=params.get('look');
   // Set active tab
-  const validTabs=['latest','weekly','stockist','collections','journal','sales','widgets'];
+  const validTabs=['latest','weekly','stockist','collections','journal','sales','about','widgets'];
   const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
   applyTabMeta(t);
@@ -4166,7 +4319,7 @@ window.addEventListener('popstate',function(e){
     document.getElementById('list-detail').classList.remove('open');
     document.getElementById('feed').style.display='block';
     currentListId=null;
-    const validTabs=['latest','weekly','stockist','collections','journal','sales','widgets'];
+    const validTabs=['latest','weekly','stockist','collections','journal','sales','about','widgets'];
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
