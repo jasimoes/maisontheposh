@@ -3,7 +3,21 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MTP — MaisonThePosh</title>
+<title>MaisonThePosh — Engineered Luxury, Edited</title>
+<meta name="description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly by Juliana.">
+<link rel="canonical" href="https://maisontheposh.com/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="MaisonThePosh">
+<meta property="og:url" content="https://maisontheposh.com/">
+<meta property="og:title" content="MaisonThePosh — Engineered Luxury, Edited">
+<meta property="og:description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly.">
+<meta property="og:image" content="https://maisontheposh.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="MaisonThePosh — Engineered Luxury, Edited">
+<meta name="twitter:description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly.">
+<meta name="twitter:image" content="https://maisontheposh.com/og-image.png">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MXZV44VECN"></script>
 <script>
@@ -170,6 +184,18 @@ body.creator .wc-del-btn{display:flex;}
 .wc-empty{text-align:center;padding:80px 40px;color:var(--soft);font-family:var(--serif);font-size:16px;font-style:italic;}
 /* ══ AFFILIATE DISCLOSURE ══ */
 .aff-note{padding:14px 40px 13px;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:12px;font-style:italic;color:var(--soft);line-height:1.6;background:var(--white);}
+/* ══ SUBSCRIBE ══ */
+.sub-block{border-top:1px solid var(--border);margin-top:12px;padding:56px 40px 64px;text-align:center;background:var(--surf);}
+.sub-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:14px;}
+.sub-line{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.5;color:var(--ink);max-width:440px;margin:0 auto 6px;}
+.sub-sub{font-size:12px;color:var(--soft);line-height:1.6;max-width:400px;margin:0 auto 22px;}
+.sub-frame{max-width:460px;margin:0 auto;background:var(--white);border:1px solid var(--border);}
+.sub-frame iframe{display:block;width:100%;height:360px;border:none;}
+@media(max-width:700px){
+  .sub-block{padding:40px 18px 48px;}
+  .sub-line{font-size:17px;}
+  .sub-frame iframe{height:380px;}
+}
 @media(max-width:700px){.aff-note{padding:12px 16px;font-size:11.5px;}}
 .wc-move-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:9px;color:var(--mid);border-radius:2px;transition:all .15s;font-family:var(--sans);line-height:1;padding:0;}
 .wc-move-btn:hover:not(:disabled){border-color:var(--ink);color:var(--ink);background:var(--surf);}
@@ -311,6 +337,19 @@ body.creator .tl-add-row{display:flex;}
 .sp-past-line{flex:1;height:1px;background:var(--border);}
 .sp-past-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:7px 15px;cursor:pointer;transition:all .16s;white-space:nowrap;}
 .sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
+/* Creator: paste a sale email and let the form fill itself */
+.sp-paste-wrap{border:1px dashed var(--faint);background:var(--surf);padding:14px 14px 12px;margin-bottom:20px;}
+.sp-paste-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-bottom:3px;display:block;}
+.sp-paste-hint{font-size:10px;color:var(--soft);line-height:1.5;margin-bottom:9px;}
+.sp-paste-box{width:100%;min-height:64px;border:1px solid var(--border);background:var(--white);padding:9px 10px;font-family:var(--sans);font-size:11px;color:var(--ink);line-height:1.5;resize:vertical;}
+.sp-paste-box:focus{outline:none;border-color:var(--mid);}
+.sp-paste-found{font-size:10px;line-height:1.7;color:var(--mid);margin-top:9px;display:none;}
+.sp-paste-found.on{display:block;}
+.sp-chip{display:inline-block;border:1px solid var(--border);background:var(--white);padding:3px 9px;margin:0 5px 5px 0;font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink);}
+.sp-chip.miss{color:var(--faint);border-style:dashed;}
+.sp-paste-clear{background:none;border:none;color:var(--soft);font-size:10px;text-decoration:underline;cursor:pointer;padding:0;margin-top:4px;}
+.sp-paste-clear:hover{color:var(--ink);}
+.sp-paste-thumb{max-height:70px;border:1px solid var(--border);display:block;margin-top:8px;}
 /* Creator: quick end-date presets */
 .sp-preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
 .sp-preset{background:none;border:1px solid var(--border);color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;cursor:pointer;transition:all .16s;}
@@ -1426,6 +1465,7 @@ function setT1(val,btn){
   document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
   closeDetail(true);
+  applyTabMeta(val);
   render();
   history.pushState({tab:val},'',`/?tab=${val}`);
 }
@@ -1458,6 +1498,40 @@ function render(){
 // One table serves every carousel tab; the `tab` column says which one a row
 // belongs to ('weekly' or 'stockist'). Adding another carousel tab later means
 // a nav button and a name here, nothing more.
+// ══ SUBSCRIBE BLOCK ══
+// Sits at the end of every tab. Substack's own embed handles the signup, the
+// confirmation email and the terms, so nothing can silently fail here.
+const SUBSTACK_URL='https://maisontheposh.substack.com';
+function subscribeBlock(){
+  return `<div class="sub-block">
+    <div class="sub-eyebrow">The Newsletter</div>
+    <p class="sub-line">Everything here, edited down and sent once a week.</p>
+    <p class="sub-sub">No endless scrolling. Just the pieces worth your attention, and why.</p>
+    <div class="sub-frame">
+      <iframe src="${SUBSTACK_URL}/embed" title="Subscribe to MaisonThePosh" loading="lazy" scrolling="no"></iframe>
+    </div>
+  </div>`;
+}
+
+// ══ PER-TAB TITLES ══
+// One title for the whole site meant Google saw one page and every shared link
+// looked identical. Each tab now names itself.
+const TAB_META={
+  journal:{t:'Posts — MaisonThePosh',d:'Essays, collection analyses and curation notes.'},
+  weekly:{t:'Weekly Curation — MaisonThePosh',d:'This week\u2019s edit, collection by collection.'},
+  stockist:{t:'Stockist — MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
+  latest:{t:'The List — MaisonThePosh',d:'The things I actually love and keep going back to.'},
+  sales:{t:'On Sale Now — MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
+  widgets:{t:'MaisonThePosh',d:''}
+};
+function applyTabMeta(tab){
+  const m=TAB_META[tab];
+  if(!m)return;
+  document.title=m.t;
+  const el=document.querySelector('meta[name="description"]');
+  if(el&&m.d)el.setAttribute('content',m.d);
+}
+
 // Affiliate disclosure — edit the wording here and it changes on every tab
 const AFF_DISCLOSURE="The products featured here may contain affiliate links.";
 function affNote(){return `<div class="aff-note">${h(AFF_DISCLOSURE)}</div>`;}
@@ -1498,7 +1572,7 @@ function renderWeekly(){
   const tab=wcTab();
   const carousels=wcList(tab);
   if(!carousels.length&&!isCreator){
-    feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`;
+    feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`+subscribeBlock();
   }else{
     const bar=isCreator?`
       <div class="wc-bar">
@@ -1524,7 +1598,7 @@ function renderWeekly(){
         </div>
       </div>`).join('');
     const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
-    feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${items}${addRow}</div>`;
+    feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${items}${addRow}</div>`+subscribeBlock();
     if(isCreator)wcInitDrag();
   }
   // First paint came from cache; pull the real list once per tab, then repaint
@@ -2007,7 +2081,7 @@ function renderLatest(){
   const entries=tlLoad();
   const addRow=isCreator?`<div class="tl-add-row" onclick="tlOpenAdd()">＋ Add to The List</div>`:'';
   if(!entries.length){
-    feed.innerHTML=`${affNote()}<div class="tl-feed">${addRow}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>Your personal collection of things you truly love.</p></div></div>`;
+    feed.innerHTML=`${affNote()}<div class="tl-feed">${addRow}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>Your personal collection of things you truly love.</p></div></div>`+subscribeBlock();
     return;
   }
   const cards=entries.map((e,i)=>{
@@ -2034,7 +2108,7 @@ function renderLatest(){
       </div>
     </div>`;
   }).join('');
-  feed.innerHTML=`${affNote()}<div class="tl-feed">${cards}${addRow}</div>`;
+  feed.innerHTML=`${affNote()}<div class="tl-feed">${cards}${addRow}</div>`+subscribeBlock();
 }
 
 let _tlEditIdx=null;
@@ -2164,7 +2238,7 @@ function _renderJournalCards(posts,wrap){
 }
 
 function _buildJournalShell(feed){
-  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>';
+  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>'+subscribeBlock();
   return feed.querySelector('.journal-feed');
 }
 
@@ -2323,7 +2397,7 @@ async function renderSales(){
   const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button>`:'';
   const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks — updated as they happen.</p><p class="sales-disclaimer">${h(AFF_DISCLOSURE)}</p></div>${addBtn}</div>`;
   if(!_posts.length){
-    feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`;
+    feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`+subscribeBlock();
     return;
   }
   const live=spSort(_posts.filter(p=>!spIsEnded(p)));
@@ -2342,7 +2416,7 @@ async function renderSales(){
     </div>`;
     if(_spShowPast)inner+=ended.map(renderPostEntry).join('');
   }
-  feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`;
+  feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
   if(isCreator)initPostDrag();
 }
 
@@ -2473,6 +2547,7 @@ function openNewPostForm(){
   document.getElementById('sp-f-subtitle').value='';
   document.getElementById('sp-f-body').value='';
   spInitEndsField(null);
+  spResetPasteBox();
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
@@ -2484,10 +2559,240 @@ function openEditPostForm(id){
   document.getElementById('sp-f-subtitle').value=p.subtitle||'';
   document.getElementById('sp-f-body').value=p.body||'';
   spInitEndsField(p.expires_at);
+  spResetPasteBox(true);
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
 function closeSPForm(){document.getElementById('sp-ov').classList.remove('open');}
+
+// ══ PASTE A SALE EMAIL ══
+// Everything here runs in the browser. Nothing is sent anywhere, and nothing is
+// saved until she hits Save Post, so a bad guess costs a correction, not a post.
+const SP_BRANDS=['The Row','Toteme','Totême','Phoebe Philo','Massimo Dutti','COS','Uniqlo','Mango','Nordstrom','Net-a-Porter','NET-A-PORTER','Mytheresa','The RealReal','TheRealReal','Saks','Neiman Marcus','Bergdorf Goodman','SSENSE','FWRD','Moda Operandi','Harrods','Selfridges','Lane Crawford','Holt Renfrew','La Garconne','Hirshleifers','The Webster','Savannahs','Antonia','24S','AYR','Vince','St. Agni','St Agni','Sezane','Sézane','Tibi','Margaux','Kallmeyer','DOEN','DÔEN','By Malene Birger','Prada','Ferragamo','Strathberry','Birkenstock','STAUD','Gap','J.Crew','Almada Label','Leset','Tuckernuck','Nour Hammour','goop','Forme Science','DIME','ZIIP','COUTR','Savette','Le Tanneur','Michael Kors','Saint Laurent','Bottega Veneta','Celine','Khaite','FFORME','Quince','Everlane','Reformation','Anthropologie','Zara','Arket','& Other Stories','Aritzia','Sandro','Maje','Ganni','Jenni Kayne','Cuyana','Sezane'];
+const SP_WEEKDAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+const SP_MONTHS=['january','february','march','april','may','june','july','august','september','october','november','december'];
+
+function spNextWeekday(name){
+  const target=SP_WEEKDAYS.indexOf(name.toLowerCase());
+  if(target<0)return null;
+  const d=new Date();d.setHours(12,0,0,0);
+  const diff=(target-d.getDay()+7)%7;   // today counts as today
+  d.setDate(d.getDate()+diff);
+  return d;
+}
+// A bare month/day with no year: assume this year, unless that is well in the
+// past, in which case the sale must mean next year.
+function spResolveYear(month,day){
+  const now=new Date();
+  let d=new Date(now.getFullYear(),month,day,12,0,0,0);
+  if((now-d)/86400000>60)d=new Date(now.getFullYear()+1,month,day,12,0,0,0);
+  return d;
+}
+function spFindEndDate(text){
+  const t=' '+text.replace(/\s+/g,' ')+' ';
+  // "ends tonight" / "today only" / "final day"
+  if(/\b(ends?\s+(tonight|today)|today\s+only|final\s+day|last\s+day|ends\s+at\s+midnight)\b/i.test(t)){
+    const d=new Date();d.setHours(12,0,0,0);return d;
+  }
+  if(/\b(ends?\s+tomorrow|tomorrow\s+only)\b/i.test(t)){
+    const d=new Date();d.setDate(d.getDate()+1);d.setHours(12,0,0,0);return d;
+  }
+  // "ends 9/25" or "through 9/25/26"
+  let m=t.match(/\b(?:ends?|through|thru|until|til|till|expires?)\b[^0-9a-z]{0,12}(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/i);
+  if(m){
+    const mo=+m[1]-1,day=+m[2];
+    if(mo>=0&&mo<=11&&day>=1&&day<=31){
+      if(m[3]){const y=+m[3];return new Date(y<100?2000+y:y,mo,day,12,0,0,0);}
+      return spResolveYear(mo,day);
+    }
+  }
+  // "ends September 25" / "through Sept 25th"
+  m=t.match(/\b(?:ends?|through|thru|until|til|till|expires?)\b[^a-z0-9]{0,12}([a-z]{3,9})\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b/i);
+  if(m){
+    const idx=SP_MONTHS.findIndex(x=>x.startsWith(m[1].toLowerCase()));
+    if(idx>=0)return spResolveYear(idx,+m[2]);
+  }
+  // "ends Sunday" / "through Monday"
+  m=t.match(/\b(?:ends?|through|thru|until|til|till)\b[^a-z]{0,12}(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/i);
+  if(m)return spNextWeekday(m[1]);
+  // "3 days left" / "ends in 2 days"
+  m=t.match(/\b(?:ends?\s+in\s+)?(\d{1,2})\s+days?\s+(?:left|remaining|only)\b/i);
+  if(m){const d=new Date();d.setDate(d.getDate()+ +m[1]);d.setHours(12,0,0,0);return d;}
+  return null;
+}
+function spFindDiscount(text){
+  const out=[];
+  const re=/(up\s+to\s+|extra\s+|additional\s+)?(\d{1,2})\s*%\s*(off)?/gi;
+  let m;
+  while((m=re.exec(text))!==null){
+    const pct=+m[2];
+    if(pct<5||pct>90)continue;                       // skip stray percentages
+    out.push({pct,prefix:(m[1]||'').trim().toLowerCase(),extra:/extra|additional/i.test(m[1]||'')});
+  }
+  if(!out.length)return null;
+  const extra=out.find(o=>o.extra);
+  const best=out.reduce((a,b)=>b.pct>a.pct?b:a);
+  const label=`${best.prefix?best.prefix.replace(/\s+$/,'')+' ':''}${best.pct}% off`;
+  return{label:label.charAt(0).toUpperCase()+label.slice(1),extra:extra?`Extra ${extra.pct}% off`:null,pct:best.pct};
+}
+function spFindCode(text){
+  // Require an explicit "code" cue so ordinary capitalised words are not grabbed
+  const m=text.match(/\b(?:promo\s*code|coupon\s*code|use\s*code|with\s*code|code)\b\s*[:\-]?\s*["']?([A-Z0-9][A-Z0-9._-]{2,19})["']?/);
+  if(!m)return null;
+  const c=m[1].replace(/[.,;:]+$/,'');
+  if(/^(THE|AND|FOR|OFF|NOW|ALL|NEW|SALE|SHOP|HERE|YOUR|WITH|FROM|ONLY)$/.test(c))return null;
+  return c;
+}
+function spFindBrand(text,links){
+  const hay=text.slice(0,1400);
+  for(const b of SP_BRANDS){
+    if(new RegExp('\\b'+b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(hay))return b;
+  }
+  // Fall back to the domain of the first real link
+  for(const l of links){
+    try{
+      const host=new URL(l).hostname.replace(/^www\./,'').replace(/^(email|click|links?|shop|e)\./,'');
+      const root=host.split('.')[0];
+      if(root.length>2&&!/^(go|bit|trk|mail|sendgrid|mailchi|list|cts)$/i.test(root))
+        return root.charAt(0).toUpperCase()+root.slice(1);
+    }catch(e){}
+  }
+  return null;
+}
+const SP_LINK_JUNK=/unsubscribe|preferences|privacy|terms|manage|optout|opt-out|profile|view.?in.?browser|facebook|instagram|twitter|pinterest|tiktok|youtube|\.(gif|png|jpe?g)(\?|$)/i;
+function spFindLinks(html,text){
+  const out=[];
+  const push=u=>{if(u&&/^https?:\/\//i.test(u)&&!SP_LINK_JUNK.test(u)&&!out.includes(u))out.push(u);};
+  if(html){const re=/href\s*=\s*["']([^"']+)["']/gi;let m;while((m=re.exec(html))!==null)push(m[1]);}
+  const re2=/https?:\/\/[^\s<>"')]+/gi;let m2;while((m2=re2.exec(text))!==null)push(m2[0]);
+  return out;
+}
+function spFindImage(html){
+  if(!html)return null;
+  const re=/<img\b[^>]*>/gi;let m,best=null,bestW=0;
+  while((m=re.exec(html))!==null){
+    const tag=m[0];
+    const src=(tag.match(/\bsrc\s*=\s*["']([^"']+)["']/i)||[])[1];
+    if(!src||!/^https?:\/\//i.test(src))continue;
+    if(/spacer|pixel|tracking|1x1|logo|icon|footer|social/i.test(src))continue;
+    const w=parseInt((tag.match(/\bwidth\s*=\s*["']?(\d+)/i)||[])[1]||'0',10);
+    const h=parseInt((tag.match(/\bheight\s*=\s*["']?(\d+)/i)||[])[1]||'0',10);
+    if((w&&w<200)||(h&&h<80))continue;               // logos and spacers
+    const score=w||300;
+    if(score>bestW){bestW=score;best=src;}
+  }
+  return best;
+}
+function spFindTitle(text,brand,discount){
+  // A pasted Gmail message often starts with the subject line
+  const lines=text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  const subj=lines.find(l=>/^subject\s*:/i.test(l));
+  if(subj){
+    const t=subj.replace(/^subject\s*:\s*/i,'').replace(/^(re|fwd)\s*:\s*/i,'').trim();
+    if(t.length>3&&t.length<90)return t;
+  }
+  for(const l of lines.slice(0,6)){
+    if(/^(from|to|date|sent|cc|bcc|reply-to)\s*:/i.test(l))continue;
+    if(/^(view (this )?(email|in browser)|unsubscribe|shop now|hi|hello|dear)\b/i.test(l))continue;
+    if(/^https?:/i.test(l))continue;
+    const clean=l.replace(/^(re|fwd|fw)\s*:\s*/i,'').replace(/\s+/g,' ').trim();
+    if(clean.length>=8&&clean.length<=90)return clean;
+  }
+  if(brand&&discount)return `${brand}: ${discount.label}`;
+  if(brand)return `${brand} Sale`;
+  return '';
+}
+// The write-up: only the facts, in short lines. Her own take goes underneath.
+function spBuildBody(d){
+  const out=[];
+  if(d.discount)out.push(d.discount.label+'.');
+  if(d.discount&&d.discount.extra&&d.discount.extra!==d.discount.label)out.push(d.discount.extra+'.');
+  if(d.code)out.push(`Use code ${d.code} at checkout.`);
+  if(d.endDate){
+    out.push(`Ends ${d.endDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'})}.`);
+  }
+  if(d.exclusions)out.push(d.exclusions);
+  return out.join('\n');
+}
+function spFindExclusions(text){
+  const m=text.match(/\b(exclusions?\s+apply[^.\n]{0,60}|select\s+styles?\s+only|final\s+sale[^.\n]{0,40}|while\s+supplies\s+last)\b/i);
+  return m?m[1].trim().replace(/^./,c=>c.toUpperCase())+'.':null;
+}
+
+let _spPastedImage=null,_spPastedLink=null;
+
+function spHandlePaste(e){
+  const cb=e.clipboardData||window.clipboardData;
+  if(!cb)return;
+  const html=cb.getData('text/html')||'';
+  const text=cb.getData('text/plain')||'';
+  if(!text.trim()&&!html.trim())return;
+  e.preventDefault();
+  const plain=text.trim()||html.replace(/<style[\s\S]*?<\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/&nbsp;/g,' ').replace(/&amp;/g,'&').replace(/[ \t]+/g,' ');
+  document.getElementById('sp-paste').value=plain.slice(0,4000);
+  spParsePasted(plain,html);
+}
+
+function spParsePasted(text,html){
+  const links=spFindLinks(html,text);
+  const d={
+    discount:spFindDiscount(text),
+    code:spFindCode(text),
+    endDate:spFindEndDate(text),
+    exclusions:spFindExclusions(text),
+    image:spFindImage(html),
+    link:links[0]||null
+  };
+  d.brand=spFindBrand(text,links);
+  const title=spFindTitle(text,d.brand,d.discount);
+
+  // Only fill fields she has not already typed into
+  const set=(id,v)=>{const el=document.getElementById(id);if(el&&v&&!el.value.trim())el.value=v;};
+  set('sp-f-title',title);
+  const body=spBuildBody(d);
+  const bodyEl=document.getElementById('sp-f-body');
+  if(bodyEl&&body&&!bodyEl.value.trim())bodyEl.value=body;
+  if(d.endDate){
+    const ex=document.getElementById('sp-f-expires');
+    if(ex&&!ex.value){ex.value=spToDateInput(d.endDate);spSyncEndsHint();}
+  }
+  _spPastedImage=d.image||null;
+  _spPastedLink=d.link||null;
+
+  // Say plainly what was and was not found
+  const chip=(label,ok)=>`<span class="sp-chip${ok?'':' miss'}">${ok?label:'no '+label}</span>`;
+  const found=document.getElementById('sp-paste-found');
+  found.innerHTML=
+    chip(d.discount?d.discount.label:'discount',!!d.discount)+
+    chip(d.code?'code '+d.code:'code',!!d.code)+
+    chip(d.endDate?'ends '+d.endDate.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'end date',!!d.endDate)+
+    chip('image',!!d.image)+
+    chip('shop link',!!d.link)+
+    (d.image?`<img class="sp-paste-thumb" src="${h(d.image)}" alt="" onerror="this.style.display='none'">`:'')+
+    `<div style="margin-top:7px;color:var(--soft);">Filled in below. Edit anything that looks off${d.image?', the image and link are attached on save':''}.</div>`;
+  found.classList.add('on');
+  document.getElementById('sp-paste-clear').style.display='block';
+}
+
+// The paste box only makes sense for a brand new post
+function spResetPasteBox(hide){
+  const wrap=document.getElementById('sp-paste-wrap');
+  if(wrap)wrap.style.display=hide?'none':'block';
+  _spPastedImage=null;_spPastedLink=null;
+  const box=document.getElementById('sp-paste');if(box)box.value='';
+  const f=document.getElementById('sp-paste-found');if(f){f.classList.remove('on');f.innerHTML='';}
+  const c=document.getElementById('sp-paste-clear');if(c)c.style.display='none';
+}
+
+function spClearPaste(){
+  _spPastedImage=null;_spPastedLink=null;
+  ['sp-paste','sp-f-title','sp-f-subtitle','sp-f-body','sp-f-expires'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const f=document.getElementById('sp-paste-found');
+  f.classList.remove('on');f.innerHTML='';
+  document.getElementById('sp-paste-clear').style.display='none';
+  spSyncEndsHint();
+}
+
 
 // Date <input> wants YYYY-MM-DD in LOCAL time, so build it by parts rather than
 // via toISOString, which shifts to UTC and can land on the wrong day.
@@ -2541,12 +2846,19 @@ async function savePostForm(){
       await savePost({id:_editingPostId,title,subtitle,body,expires_at});
     } else {
       const newPost={id:uid(),title,subtitle,body,expires_at,published_at:new Date().toISOString(),images:[]};
-      _posts.unshift(newPost);
       await savePost(newPost);
+      // Anything the pasted email gave us becomes the post's banner in one go
+      if(_spPastedImage||_spPastedLink){
+        const img={id:uid(),post_id:newPost.id,image:_spPastedImage||'',caption:'',price:'',link:_spPastedLink||'',sort_order:0};
+        try{await savePostImage(img);newPost.images=[img];}
+        catch(err){console.error('pasted image save failed:',err);}
+      }
+      _posts.unshift(newPost);
+      _spPastedImage=null;_spPastedLink=null;
     }
     closeSPForm();
     renderSales();
-    toast(_editingPostId?'Post updated':'Post created — now add images below');
+    toast(_editingPostId?'Post updated':'Post created');
   }catch(e){toast('⚠ Could not save post');console.error(e);}
   btn.textContent='Save Post';btn.disabled=false;
 }
@@ -3660,9 +3972,10 @@ function restoreFromURL(){
   const itemId=params.get('item');
   const lookId=params.get('look');
   // Set active tab
-  const validTabs=['latest','weekly','collections','journal','sales','widgets'];
+  const validTabs=['latest','weekly','stockist','collections','journal','sales','widgets'];
   const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
+  applyTabMeta(t);
   document.querySelectorAll('.t1').forEach(b=>{
     const match=b.dataset.t1===t;
     b.classList.toggle('on',match);
@@ -3728,7 +4041,7 @@ window.addEventListener('popstate',function(e){
     document.getElementById('list-detail').classList.remove('open');
     document.getElementById('feed').style.display='block';
     currentListId=null;
-    const validTabs=['latest','weekly','collections','journal','sales','widgets'];
+    const validTabs=['latest','weekly','stockist','collections','journal','sales','widgets'];
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
@@ -3960,6 +4273,13 @@ async function runFetchImages(){
 <div class="fov" id="sp-ov">
   <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
     <h3 class="ftitle" id="sp-form-title">New Post</h3>
+    <div class="sp-paste-wrap" id="sp-paste-wrap">
+      <span class="sp-paste-lbl">Paste the sale email</span>
+      <div class="sp-paste-hint">Copy the whole email out of Gmail and paste it here. Everything below fills itself in, including the banner image and shop link. Check it over before saving.</div>
+      <textarea class="sp-paste-box" id="sp-paste" placeholder="Paste here…" onpaste="spHandlePaste(event)"></textarea>
+      <div class="sp-paste-found" id="sp-paste-found"></div>
+      <button type="button" class="sp-paste-clear" id="sp-paste-clear" style="display:none;" onclick="spClearPaste()">Clear and start over</button>
+    </div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional — e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
     <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale — what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
