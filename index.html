@@ -3,19 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MaisonThePosh — Engineered Luxury, Edited</title>
+<title>MaisonThePosh | Engineered Luxury, Edited</title>
 <meta name="description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly by Juliana.">
 <link rel="canonical" href="https://maisontheposh.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="MaisonThePosh">
 <meta property="og:url" content="https://maisontheposh.com/">
-<meta property="og:title" content="MaisonThePosh — Engineered Luxury, Edited">
+<meta property="og:title" content="MaisonThePosh | Engineered Luxury, Edited">
 <meta property="og:description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly.">
 <meta property="og:image" content="https://maisontheposh.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="MaisonThePosh — Engineered Luxury, Edited">
+<meta name="twitter:title" content="MaisonThePosh | Engineered Luxury, Edited">
 <meta name="twitter:description" content="An edited view of the pieces worth owning. The Row, Toteme and Phoebe Philo alongside the affordable finds that hold up, curated weekly.">
 <meta name="twitter:image" content="https://maisontheposh.com/og-image.png">
 <!-- Google tag (gtag.js) -->
@@ -736,7 +736,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 <div class="creator-bar" id="creator-bar">
   <div class="creator-bar-left">
     <div class="creator-dot"></div>
-    <span>Creator Mode — only you see this</span>
+    <span>Creator Mode, only you see this</span>
     <span id="img-counter" style="opacity:.5;font-size:10px;margin-left:6px;"></span>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
@@ -750,7 +750,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 <div class="fov" id="importer-ov" style="z-index:500;">
   <div class="fp" style="max-width:680px;width:100%;" onclick="event.stopPropagation()">
     <h3 class="ftitle">Import ShopMy Links</h3>
-    <p style="font-size:13px;color:var(--mid);margin-bottom:1.25rem;font-family:var(--serif);font-style:italic;">Drop your ShopMy CSV export — new items will be added to Latest Finds. Duplicates are skipped automatically.</p>
+    <p style="font-size:13px;color:var(--mid);margin-bottom:1.25rem;font-family:var(--serif);font-style:italic;">Drop your ShopMy CSV export. New items will be added to Latest Finds. Duplicates are skipped automatically.</p>
 
     <div class="dropz" id="imp-dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])handleImportFile(event.dataTransfer.files[0])">
       <input type="file" accept=".csv" onchange="handleImportFile(this.files[0])">
@@ -925,7 +925,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <h3 class="ftitle">Edit List</h3>
     <div class="fg"><label class="fl">List Name</label><input type="text" class="fi" id="el-name" placeholder="e.g. Substack Week 12, 2026"></div>
     <div class="fg"><label class="fl">Editor's Note <span class="flh">(shown on list card)</span></label>
-      <textarea class="fi fta" id="el-note" rows="3" placeholder="Your take on this list — the engineering angle, what ties it together…"></textarea>
+      <textarea class="fi fta" id="el-note" rows="3" placeholder="Your take on this list: the engineering angle, what ties it together…"></textarea>
     </div>
     <div class="fg"><label class="fl">Section</label>
       <div class="chips" id="el-t1c">
@@ -1013,14 +1013,14 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <h3 class="ftitle">Add Item</h3>
     <div class="fetch-box">
       <label class="fl" style="margin-bottom:4px">Affiliate or Instagram Link</label>
-      <div style="font-size:10px;color:var(--soft);margin-bottom:8px;line-height:1.5;">Paste a CJ / Awin / Rakuten link <em>or</em> an Instagram post URL — auto-fills details &amp; image.</div>
+      <div style="font-size:10px;color:var(--soft);margin-bottom:8px;line-height:1.5;">Paste a CJ / Awin / Rakuten link <em>or</em> an Instagram post URL, auto-fills details &amp; image.</div>
       <div class="fetch-row">
         <input type="url" class="fi" id="fetch-url" placeholder="https://… primary affiliate link or instagram.com/p/…">
         <button class="btn-go" id="fetch-btn" onclick="fetchProduct()">Auto-fill</button>
       </div>
       <div class="fmsg" id="fmsg"></div>
       <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px;">
-        <label class="fl" style="margin-bottom:0;">More Retailer Links <span class="flh">(optional — up to 5 more)</span></label>
+        <label class="fl" style="margin-bottom:0;">More Retailer Links <span class="flh">(optional, up to 5 more)</span></label>
         <input type="url" class="fi" id="fetch-url2" placeholder="Retailer 2">
         <input type="url" class="fi" id="fetch-url3" placeholder="Retailer 3">
         <input type="url" class="fi" id="fetch-url4" placeholder="Retailer 4">
@@ -1034,7 +1034,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <div><label class="fl">Price</label><input type="text" class="fi" id="i-price" placeholder="$890"></div>
     </div>
     <div class="fg"><label class="fl">Your Take <span class="flh">(shown on card)</span></label>
-      <input type="text" class="fi" id="i-note" placeholder="e.g. Blake stitch — will outlast 3 cheaper pairs">
+      <input type="text" class="fi" id="i-note" placeholder="e.g. Blake stitch, will outlast 3 cheaper pairs">
     </div>
     <div class="fg">
       <label class="fl">Category</label>
@@ -1095,9 +1095,9 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <input type="hidden" id="look-img-val">
     </div>
     <div class="fg"><label class="fl">Look Title</label><input type="text" class="fi" id="look-title" placeholder="e.g. Quiet Luxury Weekend"></div>
-    <div class="fg"><label class="fl">Editorial Note</label><textarea class="fi fta" id="look-note" rows="3" placeholder="Your take — outfit formula, material notes, why you love it…"></textarea></div>
+    <div class="fg"><label class="fl">Editorial Note</label><textarea class="fi fta" id="look-note" rows="3" placeholder="Your take: outfit formula, material notes, why you love it…"></textarea></div>
     <div class="fg">
-      <label class="fl">Tag Products <span class="flh">(optional — from your lists or add a link)</span></label>
+      <label class="fl">Tag Products <span class="flh">(optional, from your lists or add a link)</span></label>
       <!-- Tab: from list or add link -->
       <div class="itabs" style="margin-bottom:10px;">
         <button class="itab on" id="ptab-list" onclick="switchPickerTab('list')">From My Lists</button>
@@ -1332,7 +1332,7 @@ async function saveItem(it,listId){
     });
   }catch(e){
     console.error('saveItem failed:',e);
-    toast('⚠ Item saved locally but not to cloud — check connection');
+    toast('⚠ Item saved locally but not to cloud. Check your connection');
   }
 }
 
@@ -1363,7 +1363,7 @@ async function saveLookToCloud(look){
     });
   }catch(e){
     console.error('saveLook failed:',e);
-    toast('⚠ Could not save look — try a smaller cover image');
+    toast('⚠ Could not save look. Try a smaller cover image');
   }
 }
 
@@ -1376,6 +1376,8 @@ let isCreator=false;
 let detailAllItems=[];
 let lookManualItems=[];
 
+// Older items store an em dash as the "no brand" placeholder. Never show it.
+function bd(b){b=String(b||'').trim();return (b==='—'||b==='–'||b==='-')?'':b;}
 function h(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.remove('has-undo');t.onclick=null;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 function showToastUndo(m,undoCb){
@@ -1435,7 +1437,7 @@ function submitPW(){
     render();
     toast('Creator mode on');
   } else {
-    document.getElementById('pw-err').textContent='Incorrect password — try again';
+    document.getElementById('pw-err').textContent='Incorrect password. Try again';
     document.getElementById('pw-input').value='';
     document.getElementById('pw-input').focus();
   }
@@ -1561,12 +1563,12 @@ function subscribeBlock(){
 // One title for the whole site meant Google saw one page and every shared link
 // looked identical. Each tab now names itself.
 const TAB_META={
-  journal:{t:'Posts — MaisonThePosh',d:'Essays, collection analyses and curation notes.'},
-  weekly:{t:'Weekly Curation — MaisonThePosh',d:'This week\u2019s edit, collection by collection.'},
-  stockist:{t:'Stockist — MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
-  latest:{t:'The List — MaisonThePosh',d:'The things I actually love and keep going back to.'},
-  sales:{t:'On Sale Now — MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
-  about:{t:'About & Partnerships — MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
+  journal:{t:'Posts | MaisonThePosh',d:'Essays, collection analyses and curation notes.'},
+  weekly:{t:'Weekly Curation | MaisonThePosh',d:'This week\u2019s edit, collection by collection.'},
+  stockist:{t:'Stockist | MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
+  latest:{t:'The List | MaisonThePosh',d:'The things I actually love and keep going back to.'},
+  sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
+  about:{t:'About & Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
   widgets:{t:'MaisonThePosh',d:''}
 };
 function applyTabMeta(tab){
@@ -1655,7 +1657,7 @@ function renderWeekly(){
     }).catch(e=>{
       _wcFetching[tab]=false;
       console.error(`${WC_TAB_LABELS[tab]} load failed:`,e);
-      if(isCreator)toast('⚠ Could not reach the cloud — showing the last saved list');
+      if(isCreator)toast('⚠ Could not reach the cloud. Showing the last saved list');
     });
   }
 }
@@ -1714,7 +1716,7 @@ async function wcDelete(i){
     });
   }catch(e){
     console.error('wcDelete failed:',e);
-    toast('⚠ Could not remove — check your connection');
+    toast('⚠ Could not remove. Check your connection');
   }
 }
 
@@ -1766,7 +1768,7 @@ async function wcSaveForm(){
     }
   }catch(e){
     console.error('wcSaveForm failed:',e);
-    toast('⚠ Could not save — check your connection');
+    toast('⚠ Could not save. Check your connection');
   }finally{
     btn.textContent=label;btn.disabled=false;
   }
@@ -1857,7 +1859,7 @@ function stripCard(l){
       ?`onclick="event.stopPropagation();if(window.matchMedia('(pointer:coarse)').matches){openItemPop('${itemId}')}else{openDetail('${h(l.id)}')}"` 
       :'onclick="event.stopPropagation()"';
     if(img)slots.push(`<div class="strip-cell" ${clickHandler} style="cursor:pointer"><img src="${h(img.image)}" alt="" onerror="this.style.display='none'"></div>`);
-    else if(it)slots.push(`<div class="strip-cell" ${clickHandler} style="cursor:pointer"><span class="strip-ph">${(it.brand||'?')[0]}</span></div>`);
+    else if(it)slots.push(`<div class="strip-cell" ${clickHandler} style="cursor:pointer"><span class="strip-ph">${(bd(it.brand)||'?')[0]}</span></div>`);
     else slots.push(`<div class="strip-ghost"></div>`);
   }
   const noteHtml=l.note?`<div class="wl-note">"${h(l.note)}"</div>`:'';
@@ -1922,7 +1924,7 @@ function renderDetailItems(items){
   g.innerHTML=items.map(it=>{
     const imgHtml=it.image
       ?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`
-      :`<div class="dcard-ph">${(it.brand||'?')[0]}</div>`;
+      :`<div class="dcard-ph">${(bd(it.brand)||'?')[0]}</div>`;
     const copyBtn=`<button class="btn-copy-link creator-only-btn" onclick="event.stopPropagation();copyItemLink('${h(it.id)}','${h(it.link)}')">Copy Link</button>`;
     const creatorBtns=`<div class="creator-only-btn" style="display:flex;gap:6px;margin-top:6px;">
       <button data-edit-id="${h(it.id)}" onclick="event.stopPropagation()" style="flex:1;padding:6px 0;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;">✎ Edit</button>
@@ -1932,7 +1934,7 @@ function renderDetailItems(items){
       <div class="dcard-drag-handle creator-only-btn" title="Drag to reorder" onclick="event.stopPropagation()">⠿</div>
       <div class="dcard-img">${imgHtml}</div>
       <div class="dcard-info">
-        <div class="dcard-brand">${h(it.brand)}</div>
+        <div class="dcard-brand">${h(bd(it.brand))}</div>
         <div class="dcard-name">${h(it.name)}</div>
         <div class="dcard-price">${it.price?'$'+h(it.price):''}</div>
         <div class="dcard-note">${h(it.note||'')}</div>
@@ -2020,7 +2022,7 @@ function copyItemPageLink(){
   const itemId=document.getElementById('ip-pop').dataset.itemId;
   if(!itemId)return;
   const url=`https://maisontheposh.com/?item=${encodeURIComponent(itemId)}`;
-  navigator.clipboard.writeText(url).then(()=>toast('Item link copied — paste into Substack!')).catch(()=>{
+  navigator.clipboard.writeText(url).then(()=>toast('Item link copied. Paste into Substack!')).catch(()=>{
     const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Item link copied!');
   });
 }
@@ -2046,7 +2048,7 @@ function openEditItem(itemId){
   if(it.image){
     document.getElementById('auto-prev').innerHTML=`<img src="${h(it.image)}" style="width:100%;height:100%;object-fit:cover">`;
   } else {
-    document.getElementById('auto-prev').innerHTML='<p class="ihint">No image — paste URL or upload below</p>';
+    document.getElementById('auto-prev').innerHTML='<p class="ihint">No image. Paste a URL or upload below</p>';
   }
   document.getElementById('fmsg').textContent='';
   document.getElementById('fmsg').className='fmsg';
@@ -2073,7 +2075,7 @@ async function saveEditItem(){
   l.items[idx]={
     ...l.items[idx],
     name,
-    brand:document.getElementById('i-brand').value.trim()||'—',
+    brand:document.getElementById('i-brand').value.trim(),
     price:document.getElementById('i-price').value.trim()||'',
     note:document.getElementById('i-note').value.trim(),
     ...getLinks(),
@@ -2154,17 +2156,8 @@ function renderAbout(){
       <p class="ab-note">Written since October 2025. Published weekly on Saturdays, plus collection coverage as it drops.</p>
     </div>
 
-    <div class="ab-sec">
-      <div class="ab-h">Selected partners</div>
-      <div class="ab-cover">
-        <span class="ab-pill soft">COUTR</span>
-        <span class="ab-pill soft">Forme Science</span>
-        <span class="ab-pill soft">DIME</span>
-        <span class="ab-pill soft">ZIIP</span>
-      </div>
-      <div class="ab-slot" style="margin-top:20px;">
-        <strong>Only you can see this.</strong> When you want reach figures on the page, tell me what to publish and I will add a stats row here, subscribers, open rate, monthly clicks, countries, whatever you are comfortable with. Brands ask for these, so it is worth filling in before a pitch.
-      </div>
+    <div class="ab-slot" style="margin-top:34px;">
+      <strong>Only you can see this.</strong> When you want reach figures on the page, tell me what to publish and I will add a stats row here, subscribers, open rate, monthly clicks, countries, whatever you are comfortable with. Brands ask for these, so it is worth filling in before a pitch.
     </div>
 
     <div class="ab-sec" id="ab-contact">
@@ -2227,7 +2220,7 @@ async function abSubmit(e){
   }catch(ex){
     console.error('contact form failed:',ex);
     // Never swallow it — give them a way through that does not depend on my database
-    err.innerHTML=`Something went wrong sending that. Please email me directly at <a href="mailto:${MTP_CONTACT_EMAIL}?subject=${encodeURIComponent('Partnership enquiry — MaisonThePosh')}">${MTP_CONTACT_EMAIL}</a> and I will pick it up.`;
+    err.innerHTML=`Something went wrong sending that. Please email me directly at <a href="mailto:${MTP_CONTACT_EMAIL}?subject=${encodeURIComponent('Partnership enquiry via MaisonThePosh')}">${MTP_CONTACT_EMAIL}</a> and I will pick it up.`;
     err.style.display='block';
     btn.textContent='Try again';btn.disabled=false;
   }
@@ -2345,7 +2338,7 @@ function tlMaybeFetch(){
   }).catch(e=>{
     _tlFetching=false;
     console.error('The List load failed:',e);
-    if(isCreator)toast('⚠ Could not reach the cloud — showing the last saved list');
+    if(isCreator)toast('⚠ Could not reach the cloud. Showing the last saved list');
   });
 }
 
@@ -2419,7 +2412,7 @@ async function tlSaveForm(){
     toast(_tlEditIdx!==null?'Saved':'Added to The List');
   }catch(e){
     console.error('tlSaveForm failed:',e);
-    toast('⚠ Could not save — check your connection');
+    toast('⚠ Could not save. Check your connection');
   }finally{btn.textContent=label;btn.disabled=false;}
 }
 
@@ -2441,7 +2434,7 @@ async function tlDelete(i){
       const back=tlLoad().slice();back.splice(i,0,gone);
       try{await tlPersist(back);renderLatest();}catch(e){toast('⚠ Could not undo');}
     });
-  }catch(e){console.error('tlDelete failed:',e);toast('⚠ Could not remove — check your connection');}
+  }catch(e){console.error('tlDelete failed:',e);toast('⚠ Could not remove. Check your connection');}
 }
 
 function tlAddImage(entryIdx,imgIdx){
@@ -2516,7 +2509,7 @@ function _renderJournalCards(posts,wrap){
 }
 
 function _buildJournalShell(feed){
-  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds — from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>'+subscribeBlock();
+  feed.innerHTML='<div class="journal-wrap"><div class="journal-hdr"><h2>Posts</h2><p>Essays, curation notes &amp; finds, from <a href="https://maisontheposh.substack.com" target="_blank" rel="noopener">Substack</a>.</p></div><div class="journal-feed"></div></div>'+subscribeBlock();
   return feed.querySelector('.journal-feed');
 }
 
@@ -2673,7 +2666,7 @@ async function renderSales(){
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   await loadPosts();
   const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button>`:'';
-  const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks — updated as they happen.</p><p class="sales-disclaimer">${h(AFF_DISCLOSURE)}</p></div>${addBtn}</div>`;
+  const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks, updated as they happen.</p><p class="sales-disclaimer">${h(AFF_DISCLOSURE)}</p></div>${addBtn}</div>`;
   if(!_posts.length){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`+subscribeBlock();
     return;
@@ -2684,7 +2677,7 @@ async function renderSales(){
 
   let inner=live.map(renderPostEntry).join('');
   if(!live.length){
-    inner=`<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon — new ones go up as they land.'}</p></div>`;
+    inner=`<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`;
   }
   if(ended.length){
     inner+=`<div class="sp-past-bar">
@@ -2846,7 +2839,7 @@ function closeSPForm(){document.getElementById('sp-ov').classList.remove('open')
 // ══ PASTE A SALE EMAIL ══
 // Everything here runs in the browser. Nothing is sent anywhere, and nothing is
 // saved until she hits Save Post, so a bad guess costs a correction, not a post.
-const SP_BRANDS=['The Row','Toteme','Totême','Phoebe Philo','Massimo Dutti','COS','Uniqlo','Mango','Nordstrom','Net-a-Porter','NET-A-PORTER','Mytheresa','The RealReal','TheRealReal','Saks','Neiman Marcus','Bergdorf Goodman','SSENSE','FWRD','Moda Operandi','Harrods','Selfridges','Lane Crawford','Holt Renfrew','La Garconne','Hirshleifers','The Webster','Savannahs','Antonia','24S','AYR','Vince','St. Agni','St Agni','Sezane','Sézane','Tibi','Margaux','Kallmeyer','DOEN','DÔEN','By Malene Birger','Prada','Ferragamo','Strathberry','Birkenstock','STAUD','Gap','J.Crew','Almada Label','Leset','Tuckernuck','Nour Hammour','goop','Forme Science','DIME','ZIIP','COUTR','Savette','Le Tanneur','Michael Kors','Saint Laurent','Bottega Veneta','Celine','Khaite','FFORME','Quince','Everlane','Reformation','Anthropologie','Zara','Arket','& Other Stories','Aritzia','Sandro','Maje','Ganni','Jenni Kayne','Cuyana','Sezane'];
+const SP_BRANDS=['The Row','Toteme','Totême','Phoebe Philo','Róhe','Rohe','ROHE','Massimo Dutti','COS','Uniqlo','Mango','H&M','H & M','Nordstrom','Net-a-Porter','NET-A-PORTER','Mytheresa','The RealReal','TheRealReal','Saks','Neiman Marcus','Bergdorf Goodman','SSENSE','FWRD','Moda Operandi','Harrods','Selfridges','Lane Crawford','Holt Renfrew','La Garconne','Hirshleifers','The Webster','Savannahs','Antonia','24S','AYR','Vince','St. Agni','St Agni','Sezane','Sézane','Tibi','Margaux','Kallmeyer','DOEN','DÔEN','By Malene Birger','Prada','Ferragamo','Strathberry','Birkenstock','STAUD','Gap','J.Crew','Almada Label','Leset','Tuckernuck','Nour Hammour','goop','Forme Science','DIME','ZIIP','COUTR','Savette','Le Tanneur','Michael Kors','Saint Laurent','Bottega Veneta','Celine','Khaite','FFORME','Quince','Everlane','Reformation','Anthropologie','Zara','Arket','& Other Stories','Aritzia','Sandro','Maje','Ganni','Jenni Kayne','Cuyana','Sezane'];
 const SP_WEEKDAYS=['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 const SP_MONTHS=['january','february','march','april','may','june','july','august','september','october','november','december'];
 
@@ -2921,10 +2914,13 @@ function spFindCode(text){
   if(/^(THE|AND|FOR|OFF|NOW|ALL|NEW|SALE|SHOP|HERE|YOUR|WITH|FROM|ONLY)$/.test(c))return null;
   return c;
 }
+// Some brands get written several ways; always give back their own styling
+const SP_CANON={'rohe':'Róhe','róhe':'Róhe','h & m':'H&M','h&m':'H&M','toteme':'Toteme','totême':'Toteme','sezane':'Sézane','sézane':'Sézane','st agni':'St. Agni','st. agni':'St. Agni','therealreal':'The RealReal','the realreal':'The RealReal','doen':'DÔEN','dôen':'DÔEN','net-a-porter':'NET-A-PORTER'};
+function spCanonBrand(b){return SP_CANON[String(b).toLowerCase()]||b;}
 function spFindBrand(text,links){
   const hay=text.slice(0,1400);
   for(const b of SP_BRANDS){
-    if(new RegExp('\\b'+b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(hay))return b;
+    if(new RegExp('\\b'+b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(hay))return spCanonBrand(b);
   }
   // Fall back to the domain of the first real link
   for(const l of links){
@@ -3252,12 +3248,12 @@ async function renderWidgets(){
   const views=await loadAnalytics();
   const analyticsHtml=`<div class="widgets-hd" style="margin-bottom:0;">
     <h2>Analytics</h2>
-    <p>Page views for maisontheposh.com — updated every visit.</p>
+    <p>Page views for maisontheposh.com, updated every visit.</p>
   </div>
   ${renderAnalytics(views)}`;
   const rows=D.lists.map(l=>{
     const thumbs=l.items.slice(0,4).map(it=>
-      it.image?`<div class="w-thumb"><img src="${h(it.image)}" alt=""></div>`:`<div class="w-thumb"><span style="font-family:var(--serif);font-size:14px;color:var(--faint)">${(it.brand||'?')[0]}</span></div>`
+      it.image?`<div class="w-thumb"><img src="${h(it.image)}" alt=""></div>`:`<div class="w-thumb"><span style="font-family:var(--serif);font-size:14px;color:var(--faint)">${(bd(it.brand)||'?')[0]}</span></div>`
     ).join('');
     return `<div class="widget-row">
       <div class="w-thumbs">${thumbs}</div>
@@ -3270,7 +3266,7 @@ async function renderWidgets(){
   }).join('');
   feed.innerHTML=`<div class="widgets-wrap">
     ${analyticsHtml}
-    <div class="widgets-hd" style="margin-top:32px;"><h2>My Widgets</h2><p>Generate an embeddable product grid for any list — paste the HTML into any Substack post using the HTML block.</p></div>
+    <div class="widgets-hd" style="margin-top:32px;"><h2>My Widgets</h2><p>Generate an embeddable product grid for any list. Paste the HTML into any Substack post using the HTML block.</p></div>
     ${rows||'<div class="empty"><h3>No lists yet</h3></div>'}
   </div>`;
 }
@@ -3333,7 +3329,7 @@ function renderWB(){
     return `<div class="wb-card${sel?' selected':''}" onclick="toggleWBItem('${h(it.id)}')">
       <div class="wb-card-img">${img}</div>
       <div class="wb-card-info">
-        <div class="wb-card-brand">${h(it.brand)}</div>
+        <div class="wb-card-brand">${h(bd(it.brand))}</div>
         <div class="wb-card-name">${h(it.name)}</div>
         <div class="wb-card-price">${it.price?'$'+h(it.price):''}</div>
       </div>
@@ -3382,7 +3378,7 @@ function openEmbed(id){
   document.getElementById('embed-code').textContent=url;
   document.getElementById('embed-pop').classList.add('open');
 }
-function copyEmbed(){navigator.clipboard.writeText(document.getElementById('embed-code').textContent).then(()=>toast('Link copied — paste into Substack!')).catch(()=>{const ta=document.createElement('textarea');ta.value=document.getElementById('embed-code').textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Link copied!');});}
+function copyEmbed(){navigator.clipboard.writeText(document.getElementById('embed-code').textContent).then(()=>toast('Link copied. Paste into Substack!')).catch(()=>{const ta=document.createElement('textarea');ta.value=document.getElementById('embed-code').textContent;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Link copied!');});}
 function openWidgetTab(){const url=document.getElementById('embed-code').textContent;if(url)window.open(url,'_blank');}
 function closeEmbed(){document.getElementById('embed-pop').classList.remove('open');}
 
@@ -3633,7 +3629,7 @@ async function fetchProduct(){
   }
   if(m.image){
     document.getElementById('auto-img').value=m.image;
-    document.getElementById('auto-prev').innerHTML=`<img src="${h(m.image)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<p class=\\'ihint\\'>Image blocked — use URL or Upload tab.</p>'">`;
+    document.getElementById('auto-prev').innerHTML=`<img src="${h(m.image)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<p class=\\'ihint\\'>Image blocked. Use the URL or Upload tab.</p>'">`;
     switchTab('auto');
   }
 
@@ -3649,8 +3645,8 @@ async function fetchProduct(){
   const hits=[m.title,m.image,m.price].filter(Boolean).length;
   msg.className=hits>=2?'fmsg ok':'fmsg';
   msg.textContent=hits>=2
-    ?`✓ Filled in${catGuess?' · '+catGuess:''} — add Your Take below.`
-    :hits===1?'~ Partial — fill in remaining fields.':'⚠ Could not pull details — fill manually.';
+    ?`✓ Filled in${catGuess?' · '+catGuess:''}. Add Your Take below.`
+    :hits===1?'~ Partial. Fill in the remaining fields.':'⚠ Could not pull details. Fill them in manually.';
 }
 
 // ── INSTAGRAM FETCH ──
@@ -3662,7 +3658,7 @@ async function fetchInstagram(url,msg){
   }
   if(!html){
     msg.className='fmsg err';
-    msg.textContent='⚠ Instagram blocked — download your photo and use the Upload tab instead.';
+    msg.textContent='⚠ Instagram blocked. Download your photo and use the Upload tab instead.';
     return;
   }
   // Extract og:image from Instagram HTML
@@ -3672,13 +3668,13 @@ async function fetchInstagram(url,msg){
 
   if(image){
     document.getElementById('auto-img').value=image;
-    document.getElementById('auto-prev').innerHTML=`<img src="${h(image)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<p class=\\'ihint\\'>IG image blocked by browser — download &amp; upload instead.</p>'">`;
+    document.getElementById('auto-prev').innerHTML=`<img src="${h(image)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='<p class=\\'ihint\\'>IG image blocked by browser. Download &amp; upload instead.</p>'">`;
     switchTab('auto');
     msg.className='fmsg ok';
-    msg.textContent='✓ Instagram image pulled — add product details below.';
+    msg.textContent='✓ Instagram image pulled. Add product details below.';
   } else {
     msg.className='fmsg err';
-    msg.textContent='⚠ Could not extract image — Instagram may require login. Try the Upload tab.';
+    msg.textContent='⚠ Could not extract image. Instagram may require login, try the Upload tab.';
   }
   // Pre-fill description as a starting note if fields are empty
   if(desc&&!document.getElementById('i-note').value){
@@ -3735,7 +3731,7 @@ async function addItem(){
   const links=getLinks();
   const rawImg=getImg();
   const image=await compressImage(rawImg);
-  const item={id:uid(),name,brand:document.getElementById('i-brand').value.trim()||'—',price:document.getElementById('i-price').value.trim()||'',note:document.getElementById('i-note').value.trim(),...links,image,cat:detectedItemCat||''};
+  const item={id:uid(),name,brand:document.getElementById('i-brand').value.trim(),price:document.getElementById('i-price').value.trim()||'',note:document.getElementById('i-note').value.trim(),...links,image,cat:detectedItemCat||''};
   l.items.push(item);
   const btn=document.querySelector('#ai-ov .btn-p');
   if(btn){btn.textContent='Saving…';btn.disabled=true;}
@@ -3774,11 +3770,11 @@ function renderPickItems(items){
   body.innerHTML=Object.entries(byList).map(([listName,its])=>`
     <div class="pick-section-label">${h(listName)}</div>
     <div class="pick-grid">${its.map(it=>{
-      const img=it.image?`<img src="${h(it.image)}" alt="" loading="lazy">`:`<div class="pick-card-ph">${(it.brand||'?')[0]}</div>`;
+      const img=it.image?`<img src="${h(it.image)}" alt="" loading="lazy">`:`<div class="pick-card-ph">${(bd(it.brand)||'?')[0]}</div>`;
       return `<div class="pick-card" onclick="pickItem('${h(it.id)}')">
         <div class="pick-card-img">${img}</div>
         <div class="pick-card-info">
-          <div class="pick-card-brand">${h(it.brand||'')}</div>
+          <div class="pick-card-brand">${h(bd(it.brand))}</div>
           <div class="pick-card-name">${h(it.name)}</div>
           ${it.price?`<div class="pick-card-price">$${h(it.price)}</div>`:''}
         </div>
@@ -3881,7 +3877,7 @@ function openCreateLook(){
   switchPickerTab('list');
   const picker=document.getElementById('look-picker');
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
-  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first, or use the Add a Link tab.</p>';
+  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(bd(it.brand)||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(bd(it.brand))} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first, or use the Add a Link tab.</p>';
   document.getElementById('look-ov').classList.add('open');
 }
 
@@ -3908,7 +3904,7 @@ function openEditLook(id){
   const lookItemIds=new Set((look.items||[]).map(it=>it.id));
   const allItems=[];D.lists.forEach(l=>l.items.forEach(it=>allItems.push({...it,_ln:l.name})));
   const picker=document.getElementById('look-picker');
-  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" ${lookItemIds.has(it.id)?'checked':''} style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(it.brand||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(it.brand)} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first.</p>';
+  picker.innerHTML=allItems.length?allItems.map(it=>`<label style="display:flex;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--border);"><input type="checkbox" value="${h(it.id)}" ${lookItemIds.has(it.id)?'checked':''} style="flex-shrink:0;">${it.image?`<img src="${h(it.image)}" style="width:36px;height:48px;object-fit:cover;flex-shrink:0;">`:`<div style="width:36px;height:48px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:var(--serif);color:var(--faint);">${(bd(it.brand)||'?')[0]}</div>`}<div><div style="font-size:12px;color:var(--ink);font-family:var(--serif);">${h(it.name)}</div><div style="font-size:10px;color:var(--soft);">${h(bd(it.brand))} · ${h(it._ln)}</div></div></label>`).join(''):'<p style="padding:12px;font-size:12px;color:var(--soft);">Add items to your lists first.</p>';
   // Restore any manual (non-list) items
   const listItemIds=new Set(allItems.map(it=>it.id));
   lookManualItems=(look.items||[]).filter(it=>!listItemIds.has(it.id));
@@ -3979,7 +3975,7 @@ async function saveLook(){
     }
     closeLook();render();toast(editingId?'Look updated ✓':'Look saved ✓');
   }catch(e){
-    toast('⚠ Save failed — check connection and try again');
+    toast('⚠ Save failed. Check your connection and try again');
   }finally{
     if(btn){btn.textContent='SAVE LOOK';btn.disabled=false;}
   }
@@ -4037,16 +4033,16 @@ function openLookPanel(id){
     <div style="padding:18px 16px;display:flex;flex-direction:column;gap:10px;height:100%;">
       <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);font-family:var(--sans);">Editor's Note</div>
       <div style="font-family:var(--serif);font-size:13px;font-style:italic;color:var(--ink);line-height:1.7;flex:1;">${h(look.note)}</div>
-      <div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:var(--sans);">— MaisonThePosh</div>
+      <div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);font-family:var(--sans);">MaisonThePosh</div>
     </div>
   </div>`:'';
   g.innerHTML=cover+look.items.map(it=>{
-    const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="picard-ph">${(it.brand||'?')[0]}</div>`;
+    const img=it.image?`<img src="${h(it.image)}" alt="${h(it.name)}" onerror="this.style.display='none'">`:`<div class="picard-ph">${(bd(it.brand)||'?')[0]}</div>`;
     const extraLinks=[it.link2,it.link3,it.link4,it.link5,it.link6].filter(l=>l&&l.trim()&&l!=='#');
     const altBtn=extraLinks.length>0
       ?`<button class="picard-alt" onclick="event.preventDefault();event.stopPropagation();openPanelOpts(this)" data-item='${JSON.stringify({image:it.image||'',name:it.name||'',brand:it.brand||'',link:it.link||'#',link2:it.link2||'',link3:it.link3||'',link4:it.link4||'',link5:it.link5||'',link6:it.link6||''}).replace(/'/g,"&#39;")}'>See ${extraLinks.length} other option${extraLinks.length>1?'s':''} →</button>`
       :'';
-    return `<a class="picard" href="${h(it.link)}" target="_blank" rel="noopener"><div class="picard-img">${img}</div><div class="picard-info"><div class="picard-brand">${h(it.brand)}</div><div class="picard-name">${h(it.name)}</div><div class="picard-price">${it.price?'$'+h(it.price):h(it.price)}</div>${it.note?`<div class="picard-note">${h(it.note)}</div>`:''}<span class="picard-cta">Shop →</span>${altBtn}</div></a>`;
+    return `<a class="picard" href="${h(it.link)}" target="_blank" rel="noopener"><div class="picard-img">${img}</div><div class="picard-info"><div class="picard-brand">${h(bd(it.brand))}</div><div class="picard-name">${h(it.name)}</div><div class="picard-price">${it.price?'$'+h(it.price):h(it.price)}</div>${it.note?`<div class="picard-note">${h(it.note)}</div>`:''}<span class="picard-cta">Shop →</span>${altBtn}</div></a>`;
   }).join('')+noteCard;
   document.getElementById('backdrop').classList.add('open');
   document.getElementById('panel').classList.add('open');
@@ -4409,7 +4405,7 @@ async function handleImportFile(file){
   tbody.innerHTML='';
   newItems.slice(0,5).forEach(item=>{
     const tr=document.createElement('tr');
-    tr.innerHTML='<td style="padding:6px 8px;border-bottom:1px solid var(--border);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+item.title+'">'+item.title.slice(0,35)+(item.title.length>35?'…':'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+( item.brand||'—')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--soft);">'+item.cat+'</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--soft);">'+item.shortUrl.replace('https://','')+'</td>';
+    tr.innerHTML='<td style="padding:6px 8px;border-bottom:1px solid var(--border);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+item.title+'">'+item.title.slice(0,35)+(item.title.length>35?'…':'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(bd(item.brand)||'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--soft);">'+item.cat+'</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--soft);">'+item.shortUrl.replace('https://','')+'</td>';
     tbody.appendChild(tr);
   });
   if(newItems.length>0)document.getElementById('imp-btn').style.display='block';
@@ -4434,13 +4430,13 @@ async function runImport(){
       batch.forEach(b=>(D.unassigned=D.unassigned||[]).push(b));
       batch.forEach(b=>_impLog('✓ '+b.name+' · '+b.cat,'ok'));
     } else {
-      _impLog('✗ batch '+(i)+'–'+(i+BATCH)+' failed','err');
+      _impLog('✗ batch '+(i)+' to '+(i+BATCH)+' failed','err');
     }
     document.getElementById('imp-n-done').textContent=done;
     document.getElementById('imp-prog-fill').style.width=Math.min(100,Math.round((i+BATCH)/newItems.length*100))+'%';
   }
   document.getElementById('imp-prog-fill').style.width='100%';
-  _impLog('Done — '+done+' items imported to Latest Finds.','ok');
+  _impLog('Done. '+done+' items imported to Latest Finds.','ok');
   if(done>0&&activeT1==='latest')render();
 }
 
@@ -4559,8 +4555,8 @@ async function runFetchImages(){
       <button type="button" class="sp-paste-clear" id="sp-paste-clear" style="display:none;" onclick="spClearPaste()">Clear and start over</button>
     </div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
-    <div class="fg"><label class="fl">Subtitle <span class="flh">(optional — e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
-    <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale — what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
+    <div class="fg"><label class="fl">Subtitle <span class="flh">(optional, e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
+    <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale: what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
     <div class="fg">
       <label class="fl">Sale ends <span class="flh">(leave empty if it has no end date)</span></label>
       <input type="date" class="fi" id="sp-f-expires" onchange="spSyncEndsHint()">
@@ -4593,12 +4589,12 @@ async function runFetchImages(){
       <input type="hidden" id="sp-f-img-val">
     </div>
     <div class="fg">
-      <label class="fl">Image URL <span class="flh">(optional — paste a link to load image)</span></label>
+      <label class="fl">Image URL <span class="flh">(optional, paste a link to load image)</span></label>
       <input type="url" class="fi" id="sp-f-img-url" placeholder="https://…" oninput="(function(v){if(!v)return;const prev=document.getElementById('sp-f-img-preview');prev.src=v;prev.style.display='block';document.getElementById('sp-f-img-val').value=v;})(this.value.trim())">
     </div>
     <div class="fg"><label class="fl">Caption</label><input type="text" class="fi" id="sp-f-caption" placeholder="e.g. The Row Margaux Ballet Flat"></div>
     <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-f-price" placeholder="890"></div>
-    <div class="fg"><label class="fl">Affiliate Link <span class="flh">(no image? just add this — a Shop button will show)</span></label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
+    <div class="fg"><label class="fl">Affiliate Link <span class="flh">(no image? just add this and a Shop button will show)</span></label><input type="url" class="fi" id="sp-f-link" placeholder="https://…"></div>
     <button class="btn-g" id="sp-copy-link-btn" onclick="(function(){const v=document.getElementById('sp-f-link').value.trim();if(!v)return;navigator.clipboard.writeText(v).then(()=>{const b=document.getElementById('sp-copy-link-btn');b.textContent='Copied!';setTimeout(()=>b.textContent='Copy Image Link',1800);});})()" style="font-size:10px;letter-spacing:.12em;">Copy Image Link</button>
     <button class="btn-p" onclick="saveImageForm()">Save</button>
     <button class="btn-g" onclick="closeSPImgForm()">Cancel</button>
@@ -4611,14 +4607,14 @@ async function runFetchImages(){
     <h3 class="ftitle" id="tl-form-title">New Entry</h3>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="tl-f-title" placeholder="e.g. Via Carota, The White Album, Khaite..."></div>
     <div class="fg">
-      <label class="fl">Tag <span class="flh">(optional — e.g. Restaurant, Book, Store, Travel, Product)</span></label>
+      <label class="fl">Tag <span class="flh">(optional, e.g. Restaurant, Book, Store, Travel, Product)</span></label>
       <input type="text" class="fi" id="tl-f-tag" placeholder="Restaurant">
     </div>
     <div class="fg"><label class="fl">Why you love it</label><textarea class="fi fta" id="tl-f-note" rows="5" placeholder="Your write-up..." style="font-style:normal;min-height:110px;"></textarea></div>
     <div class="fg"><label class="fl">Link <span class="flh">(optional)</span></label><input type="url" class="fi" id="tl-f-link" placeholder="https://…"></div>
-    <div class="fg"><label class="fl">Link label <span class="flh">(optional — e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
+    <div class="fg"><label class="fl">Link label <span class="flh">(optional, e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
     <div class="fg">
-      <label class="fl">How long you've had it <span class="flh">(optional — the bit no one else can copy)</span></label>
+      <label class="fl">How long you've had it <span class="flh">(optional, the bit no one else can copy)</span></label>
       <input type="text" class="fi" id="tl-f-owned" placeholder="e.g. Owned 2 years · Worn most weeks since March · On its third summer">
     </div>
     <div class="fg">
