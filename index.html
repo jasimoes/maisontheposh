@@ -182,6 +182,34 @@ body.creator .wc-del-btn{display:flex;}
 .wc-add-row{display:flex;align-items:center;justify-content:center;padding:30px;gap:10px;cursor:pointer;color:var(--soft);font-size:10px;letter-spacing:.14em;text-transform:uppercase;border-bottom:1px solid var(--border);transition:all .18s;}
 .wc-add-row:hover{background:var(--surf);color:var(--mid);}
 .wc-empty{text-align:center;padding:80px 40px;color:var(--soft);font-family:var(--serif);font-size:16px;font-style:italic;}
+/* Collapsible carousel rows */
+.wc-carousel-header{gap:14px;}
+.wc-head-btn{flex:1;min-width:0;display:flex;align-items:center;gap:11px;background:none;border:none;padding:6px 0;margin:0;cursor:pointer;text-align:left;font-family:inherit;color:inherit;}
+.wc-head-btn:hover .wc-carousel-label{opacity:.6;}
+.wc-chev{width:7px;height:7px;border-right:1px solid var(--mid);border-bottom:1px solid var(--mid);transform:rotate(-45deg);transition:transform .22s ease;flex-shrink:0;margin-top:-2px;}
+.wc-open .wc-chev{transform:rotate(45deg);}
+.wc-grp{font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);border:1px solid var(--border);padding:2px 7px;white-space:nowrap;flex-shrink:0;}
+.wc-body{display:none;padding-top:10px;}
+.wc-open .wc-body{display:block;}
+.wc-item:not(.wc-open) .wc-carousel-wrap{padding-top:16px;padding-bottom:14px;}
+.wc-flash{background:var(--surf);}
+.wc-link-btn{width:28px;height:28px;border:1px solid var(--border);background:none;cursor:pointer;display:none;align-items:center;justify-content:center;font-size:11px;color:var(--mid);border-radius:2px;transition:all .15s;}
+.wc-link-btn:hover{border-color:var(--ink);color:var(--ink);}
+body.creator .wc-link-btn{display:flex;}
+/* Open all / close all */
+.wc-tools{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 40px;border-bottom:1px solid var(--border);}
+.wc-tools-count{font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
+.wc-tools-acts{display:flex;gap:7px;}
+.wc-tool-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;padding:6px 12px;cursor:pointer;transition:all .16s;}
+.wc-tool-btn:hover{border-color:var(--ink);color:var(--ink);}
+/* Count beside each filter chip */
+.t2-n{font-size:8.5px;color:var(--faint);margin-left:3px;letter-spacing:.06em;}
+.t2.on .t2-n{color:var(--soft);}
+@media(max-width:700px){
+  .wc-tools{padding:11px 16px;}
+  .wc-carousel-header{gap:8px;}
+  .wc-grp{display:none;}
+}
 /* ══ AFFILIATE DISCLOSURE ══ */
 .aff-note{padding:14px 40px 13px;border-bottom:1px solid var(--border);font-family:var(--serif);font-size:12px;font-style:italic;color:var(--soft);line-height:1.6;background:var(--white);}
 /* ══ SUBSCRIBE ══ */
@@ -846,7 +874,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <!-- Row 3: Nav centered -->
   <nav class="site-nav" id="nav1">
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
-    <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">Weekly Curation</button>
+    <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">The Edits</button>
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
     <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
@@ -930,7 +958,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <div class="fg"><label class="fl">Section</label>
       <div class="chips" id="el-t1c">
         <button class="chip" onclick="selELT1(this,'latest')">Latest Finds</button>
-        <button class="chip" onclick="selELT1(this,'weekly')">Weekly Curation</button>
+        <button class="chip" onclick="selELT1(this,'weekly')">The Edits</button>
         <button class="chip" onclick="selELT1(this,'sales')">On Sale Now</button>
       </div>
     </div>
@@ -995,7 +1023,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <div class="fg"><label class="fl">Section</label>
       <div class="chips" id="nl-t1c">
         <button class="chip" onclick="selT1c(this,'latest')">Latest Finds</button>
-        <button class="chip" onclick="selT1c(this,'weekly')">Weekly Curation</button>
+        <button class="chip" onclick="selT1c(this,'weekly')">The Edits</button>
         <button class="chip" onclick="selT1c(this,'sales')">On Sale Now</button>
       </div>
     </div>
@@ -1503,6 +1531,13 @@ function goHome(){
 }
 
 // ══ NAV ══
+// The tab is called The Edits but its key, and its rows in wc_carousels, stay
+// 'weekly'. These two keep the shared URL readable without touching either.
+const TAB_SLUG={weekly:'edits'};
+const SLUG_TAB={edits:'weekly'};
+function tabToSlug(t){return TAB_SLUG[t]||t;}
+function slugToTab(s){return SLUG_TAB[s]||s;}
+
 function setT1(val,btn){
   activeT1=val;activeCat='all';
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
@@ -1510,9 +1545,10 @@ function setT1(val,btn){
   document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
   closeDetail(true);
+  if(!wcIsTab(val)){_wcFilter='all';}
   applyTabMeta(val);
   render();
-  history.pushState({tab:val},'',`/?tab=${val}`);
+  history.pushState({tab:val},'',`/?tab=${tabToSlug(val)}`);
 }
 function setCat(val,btn){activeCat=val;document.querySelectorAll('.t2').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
 
@@ -1564,7 +1600,7 @@ function subscribeBlock(){
 // looked identical. Each tab now names itself.
 const TAB_META={
   journal:{t:'Posts | MaisonThePosh',d:'Essays, collection analyses and curation notes.'},
-  weekly:{t:'Weekly Curation | MaisonThePosh',d:'This week\u2019s edit, collection by collection.'},
+  weekly:{t:'The Edits | MaisonThePosh',d:'My shoppable edits, brand by brand and category by category.'},
   stockist:{t:'Stockist | MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
   latest:{t:'The List | MaisonThePosh',d:'The things I actually love and keep going back to.'},
   sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
@@ -1583,7 +1619,7 @@ function applyTabMeta(tab){
 const AFF_DISCLOSURE="The products featured here may contain affiliate links.";
 function affNote(){return `<div class="aff-note">${h(AFF_DISCLOSURE)}</div>`;}
 
-const WC_TAB_LABELS={weekly:'Weekly Curation',stockist:'Stockist'};
+const WC_TAB_LABELS={weekly:'The Edits',stockist:'Stockist'};
 function wcIsTab(t){return Object.prototype.hasOwnProperty.call(WC_TAB_LABELS,t);}
 function wcTab(){return wcIsTab(activeT1)?activeT1:'weekly';}
 // Keep the original cache key for weekly so returning readers still paint instantly
@@ -1597,7 +1633,7 @@ function wcList(t){t=t||wcTab();return _wcData[t]||wcCacheLoad(t);}
 
 async function wcFetchCloud(t){
   const rows=await sbFetch(`wc_carousels?select=*&tab=eq.${encodeURIComponent(t)}&order=sort_order.asc,created_at.asc`);
-  const arr=(rows||[]).map(r=>({id:r.id,title:r.title,src:r.src}));
+  const arr=(rows||[]).map(r=>({id:r.id,title:r.title,src:r.src,group:r.group||''}));
   _wcData[t]=arr;wcCacheSave(t,arr);return arr;
 }
 
@@ -1614,39 +1650,169 @@ function wcCleanSrc(raw){
   return src;
 }
 
+// ══ GROUPS, COLLAPSE AND ANCHORING ══
+// Twenty stacked carousels was ten screens of scrolling with no way to jump.
+// Collections now carry a group, the sub-nav filters by it, and everything past
+// the first two opens on demand so the page reads as an index you can scan.
+const WC_GROUPS=[
+  {key:'all',       label:'All'},
+  {key:'houses',    label:'Houses'},
+  {key:'highstreet',label:'High Street'},
+  {key:'category',  label:'By Category'},
+  {key:'menswear',  label:'Menswear'}
+];
+const WC_GROUP_LABEL=Object.fromEntries(WC_GROUPS.map(g=>[g.key,g.label]));
+const WC_OPEN_BY_DEFAULT=2;   // how many sit open when the page loads
+const WC_FILTER_MIN=8;        // only show filters once a tab is long enough
+let _wcFilter='all';
+let _wcOpen=null;             // Set of open collection ids, null until first render
+let _wcOpenInit=false;        // have the defaults been applied to real data yet
+let _wcAnchorId=null;         // a collection linked directly from outside
+
+function wcGroupsPresent(list){
+  const seen=new Set(list.map(c=>c.group).filter(Boolean));
+  return WC_GROUPS.filter(g=>g.key==='all'||seen.has(g.key));
+}
+function wcVisible(list){
+  return _wcFilter==='all'?list:list.filter(c=>(c.group||'')===_wcFilter);
+}
+function wcCount(list,key){
+  return key==='all'?list.length:list.filter(c=>(c.group||'')===key).length;
+}
+
+// Sub-nav filter chips live in the bar the site already had for second-level nav
+function wcRenderFilters(list){
+  const nav=document.getElementById('nav2');
+  if(!nav)return;
+  const groups=wcGroupsPresent(list);
+  if(list.length<WC_FILTER_MIN||groups.length<3){nav.classList.add('hide');nav.innerHTML='';return;}
+  nav.innerHTML=groups.map(g=>
+    `<button class="t2${_wcFilter===g.key?' on':''}" onclick="wcSetFilter('${g.key}')">${h(g.label)} <span class="t2-n">${wcCount(list,g.key)}</span></button>`
+  ).join('');
+  nav.classList.remove('hide');
+}
+function wcSetFilter(key){
+  if(_wcFilter===key)return;
+  _wcFilter=key;
+  renderWeekly();
+  // A filter change is a fresh view, so start it at the top of the list
+  const feed=document.getElementById('feed');
+  const top=feed?feed.getBoundingClientRect().top+window.scrollY-(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h'))||122)-8:0;
+  window.scrollTo({top:Math.max(0,top),behavior:'smooth'});
+}
+
+// Open and close without the page jumping under the reader: hold whatever the
+// header's distance from the top of the viewport was, and restore it after.
+function wcToggle(id,btn){
+  const item=btn.closest('.wc-item');
+  if(!item)return;
+  const before=item.getBoundingClientRect().top;
+  const open=item.classList.toggle('wc-open');
+  if(open){
+    const f=item.querySelector('iframe');
+    if(f&&!f.src&&f.dataset.src)f.src=f.dataset.src;   // load only when opened
+    _wcOpen.add(id);
+  }else{
+    _wcOpen.delete(id);
+  }
+  btn.setAttribute('aria-expanded',open?'true':'false');
+  const after=item.getBoundingClientRect().top;
+  if(Math.abs(after-before)>1)window.scrollBy(0,after-before);
+}
+
+function wcExpandAll(openIt){
+  const list=wcVisible(wcList(wcTab()));
+  if(openIt)list.forEach(c=>_wcOpen.add(c.id)); else _wcOpen.clear();
+  renderWeekly();
+}
+
+// Open a specific collection and bring it into view, used by ?c=<id> links
+function wcGoTo(id,smooth){
+  const el=document.querySelector(`.wc-item[data-wc-id="${CSS.escape(id)}"]`);
+  if(!el)return false;
+  if(!el.classList.contains('wc-open')){
+    const btn=el.querySelector('.wc-head-btn');
+    if(btn)wcToggle(id,btn);
+  }
+  const off=(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h'))||122)+52;
+  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-off,behavior:smooth?'smooth':'auto'});
+  el.classList.add('wc-flash');
+  setTimeout(()=>el.classList.remove('wc-flash'),1400);
+  return true;
+}
+function wcCopyLink(id){
+  const url=`https://maisontheposh.com/?tab=${tabToSlug(wcTab())}&c=${encodeURIComponent(id)}`;
+  navigator.clipboard.writeText(url).then(()=>toast('Link to this edit copied')).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=url;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);toast('Link to this edit copied');
+  });
+}
+
 function renderWeekly(){
   const feed=document.getElementById('feed');
   const tab=wcTab();
-  const carousels=wcList(tab);
-  if(!carousels.length&&!isCreator){
+  const all=wcList(tab);
+  // Decide what starts open, but only once there is real data. On a first visit
+  // the cache is empty, so doing this earlier would leave everything collapsed.
+  if(_wcOpen===null)_wcOpen=new Set();
+  if(!_wcOpenInit&&all.length){
+    _wcOpenInit=true;
+    all.slice(0,WC_OPEN_BY_DEFAULT).forEach(c=>_wcOpen.add(c.id));
+    if(_wcAnchorId)_wcOpen.add(_wcAnchorId);
+  }
+  const carousels=wcVisible(all);
+
+  if(!all.length&&!isCreator){
+    document.getElementById('nav2').classList.add('hide');
     feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`+subscribeBlock();
   }else{
+    wcRenderFilters(all);
     const bar=isCreator?`
       <div class="wc-bar">
-        <div class="wc-bar-note"><b>${carousels.length} collection${carousels.length===1?'':'s'}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
+        <div class="wc-bar-note"><b>${all.length} collection${all.length===1?'':'s'}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
         <div class="wc-bar-acts">
           <button class="wc-bar-btn" onclick="wcOpenAdd()">＋ Add collection</button>
           <button class="wc-bar-btn ghost" onclick="wcRefresh()">Refresh</button>
         </div>
       </div>`:'';
-    const items=carousels.map((c,i)=>`
-      <div class="wc-item" data-wc-i="${i}" draggable="${isCreator}">
+    const tools=all.length>=WC_FILTER_MIN?`
+      <div class="wc-tools">
+        <span class="wc-tools-count">${carousels.length} ${carousels.length===1?'edit':'edits'}${_wcFilter!=='all'?' in '+h(WC_GROUP_LABEL[_wcFilter]):''}</span>
+        <div class="wc-tools-acts">
+          <button class="wc-tool-btn" onclick="wcExpandAll(true)">Open all</button>
+          <button class="wc-tool-btn" onclick="wcExpandAll(false)">Close all</button>
+        </div>
+      </div>`:'';
+    const items=carousels.map((c,vi)=>{
+      const i=all.indexOf(c);
+      const open=_wcOpen.has(c.id);
+      return `
+      <div class="wc-item${open?' wc-open':''}" data-wc-i="${i}" data-wc-id="${h(c.id)}" draggable="${isCreator}">
         <div class="wc-carousel-wrap">
           <div class="wc-carousel-header">
-            <span class="wc-carousel-label">${h(c.title)}</span>
+            <button class="wc-head-btn" onclick="wcToggle('${h(c.id)}',this)" aria-expanded="${open?'true':'false'}">
+              <span class="wc-chev" aria-hidden="true"></span>
+              <span class="wc-carousel-label">${h(c.title)}</span>
+              ${c.group&&_wcFilter==='all'?`<span class="wc-grp">${h(WC_GROUP_LABEL[c.group]||c.group)}</span>`:''}
+            </button>
             <div class="wc-carousel-acts">
-              <button class="wc-move-btn" onclick="wcMove(${i},-1)" ${i===0?'disabled':''} title="Move up">▲</button>
-              <button class="wc-move-btn" onclick="wcMove(${i},1)" ${i===carousels.length-1?'disabled':''} title="Move down">▼</button>
-              <button class="wc-edit-btn" onclick="wcOpenEdit(${i})" title="Edit name or link">✎</button>
-              <button class="wc-del-btn" onclick="wcDelete(${i})" title="Remove">✕</button>
+              <button class="wc-link-btn" onclick="event.stopPropagation();wcCopyLink('${h(c.id)}')" title="Copy a link straight to this edit">↗</button>
+              <button class="wc-move-btn" onclick="event.stopPropagation();wcMove(${i},-1)" ${i===0?'disabled':''} title="Move up">▲</button>
+              <button class="wc-move-btn" onclick="event.stopPropagation();wcMove(${i},1)" ${i===all.length-1?'disabled':''} title="Move down">▼</button>
+              <button class="wc-edit-btn" onclick="event.stopPropagation();wcOpenEdit(${i})" title="Edit name, link or group">✎</button>
+              <button class="wc-del-btn" onclick="event.stopPropagation();wcDelete(${i})" title="Remove">✕</button>
             </div>
           </div>
-          <iframe loading="lazy" title="${h(c.title)}" src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
+          <div class="wc-body">
+            <iframe loading="lazy" title="${h(c.title)}" ${open?`src="${h(c.src)}"`:''} data-src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
+          </div>
         </div>
-      </div>`).join('');
+      </div>`;}).join('');
+    const empty=(!carousels.length&&all.length)?`<div class="wc-empty">Nothing in ${h(WC_GROUP_LABEL[_wcFilter]||'this group')} yet.</div>`:'';
     const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
-    feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${items}${addRow}</div>`+subscribeBlock();
+    feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${tools}${items}${empty}${addRow}</div>`+subscribeBlock();
     if(isCreator)wcInitDrag();
+    // Honour a ?c=<id> deep link once the data is actually there
+    if(_wcAnchorId){const done=wcGoTo(_wcAnchorId,false);if(done)_wcAnchorId=null;}
   }
   // First paint came from cache; pull the real list once per tab, then repaint
   if(!_wcLoaded[tab]&&!_wcFetching[tab]){
@@ -1687,7 +1853,7 @@ function wcRefresh(){
 
 // Write the whole lineup back, with sort_order matching the on-page order
 async function wcPersist(tab,arr){
-  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,tab:tab,sort_order:i}));
+  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,group:c.group||'',tab:tab,sort_order:i}));
   if(rows.length){
     await sbFetch('wc_carousels',{
       method:'POST',
@@ -1695,7 +1861,7 @@ async function wcPersist(tab,arr){
       body:JSON.stringify(rows)
     });
   }
-  _wcData[tab]=arr.map(c=>({id:c.id,title:c.title,src:c.src}));
+  _wcData[tab]=arr.map(c=>({id:c.id,title:c.title,src:c.src,group:c.group||''}));
   wcCacheSave(tab,_wcData[tab]);
 }
 
@@ -1728,6 +1894,7 @@ function wcOpenAdd(){
   document.getElementById('wc-form-title').textContent=`Add to ${WC_TAB_LABELS[_wcFormTab]}`;
   document.getElementById('wc-f-title').value='';
   document.getElementById('wc-f-src').value='';
+  document.getElementById('wc-f-group').value=_wcFilter==='all'?'':_wcFilter;
   document.getElementById('wc-save-btn').textContent='Add';
   document.getElementById('wc-ov').classList.add('open');
   setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
@@ -1740,6 +1907,7 @@ function wcOpenEdit(i){
   document.getElementById('wc-form-title').textContent='Edit Collection';
   document.getElementById('wc-f-title').value=c.title||'';
   document.getElementById('wc-f-src').value=c.src||'';
+  document.getElementById('wc-f-group').value=c.group||'';
   document.getElementById('wc-save-btn').textContent='Save';
   document.getElementById('wc-ov').classList.add('open');
   setTimeout(()=>document.getElementById('wc-f-title').focus(),50);
@@ -1749,6 +1917,7 @@ function wcCloseForm(){document.getElementById('wc-ov').classList.remove('open')
 async function wcSaveForm(){
   const title=document.getElementById('wc-f-title').value.trim();
   const src=wcCleanSrc(document.getElementById('wc-f-src').value);
+  const group=document.getElementById('wc-f-group').value;
   if(!title){toast('Give the collection a name');return;}
   if(!src){toast('Paste the ShopMy embed code or collection link');return;}
   const tab=_wcFormTab;
@@ -1758,11 +1927,13 @@ async function wcSaveForm(){
   try{
     if(_wcEditIdx===null){
       if(arr.some(c=>c.src===src)){toast(`That collection is already on ${WC_TAB_LABELS[tab]}`);return;}
-      arr.unshift({id:uid(),title,src});
+      const nid=uid();
+      arr.unshift({id:nid,title,src,group});
+      _wcOpen.add(nid);
       await wcPersist(tab,arr);
       wcCloseForm();renderWeekly();toast('Added to the top and saved');
     }else{
-      arr[_wcEditIdx]={...arr[_wcEditIdx],title,src};
+      arr[_wcEditIdx]={...arr[_wcEditIdx],title,src,group};
       await wcPersist(tab,arr);
       wcCloseForm();renderWeekly();toast('Saved');
     }
@@ -3394,7 +3565,7 @@ function openEditList(){
   document.querySelectorAll('#el-t1c .chip').forEach(c=>c.classList.toggle('on',c.textContent.toLowerCase().replace(/\s+/g,'')===elT1.replace(/\s+/g,'')||
     (c.textContent==='Latest Finds'&&elT1==='latest')||
     (c.textContent==='Collections'&&elT1==='collections')||
-    (c.textContent==='Weekly Curation'&&elT1==='weekly')||
+    (c.textContent==='The Edits'&&elT1==='weekly')||
     (c.textContent==='On Sale Now'&&elT1==='sales')
   ));
   document.querySelectorAll('#el-cc .chip').forEach(c=>c.classList.toggle('on',c.textContent.toLowerCase()===elCat));
@@ -4241,7 +4412,9 @@ document.addEventListener('click',function(e){
 // ══ HISTORY / BACK-FORWARD ══
 function restoreFromURL(){
   const params=new URLSearchParams(location.search);
-  const tab=params.get('tab')||'latest';
+  const tab=slugToTab(params.get('tab')||'latest');
+  const anchorC=params.get('c');
+  if(anchorC)_wcAnchorId=anchorC;
   const listId=params.get('list');
   const itemId=params.get('item');
   const lookId=params.get('look');
@@ -4442,7 +4615,7 @@ async function runImport(){
 
 
 window.addEventListener('DOMContentLoaded',()=>{
-  // Weekly Curation loads from Supabase on first paint — nothing to seed here.
+  // The Edits loads from Supabase on first paint, nothing to seed here.
   updateHeaderHeight();
   window.addEventListener('resize',updateHeaderHeight);
   const dz=document.getElementById('dropz');
@@ -4637,6 +4810,16 @@ async function runFetchImages(){
     <div class="fg">
       <label class="fl">ShopMy collection <span class="flh">(paste the embed code or just the collection link)</span></label>
       <textarea class="fi fta" id="wc-f-src" rows="3" placeholder="&lt;iframe src=&quot;https://shopmy.us/collections/embed/5506942?&quot;&gt;&lt;/iframe&gt;&#10;or&#10;https://shopmy.us/shop/collections/5506942" style="font-style:normal;min-height:78px;font-size:12px;"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Group <span class="flh">(optional, drives the filters across the top)</span></label>
+      <select class="fi" id="wc-f-group">
+        <option value="">Ungrouped</option>
+        <option value="houses">Houses</option>
+        <option value="highstreet">High Street</option>
+        <option value="category">By Category</option>
+        <option value="menswear">Menswear</option>
+      </select>
     </div>
     <button class="btn-p" id="wc-save-btn" onclick="wcSaveForm()">Add</button>
     <button class="btn-g" onclick="wcCloseForm()">Cancel</button>
