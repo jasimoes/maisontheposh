@@ -495,6 +495,8 @@ body.creator .sp-add-img{display:flex;}
 .w-acts{display:flex;gap:8px;padding:10px 14px;flex-shrink:0;align-items:center;}
 .btn-embed{padding:5px 12px;font-family:var(--sans);font-size:10px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;white-space:nowrap;}
 .btn-embed:hover{border-color:var(--ink);color:var(--ink);}
+.btn-embed.del{border-color:var(--border);color:var(--soft);}
+.btn-embed.del:hover{border-color:#B03030;color:#B03030;background:none;}
 .btn-embed.pri{background:var(--ink);border-color:var(--ink);color:white;}
 
 /* ══ LIST DETAIL VIEW (full-page, replaces feed) ══ */
@@ -647,6 +649,29 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .look-drop p{font-size:12px;color:var(--soft);}
 .look-prev{width:100%;max-height:200px;object-fit:cover;margin-bottom:12px;display:none;}
 
+/* Add products by pasting links */
+.wb-paste{border-bottom:1px solid var(--border);flex-shrink:0;}
+.wb-paste-head{display:flex;align-items:center;gap:14px;padding:12px 32px;flex-wrap:wrap;}
+.wb-tool-tab{background:none;border:1px solid var(--ink);color:var(--ink);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;padding:7px 14px;cursor:pointer;transition:all .16s;white-space:nowrap;}
+.wb-tool-tab:hover{background:var(--ink);color:#fff;}
+.wb-tool-tab.on{background:var(--ink);color:#fff;}
+.wb-paste-note{font-size:10.5px;color:var(--soft);line-height:1.5;}
+.wb-paste-body{display:none;padding:0 32px 16px;}
+.wb-paste-body.open{display:block;}
+.wb-paste-box{width:100%;min-height:92px;border:1px solid var(--border);background:var(--surf);padding:10px 12px;font-family:var(--sans);font-size:11.5px;color:var(--ink);line-height:1.7;resize:vertical;}
+.wb-paste-box:focus{outline:none;border-color:var(--mid);}
+.wb-paste-acts{display:flex;align-items:center;gap:8px;margin-top:10px;}
+.wb-paste-status{flex:1;font-size:10.5px;color:var(--soft);}
+.wb-paste-results{margin-top:12px;display:flex;flex-direction:column;gap:6px;max-height:210px;overflow-y:auto;}
+.wb-pr{display:flex;align-items:center;gap:10px;border:1px solid var(--border);padding:7px 10px;font-size:11px;}
+.wb-pr img{width:34px;height:44px;object-fit:cover;background:var(--bg);flex-shrink:0;}
+.wb-pr-t{flex:1;min-width:0;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.wb-pr-b{color:var(--soft);font-size:9px;letter-spacing:.1em;text-transform:uppercase;}
+.wb-pr-p{color:var(--mid);white-space:nowrap;}
+.wb-pr.bad{border-style:dashed;color:var(--faint);}
+.wb-pr-x{background:none;border:none;color:var(--faint);cursor:pointer;font-size:13px;padding:0 4px;}
+.wb-pr-x:hover{color:var(--ink);}
+@media(max-width:700px){.wb-paste-head,.wb-paste-body{padding-left:18px;padding-right:18px;}}
 /* ══ WIDGET BUILDER ══ */
 .wb-pop{position:fixed;inset:0;background:var(--white);z-index:480;display:none;flex-direction:column;}
 .wb-pop.open{display:flex;}
@@ -1186,6 +1211,21 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
       <button class="wb-close" onclick="closeWB()">←</button>
       <div class="wb-title">Build Widget</div>
       <div class="wb-count" id="wb-count">0 items selected</div>
+    </div>
+  </div>
+  <div class="wb-paste" id="wb-paste">
+    <div class="wb-paste-head">
+      <button class="wb-tool-tab" id="wb-paste-toggle" onclick="wbTogglePaste()">＋ Add products by link</button>
+      <span class="wb-paste-note">Paste ShopMy links, one per line. They come back as your own cards, no ShopMy branding.</span>
+    </div>
+    <div class="wb-paste-body" id="wb-paste-body">
+      <textarea id="wb-paste-urls" class="wb-paste-box" placeholder="https://go.shopmy.us/p-1234&#10;https://go.shopmy.us/p-5678&#10;https://go.shopmy.us/p-9012"></textarea>
+      <div class="wb-paste-acts">
+        <span class="wb-paste-status" id="wb-paste-status"></span>
+        <button class="wb-btn-clear" onclick="wbClearPaste()">Clear</button>
+        <button class="wb-btn-go" id="wb-paste-btn" onclick="wbFetchLinks()">Fetch products</button>
+      </div>
+      <div class="wb-paste-results" id="wb-paste-results"></div>
     </div>
   </div>
   <div class="wb-toolbar">
@@ -3484,12 +3524,13 @@ async function renderWidgets(){
       <div class="w-acts">
         <button class="btn-embed" onclick="openDetail('${h(l.id)}')">Open List</button>
         <button class="btn-embed pri" onclick="openEmbed('${h(l.id)}')">Get Embed Code</button>
+        <button class="btn-embed del" onclick="wgDelete('${h(l.id)}')" title="Delete this widget">Delete</button>
       </div>
     </div>`;
   }).join('');
   feed.innerHTML=`<div class="widgets-wrap">
     ${analyticsHtml}
-    <div class="widgets-hd" style="margin-top:32px;"><h2>My Widgets</h2><p>Generate an embeddable product grid for any list. Paste the HTML into any Substack post using the HTML block.</p></div>
+    <div class="widgets-hd" style="margin-top:32px;"><h2>My Widgets</h2><p>Generate an embeddable product grid for any list. Paste the HTML into any Substack post using the HTML block.</p><p style="font-size:11.5px;color:var(--soft);margin-top:-14px;">${impLastImportLine()}</p></div>
     ${rows||'<div class="empty"><h3>No lists yet</h3></div>'}
   </div>`;
 }
@@ -3522,6 +3563,9 @@ function renderWB(){
   // Gather all items from all lists
   const all=[];
   D.lists.forEach(l=>l.items.forEach(it=>all.push({...it,_listName:l.name,_listT1:l.t1})));
+  // Imported items have no list. They used to be invisible here, which is why
+  // a fresh CSV import never showed up in the builder.
+  (D.unassigned||[]).forEach(it=>all.push({...it,_listName:'Imported',_listT1:''}));
   // Sort newest first
   all.sort((a,b)=>parseInt(b.id.substring(0,8),36)-parseInt(a.id.substring(0,8),36));
   // Deduplicate by name+brand — keep only first (newest) occurrence
@@ -3561,6 +3605,104 @@ function renderWB(){
   }).join('');
   updateWBCount();
 }
+// ══ ADD PRODUCTS BY PASTING LINKS ══
+// The links go to the fetch-meta edge function, which follows each redirect
+// through to the retailer and reads the product's own details. Saved as items,
+// so they show up in the grid below and stay available for future widgets.
+let _wbFetched=[];
+
+function wbTogglePaste(){
+  const body=document.getElementById('wb-paste-body');
+  const btn=document.getElementById('wb-paste-toggle');
+  const open=body.classList.toggle('open');
+  btn.classList.toggle('on',open);
+  if(open)setTimeout(()=>document.getElementById('wb-paste-urls').focus(),60);
+}
+function wbClearPaste(){
+  document.getElementById('wb-paste-urls').value='';
+  document.getElementById('wb-paste-results').innerHTML='';
+  document.getElementById('wb-paste-status').textContent='';
+  _wbFetched=[];
+}
+function wbParseUrls(text){
+  return [...new Set(String(text||'').split(/[\s,]+/).map(u=>u.trim())
+    .filter(u=>/^https?:\/\//i.test(u)))];
+}
+
+async function wbFetchLinks(){
+  const urls=wbParseUrls(document.getElementById('wb-paste-urls').value);
+  const status=document.getElementById('wb-paste-status');
+  const btn=document.getElementById('wb-paste-btn');
+  if(!urls.length){status.textContent='Paste at least one link first.';return;}
+  if(urls.length>40){status.textContent='40 links at a time, please. Split the rest into a second batch.';return;}
+  btn.disabled=true;btn.textContent='Fetching…';
+  status.textContent=`Reading ${urls.length} link${urls.length===1?'':'s'}…`;
+  try{
+    const res=await fetch(`${SUPA_URL}/functions/v1/fetch-meta`,{
+      method:'POST',
+      headers:{'Authorization':`Bearer ${SUPA_KEY}`,'Content-Type':'application/json'},
+      body:JSON.stringify({urls})
+    });
+    if(!res.ok)throw new Error('http '+res.status);
+    const data=await res.json();
+    const rows=(data.results||[]);
+    // Anything that came back without a name is not usable as a card
+    _wbFetched=rows.filter(r=>r.ok&&r.title).map(r=>({
+      id:uid(),name:r.title,brand:bd(r.brand)||'',price:r.price||'',
+      image:r.image||'',link:r.url,link2:r.finalUrl||'',
+      cat:(typeof _impInferCat==='function'?_impInferCat(r.title,r.brand||'',r.finalUrl||r.url):'')
+    }));
+    const failed=rows.filter(r=>!r.ok||!r.title);
+    wbRenderFetched(failed);
+    status.textContent=`${_wbFetched.length} found${failed.length?`, ${failed.length} could not be read`:''}.`;
+    if(_wbFetched.length)await wbSaveFetched();
+  }catch(e){
+    console.error('fetch-meta failed:',e);
+    status.textContent='Could not reach the fetcher. Is the fetch-meta function deployed in Supabase?';
+  }finally{
+    btn.disabled=false;btn.textContent='Fetch products';
+  }
+}
+
+function wbRenderFetched(failed){
+  const box=document.getElementById('wb-paste-results');
+  const good=_wbFetched.map((r,i)=>`
+    <div class="wb-pr">
+      ${r.image?`<img src="${h(r.image)}" alt="" onerror="this.style.visibility='hidden'">`:'<img alt="">'}
+      <div class="wb-pr-t"><div class="wb-pr-b">${h(r.brand||'')}</div>${h(r.name)}</div>
+      ${r.price?`<div class="wb-pr-p">$${h(r.price)}</div>`:''}
+      <button class="wb-pr-x" onclick="wbDropFetched(${i})" title="Drop this one">✕</button>
+    </div>`).join('');
+  const bad=(failed||[]).map(f=>`<div class="wb-pr bad"><div class="wb-pr-t">${h(f.url)}</div><div class="wb-pr-p">${h(f.error||'no details')}</div></div>`).join('');
+  box.innerHTML=good+bad;
+}
+function wbDropFetched(i){
+  _wbFetched.splice(i,1);
+  wbRenderFetched([]);
+  document.getElementById('wb-paste-status').textContent=`${_wbFetched.length} kept.`;
+}
+
+// Store them so they appear in the grid and can be reused later
+async function wbSaveFetched(){
+  if(!_wbFetched.length)return;
+  const rows=_wbFetched.map((r,i)=>({
+    id:r.id,name:r.name,brand:r.brand||null,price:r.price||'',image:r.image||'',
+    link:r.link,link2:r.link2||'',cat:r.cat||'',list_id:null,sort_order:i
+  }));
+  try{
+    await sbFetch('items',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(rows)});
+    rows.forEach(r=>{
+      (D.unassigned=D.unassigned||[]).push(r);
+      _wbSelected.add(r.id);      // freshly added products start selected
+    });
+    renderWB();
+    toast(`${rows.length} added and selected`);
+  }catch(e){
+    console.error('saving fetched products failed:',e);
+    document.getElementById('wb-paste-status').textContent='Found the products but could not save them. Check your connection.';
+  }
+}
+
 function toggleWBItem(id){
   if(_wbSelected.has(id))_wbSelected.delete(id);
   else _wbSelected.add(id);
@@ -4584,6 +4726,25 @@ function _impParseCSV(text){
   return rows.slice(1).filter(r=>r.length>1&&r.some(c=>c)).map(r=>{const obj={};header.forEach((h,i)=>obj[h]=(r[i]||'').trim());return obj;});
 }
 
+// ShopMy's export headers change over time, so match on likely names rather
+// than hard-coding one schema.
+function _impPick(row,names){
+  for(const n of names){ if(row[n]&&String(row[n]).trim()) return String(row[n]).trim(); }
+  const keys=Object.keys(row);
+  for(const n of names){
+    const k=keys.find(k=>k.includes(n));
+    if(k&&row[k]&&String(row[k]).trim())return String(row[k]).trim();
+  }
+  return '';
+}
+const IMP_IMAGE_COLS=['image','image_url','imageurl','photo','photo_url','thumbnail','thumbnail_url','picture','img'];
+const IMP_PRICE_COLS=['price','retail_price','product_price','current_price','sale_price','amount'];
+function _impCleanPrice(v){
+  const m=String(v||'').replace(/,/g,'').match(/(\d+(?:\.\d{1,2})?)/);
+  if(!m)return '';
+  return String(Math.round(parseFloat(m[1])*100)/100).replace(/\.00$/,'');
+}
+
 function _impLog(msg,type=''){
   const log=document.getElementById('imp-log');
   log.style.display='block';
@@ -4594,7 +4755,8 @@ function _impLog(msg,type=''){
   log.scrollTop=log.scrollHeight;
 }
 
-let _impItems=[];
+let _impItems=[],_impHasImages=false,_impHasPrices=false;
+const IMP_LAST_KEY='mtp_last_import';
 
 async function handleImportFile(file){
   if(!file)return;
@@ -4608,23 +4770,36 @@ async function handleImportFile(file){
   const text=await file.text();
   const rows=_impParseCSV(text);
   document.getElementById('imp-n-total').textContent=rows.length;
-  // Build existing key set from D.unassigned + all list items
-  const existing=new Set();
-  (D.unassigned||[]).forEach(it=>existing.add((it.link2||'').toLowerCase().split('?')[0]+'|'+(it.brand||'').toLowerCase()));
-  (D.lists||[]).forEach(l=>l.items.forEach(it=>existing.add((it.link2||'').toLowerCase().split('?')[0]+'|'+(it.brand||'').toLowerCase())));
+  // Map each existing item by its key so a re-import can refresh it rather than
+  // just skip it. Prices and images change; the row should follow.
+  const existingBy=new Map();
+  const keyOf=it=>(it.link2||'').toLowerCase().split('?')[0]+'|'+(it.brand||'').toLowerCase();
+  (D.unassigned||[]).forEach(it=>existingBy.set(keyOf(it),it));
+  (D.lists||[]).forEach(l=>l.items.forEach(it=>existingBy.set(keyOf(it),it)));
   _impItems=rows.map(r=>{
     const title=(r.title||r.name||'').replace(/\s+/g,' ').trim();
     const brand=(r.affiliate_merchant||'').trim();
     const shortUrl=(r.short_url||'').trim();
     const destUrl=(r.url||'').trim();
+    const image=_impPick(r,IMP_IMAGE_COLS);
+    const price=_impCleanPrice(_impPick(r,IMP_PRICE_COLS));
     const cat=_impInferCat(title,brand,destUrl);
     const key=destUrl.toLowerCase().split('?')[0]+'|'+brand.toLowerCase();
-    return{title,brand,shortUrl,destUrl,cat,isDupe:existing.has(key)};
+    const prev=existingBy.get(key);
+    // An existing item is worth rewriting only if this file actually adds something
+    const improves=!!prev&&((image&&image!==prev.image)||(price&&price!==prev.price));
+    return{title,brand,shortUrl,destUrl,image,price,cat,isDupe:!!prev,prevId:prev?prev.id:null,prevListId:prev?(prev.list_id||null):null,improves};
   }).filter(r=>r.title&&r.shortUrl);
   const newItems=_impItems.filter(r=>!r.isDupe);
-  const dupes=_impItems.filter(r=>r.isDupe);
+  const updates=_impItems.filter(r=>r.isDupe&&r.improves);
+  const dupes=_impItems.filter(r=>r.isDupe&&!r.improves);
+  _impHasImages=_impItems.some(r=>r.image);
+  _impHasPrices=_impItems.some(r=>r.price);
   document.getElementById('imp-n-new').textContent=newItems.length;
   document.getElementById('imp-n-dupe').textContent=dupes.length;
+  _impLog(`Read ${rows.length} rows. ${newItems.length} new, ${updates.length} to refresh, ${dupes.length} unchanged.`);
+  _impLog(_impHasImages?'✓ This file has images.':'⚠ No image column found, items will import without pictures.',_impHasImages?'ok':'err');
+  if(_impHasPrices)_impLog('✓ This file has prices.','ok');
   document.getElementById('imp-n-done').textContent=0;
   const tbody=document.getElementById('imp-preview');
   tbody.innerHTML='';
@@ -4633,36 +4808,129 @@ async function handleImportFile(file){
     tr.innerHTML='<td style="padding:6px 8px;border-bottom:1px solid var(--border);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+item.title+'">'+item.title.slice(0,35)+(item.title.length>35?'…':'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);">'+(bd(item.brand)||'')+'</td><td style="padding:6px 8px;border-bottom:1px solid var(--border);"><span style="font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border:1px solid var(--border);color:var(--soft);">'+item.cat+'</span></td><td style="padding:6px 8px;border-bottom:1px solid var(--border);font-size:11px;color:var(--soft);">'+item.shortUrl.replace('https://','')+'</td>';
     tbody.appendChild(tr);
   });
-  if(newItems.length>0)document.getElementById('imp-btn').style.display='block';
+  if(newItems.length>0||updates.length>0)document.getElementById('imp-btn').style.display='block';
 }
 
 async function runImport(){
   const newItems=_impItems.filter(r=>!r.isDupe);
+  const updates=_impItems.filter(r=>r.isDupe&&r.improves);
+  const work=[
+    ...newItems.map(item=>({row:item,mode:'new'})),
+    ...updates.map(item=>({row:item,mode:'update'}))
+  ];
+  if(!work.length){_impLog('Nothing to do, everything is already up to date.','ok');return;}
   document.getElementById('imp-btn').style.display='none';
   document.getElementById('imp-prog-bar').style.display='block';
-  let done=0;const BATCH=20;
-  for(let i=0;i<newItems.length;i+=BATCH){
-    const batch=newItems.slice(i,i+BATCH).map((item,idx)=>({
-      id:Math.random().toString(36).slice(2,13),
-      name:item.title,brand:item.brand||null,
-      link:item.shortUrl,link2:item.destUrl,
-      cat:item.cat,list_id:null,sort_order:i+idx
-    }));
-    let _impOk=false;try{await sbFetch('items',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(batch)});_impOk=true;}catch(e){_impOk=false;}
-    if(_impOk){
-      done+=batch.length;
-      // Add to local D.unassigned so dedup works immediately
-      batch.forEach(b=>(D.unassigned=D.unassigned||[]).push(b));
-      batch.forEach(b=>_impLog('✓ '+b.name+' · '+b.cat,'ok'));
-    } else {
-      _impLog('✗ batch '+(i)+' to '+(i+BATCH)+' failed','err');
+  let done=0,added=0,refreshed=0,failed=0;
+  const BATCH=100;   // she has thousands of items; 20 at a time was needlessly slow
+  for(let i=0;i<work.length;i+=BATCH){
+    const slice=work.slice(i,i+BATCH);
+    const batch=slice.map((w,idx)=>{
+      const item=w.row;
+      return{
+        // Reuse the existing id on a refresh so this upserts instead of duplicating
+        id:w.mode==='update'?item.prevId:Math.random().toString(36).slice(2,13),
+        name:item.title,brand:item.brand||null,
+        link:item.shortUrl,link2:item.destUrl,
+        image:item.image||'',price:item.price||'',
+        cat:item.cat,
+        list_id:w.mode==='update'?item.prevListId:null,
+        sort_order:i+idx
+      };
+    });
+    let ok=false;
+    try{
+      await sbFetch('items',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(batch)});
+      ok=true;
+    }catch(e){ok=false;console.error('import batch failed:',e);}
+    if(ok){
+      slice.forEach((w,idx)=>{
+        const b=batch[idx];
+        if(w.mode==='new'){added++;(D.unassigned=D.unassigned||[]).push(b);}
+        else{
+          refreshed++;
+          const t=(D.unassigned||[]).find(x=>x.id===b.id)||(D.lists||[]).flatMap(l=>l.items||[]).find(x=>x.id===b.id);
+          if(t){t.image=b.image||t.image;t.price=b.price||t.price;}
+        }
+      });
+      done+=slice.length;
+      _impLog(`✓ ${Math.min(i+BATCH,work.length)} of ${work.length}`,'ok');
+    }else{
+      failed+=slice.length;
+      _impLog(`✗ rows ${i+1} to ${Math.min(i+BATCH,work.length)} failed`,'err');
     }
     document.getElementById('imp-n-done').textContent=done;
-    document.getElementById('imp-prog-fill').style.width=Math.min(100,Math.round((i+BATCH)/newItems.length*100))+'%';
+    document.getElementById('imp-prog-fill').style.width=Math.min(100,Math.round((i+BATCH)/work.length*100))+'%';
   }
   document.getElementById('imp-prog-fill').style.width='100%';
-  _impLog('Done. '+done+' items imported to Latest Finds.','ok');
-  if(done>0&&activeT1==='latest')render();
+  _impLog(`Done. ${added} added, ${refreshed} refreshed${failed?', '+failed+' failed':''}.`,failed?'err':'ok');
+  const noPics=(D.unassigned||[]).filter(it=>!it.image).length;
+  if(noPics)_impLog(`${noPics} items still have no picture. Hit "Fetch Images" to pull them.`);
+  try{localStorage.setItem(IMP_LAST_KEY,JSON.stringify({at:new Date().toISOString(),added,refreshed}));}catch(e){}
+  if(added||refreshed)render();
+}
+
+// Delete a widget. The products it held are kept and become available to the
+// builder again, because losing curated products to a tidy-up would be worse
+// than leaving a stale widget lying around.
+async function wgDelete(id){
+  const l=(D.lists||[]).find(x=>x.id===id);
+  if(!l)return;
+  const n=(l.items||[]).length;
+  const msg=n
+    ? `Delete the widget "${l.name}"?\n\nIts ${n} product${n===1?'':'s'} will be kept and stay available in the builder. Only the widget goes.`
+    : `Delete the empty widget "${l.name}"?`;
+  if(!confirm(msg))return;
+  const idx=D.lists.indexOf(l);
+  const items=(l.items||[]).slice();
+  // Detach first so nothing is orphaned if the list delete succeeds and this does not
+  try{
+    if(items.length){
+      await sbFetch('items',{
+        method:'POST',
+        headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+        body:JSON.stringify(items.map(it=>({...it,list_id:null})))
+      });
+    }
+    await deleteListFromCloud(id);
+  }catch(e){
+    console.error('wgDelete failed:',e);
+    toast('⚠ Could not delete that widget. Check your connection');
+    return;
+  }
+  D.lists.splice(idx,1);
+  items.forEach(it=>{it.list_id=null;(D.unassigned=D.unassigned||[]).push(it);});
+  renderWidgets();
+  showToastUndo(`Deleted "${l.name}"`,async()=>{
+    try{
+      await saveList(l);
+      if(items.length){
+        await sbFetch('items',{
+          method:'POST',
+          headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+          body:JSON.stringify(items.map(it=>({...it,list_id:id})))
+        });
+      }
+      items.forEach(it=>{it.list_id=id;});
+      D.unassigned=(D.unassigned||[]).filter(u=>!items.some(it=>it.id===u.id));
+      l.items=items;
+      D.lists.splice(idx,0,l);
+      renderWidgets();
+    }catch(e){toast('⚠ Could not undo');}
+  });
+}
+
+// A plain line telling her how current the builder's catalogue is
+function impLastImportLine(){
+  let info=null;
+  try{info=JSON.parse(localStorage.getItem(IMP_LAST_KEY)||'null');}catch(e){}
+  const total=(D.lists||[]).reduce((s,l)=>s+(l.items||[]).length,0)+(D.unassigned||[]).length;
+  if(!info)return `${total} items available to pick from. If that looks low, drop in a fresh ShopMy CSV export.`;
+  const d=new Date(info.at);
+  const days=Math.floor((Date.now()-d)/86400000);
+  const when=days===0?'today':days===1?'yesterday':`${days} days ago`;
+  const stale=days>30?' <b>Worth refreshing.</b>':'';
+  return `${total} items available to pick from. Last import ${when}, ${d.toLocaleDateString('en-US',{month:'short',day:'numeric'})}.${stale}`;
 }
 
 
