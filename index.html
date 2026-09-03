@@ -337,6 +337,14 @@ body.creator .tl-add-row{display:flex;}
 .sp-past-line{flex:1;height:1px;background:var(--border);}
 .sp-past-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:7px 15px;cursor:pointer;transition:all .16s;white-space:nowrap;}
 .sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
+/* The List: gifted label, ownership line, form checkbox */
+.tl-meta-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;}
+.tl-gifted{display:inline-flex;align-items:center;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);border:1px solid var(--border);padding:3px 8px;white-space:nowrap;}
+.tl-owned{font-family:var(--sans);font-size:11px;letter-spacing:.02em;color:var(--soft);margin-bottom:7px;}
+.tl-check{display:flex;align-items:flex-start;gap:9px;cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--ink);line-height:1.4;}
+.tl-check input{width:15px;height:15px;margin:0;flex-shrink:0;accent-color:#000;cursor:pointer;}
+.tl-check-hint{font-size:10px;color:var(--soft);line-height:1.55;margin-top:6px;padding-left:24px;}
+.tl-act-btn:disabled{opacity:.25;cursor:default;}
 /* Creator: paste a sale email and let the form fill itself */
 .sp-paste-wrap{border:1px dashed var(--faint);background:var(--surf);padding:14px 14px 12px;margin-bottom:20px;}
 .sp-paste-lbl{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);margin-bottom:3px;display:block;}
@@ -2072,16 +2080,74 @@ function filterDetailItems(q){
 
 // ══ LATEST FINDS GRID ══
 // ══ THE LIST — localStorage-based editorial entries ══
+// ══ THE LIST ══
+// Source of truth is the Supabase table the_list. localStorage is only a cache
+// so the tab paints instantly; it never adds an entry of its own.
 const TL_KEY='mtp_thelist';
-function tlLoad(){try{return JSON.parse(localStorage.getItem(TL_KEY))||[];}catch{return[];}}
-function tlSave(arr){localStorage.setItem(TL_KEY,JSON.stringify(arr));}
+let _tlData=null,_tlLoaded=false,_tlFetching=false;
+
+function tlCacheLoad(){try{return JSON.parse(localStorage.getItem(TL_KEY))||[];}catch{return[];}}
+function tlCacheSave(arr){try{localStorage.setItem(TL_KEY,JSON.stringify(arr));}catch(e){}}
+function tlLoad(){return _tlData||tlCacheLoad();}
+
+function tlMapRow(r){
+  let imgs=r.images;
+  if(typeof imgs==='string'){try{imgs=JSON.parse(imgs);}catch{imgs=[];}}
+  return{
+    id:r.id,title:r.title||'',tag:r.tag||'',note:r.note||'',
+    link:r.link||'',linkLabel:r.link_label||'',
+    gifted:!!r.gifted,owned:r.owned||'',
+    images:Array.isArray(imgs)?imgs:[],
+    sort_order:r.sort_order??0
+  };
+}
+async function tlFetchCloud(){
+  const rows=await sbFetch('the_list?select=*&order=sort_order.asc,created_at.desc');
+  const arr=(rows||[]).map(tlMapRow);
+  _tlData=arr;tlCacheSave(arr);return arr;
+}
+// Write the whole list back so sort_order always matches what is on screen
+async function tlPersist(arr){
+  const rows=arr.map((e,i)=>({
+    id:e.id,title:e.title,tag:e.tag||'',note:e.note||'',
+    link:e.link||'',link_label:e.linkLabel||'',
+    gifted:!!e.gifted,owned:e.owned||'',
+    images:e.images||[],sort_order:i
+  }));
+  if(rows.length){
+    await sbFetch('the_list',{
+      method:'POST',
+      headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(rows)
+    });
+  }
+  _tlData=arr;tlCacheSave(arr);
+}
+async function tlDeleteFromCloud(id){
+  await sbFetch(`the_list?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+}
+function tlRefresh(){
+  _tlLoaded=false;
+  tlFetchCloud().then(()=>{_tlLoaded=true;renderLatest();toast('Up to date');})
+    .catch(()=>toast('⚠ Could not reach the cloud'));
+}
 
 function renderLatest(){
   const feed=document.getElementById('feed');
   const entries=tlLoad();
   const addRow=isCreator?`<div class="tl-add-row" onclick="tlOpenAdd()">＋ Add to The List</div>`:'';
+  const bar=isCreator?`
+    <div class="wc-bar">
+      <div class="wc-bar-note"><b>${entries.length} entr${entries.length===1?'y':'ies'}.</b> Saved to the cloud, so readers see them straight away.</div>
+      <div class="wc-bar-acts">
+        <button class="wc-bar-btn" onclick="tlOpenAdd()">＋ Add entry</button>
+        <button class="wc-bar-btn ghost" onclick="tlRefresh()">Refresh</button>
+      </div>
+    </div>`:'';
   if(!entries.length){
-    feed.innerHTML=`${affNote()}<div class="tl-feed">${addRow}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>Your personal collection of things you truly love.</p></div></div>`+subscribeBlock();
+    const msg=isCreator?'Hit "Add entry" to put the first thing on the list.':(_tlLoaded?'Nothing on the list just yet. Check back soon.':'Loading…');
+    feed.innerHTML=`${affNote()}<div class="tl-feed">${bar}<div class="empty" style="padding:60px 0;"><h3>The List</h3><p>${msg}</p></div></div>`+subscribeBlock();
+    tlMaybeFetch();
     return;
   }
   const cards=entries.map((e,i)=>{
@@ -2096,19 +2162,49 @@ function renderLatest(){
       imgHTML=`<div class="tl-imgs ${gridClass}">${imgTags}<button class="tl-img-add" style="position:relative;display:none;" onclick="tlAddImage(${i},${imgCount})">+ Image</button></div>`;
     }
     const linkHTML=e.link?`<a class="tl-link" href="${h(e.link)}" target="_blank" rel="noopener">${h(e.linkLabel||'Visit →')}</a>`:'';
-    const actHTML=isCreator?`<div class="tl-acts"><button class="tl-act-btn" onclick="tlEdit(${i})">Edit</button><button class="tl-act-btn" onclick="tlAddImage(${i},${imgCount})">+ Image</button><button class="tl-act-btn red" onclick="tlDelete(${i})">Delete</button></div>`:'';
+    const actHTML=isCreator?`<div class="tl-acts"><button class="tl-act-btn" onclick="tlMove(${i},-1)" ${i===0?'disabled':''}>▲</button><button class="tl-act-btn" onclick="tlMove(${i},1)" ${i===entries.length-1?'disabled':''}>▼</button><button class="tl-act-btn" onclick="tlEdit(${i})">Edit</button><button class="tl-act-btn" onclick="tlAddImage(${i},${imgCount})">+ Image</button><button class="tl-act-btn red" onclick="tlDelete(${i})">Delete</button></div>`:'';
     return `<div class="tl-entry">
       ${imgHTML}
       <div class="tl-body">
-        ${e.tag?`<div class="tl-tag">${h(e.tag)}</div>`:''}
+        <div class="tl-meta-row">
+          ${e.tag?`<span class="tl-tag">${h(e.tag)}</span>`:''}
+          ${e.gifted?`<span class="tl-gifted" title="This was sent to me as a gift">Gifted</span>`:''}
+        </div>
         <div class="tl-title">${h(e.title)}</div>
+        ${e.owned?`<div class="tl-owned">${h(e.owned)}</div>`:''}
         ${e.note?`<div class="tl-note">${h(e.note)}</div>`:''}
         ${linkHTML}
         ${actHTML}
       </div>
     </div>`;
   }).join('');
-  feed.innerHTML=`${affNote()}<div class="tl-feed">${cards}${addRow}</div>`+subscribeBlock();
+  feed.innerHTML=`${affNote()}<div class="tl-feed">${bar}${cards}${addRow}</div>`+subscribeBlock();
+  tlMaybeFetch();
+}
+
+// First paint comes from cache; pull the real list once, then repaint
+function tlMaybeFetch(){
+  if(_tlLoaded||_tlFetching)return;
+  _tlFetching=true;
+  tlFetchCloud().then(()=>{
+    _tlLoaded=true;_tlFetching=false;
+    if(activeT1==='latest')renderLatest();
+  }).catch(e=>{
+    _tlFetching=false;
+    console.error('The List load failed:',e);
+    if(isCreator)toast('⚠ Could not reach the cloud — showing the last saved list');
+  });
+}
+
+async function tlMove(i,dir){
+  const arr=tlLoad().slice();
+  const j=i+dir;
+  if(j<0||j>=arr.length)return;
+  const prev=arr.slice();
+  [arr[i],arr[j]]=[arr[j],arr[i]];
+  _tlData=arr;renderLatest();
+  try{await tlPersist(arr);toast(dir<0?'Moved up':'Moved down');}
+  catch(e){console.error('tlMove failed:',e);_tlData=prev;renderLatest();toast('⚠ Could not save the new order');}
 }
 
 let _tlEditIdx=null;
@@ -2122,6 +2218,8 @@ function tlOpenAdd(){
   document.getElementById('tl-f-note').value='';
   document.getElementById('tl-f-link').value='';
   document.getElementById('tl-f-linklabel').value='';
+  document.getElementById('tl-f-owned').value='';
+  document.getElementById('tl-f-gifted').checked=false;
   document.getElementById('tl-ov').classList.add('open');
   document.getElementById('tl-f-title').focus();
 }
@@ -2135,11 +2233,13 @@ function tlEdit(i){
   document.getElementById('tl-f-note').value=e.note||'';
   document.getElementById('tl-f-link').value=e.link||'';
   document.getElementById('tl-f-linklabel').value=e.linkLabel||'';
+  document.getElementById('tl-f-owned').value=e.owned||'';
+  document.getElementById('tl-f-gifted').checked=!!e.gifted;
   document.getElementById('tl-ov').classList.add('open');
   document.getElementById('tl-f-title').focus();
 }
 
-function tlSaveForm(){
+async function tlSaveForm(){
   const title=document.getElementById('tl-f-title').value.trim();
   if(!title){document.getElementById('tl-f-title').focus();return;}
   const entry={
@@ -2148,25 +2248,47 @@ function tlSaveForm(){
     note:document.getElementById('tl-f-note').value.trim(),
     link:document.getElementById('tl-f-link').value.trim(),
     linkLabel:document.getElementById('tl-f-linklabel').value.trim(),
+    owned:document.getElementById('tl-f-owned').value.trim(),
+    gifted:document.getElementById('tl-f-gifted').checked
   };
-  const arr=tlLoad();
+  const btn=document.querySelector('#tl-ov .btn-p');
+  const label=btn.textContent;btn.textContent='Saving…';btn.disabled=true;
+  const arr=tlLoad().slice();
   if(_tlEditIdx!==null){
     arr[_tlEditIdx]={...arr[_tlEditIdx],...entry};
   } else {
-    arr.unshift({...entry,images:[],created_at:new Date().toISOString()});
+    arr.unshift({...entry,id:uid(),images:[]});
   }
-  tlSave(arr);
-  document.getElementById('tl-ov').classList.remove('open');
-  renderLatest();
+  try{
+    await tlPersist(arr);
+    document.getElementById('tl-ov').classList.remove('open');
+    renderLatest();
+    toast(_tlEditIdx!==null?'Saved':'Added to The List');
+  }catch(e){
+    console.error('tlSaveForm failed:',e);
+    toast('⚠ Could not save — check your connection');
+  }finally{btn.textContent=label;btn.disabled=false;}
 }
 
 function tlCloseFom(){
   document.getElementById('tl-ov').classList.remove('open');
 }
 
-function tlDelete(i){
-  if(!confirm('Delete this entry?'))return;
-  const arr=tlLoad();arr.splice(i,1);tlSave(arr);renderLatest();
+async function tlDelete(i){
+  const arr=tlLoad().slice();
+  const gone=arr[i];
+  if(!gone)return;
+  if(!confirm(`Remove "${gone.title}" from The List?`))return;
+  arr.splice(i,1);
+  try{
+    if(gone.id)await tlDeleteFromCloud(gone.id);
+    await tlPersist(arr);
+    renderLatest();
+    showToastUndo(`Removed "${gone.title}"`,async()=>{
+      const back=tlLoad().slice();back.splice(i,0,gone);
+      try{await tlPersist(back);renderLatest();}catch(e){toast('⚠ Could not undo');}
+    });
+  }catch(e){console.error('tlDelete failed:',e);toast('⚠ Could not remove — check your connection');}
 }
 
 function tlAddImage(entryIdx,imgIdx){
@@ -2177,16 +2299,19 @@ function tlAddImage(entryIdx,imgIdx){
   document.getElementById('tl-img-ov').classList.add('open');
 }
 
-function tlSaveImage(){
+async function tlSaveImage(){
   const url=document.getElementById('tl-img-url').value.trim();
   if(!url)return;
-  const arr=tlLoad();
+  const arr=tlLoad().slice();
   if(!arr[_tlEditIdx])return;
-  if(!arr[_tlEditIdx].images)arr[_tlEditIdx].images=[];
-  arr[_tlEditIdx].images.splice(_tlImgIdx,0,url);
-  tlSave(arr);
-  document.getElementById('tl-img-ov').classList.remove('open');
-  renderLatest();
+  const imgs=(arr[_tlEditIdx].images||[]).slice();
+  imgs.splice(_tlImgIdx,0,url);
+  arr[_tlEditIdx]={...arr[_tlEditIdx],images:imgs};
+  try{
+    await tlPersist(arr);
+    document.getElementById('tl-img-ov').classList.remove('open');
+    renderLatest();
+  }catch(e){console.error('tlSaveImage failed:',e);toast('⚠ Could not save the image');}
 }
 
 function tlCloseImg(){
@@ -4339,6 +4464,14 @@ async function runFetchImages(){
     <div class="fg"><label class="fl">Why you love it</label><textarea class="fi fta" id="tl-f-note" rows="5" placeholder="Your write-up..." style="font-style:normal;min-height:110px;"></textarea></div>
     <div class="fg"><label class="fl">Link <span class="flh">(optional)</span></label><input type="url" class="fi" id="tl-f-link" placeholder="https://…"></div>
     <div class="fg"><label class="fl">Link label <span class="flh">(optional — e.g. "Book a table", "Shop now")</span></label><input type="text" class="fi" id="tl-f-linklabel" placeholder="Visit →"></div>
+    <div class="fg">
+      <label class="fl">How long you've had it <span class="flh">(optional — the bit no one else can copy)</span></label>
+      <input type="text" class="fi" id="tl-f-owned" placeholder="e.g. Owned 2 years · Worn most weeks since March · On its third summer">
+    </div>
+    <div class="fg">
+      <label class="tl-check"><input type="checkbox" id="tl-f-gifted"><span>This was a gift from the brand</span></label>
+      <div class="tl-check-hint">Tick only when a brand sent it to you. A small “Gifted” label shows on the card so readers know, which is what the FTC asks for. Leave it off for anything you bought.</div>
+    </div>
     <button class="btn-p" onclick="tlSaveForm()">Save</button>
     <button class="btn-g" onclick="tlCloseFom()">Cancel</button>
   </div>
