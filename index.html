@@ -296,6 +296,28 @@ body.creator .tl-add-row{display:flex;}
 .sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
+/* ── Sale status: countdown + ended state ── */
+.sp-status{display:inline-flex;align-items:center;gap:6px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;margin-left:12px;white-space:nowrap;}
+.sp-status::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.sp-status.live{color:var(--soft);}
+.sp-status.urgent{color:var(--ink);font-weight:500;}
+.sp-status.ended{color:var(--faint);}
+.sp-status.ended::before{background:none;border:1px solid var(--faint);}
+.sp.is-ended{opacity:.55;}
+.sp.is-ended:hover{opacity:.85;}
+.sp.is-ended .sp-title{color:var(--mid);}
+/* Past sales divider + toggle */
+.sp-past-bar{display:flex;align-items:center;gap:14px;padding:34px 0 6px;}
+.sp-past-line{flex:1;height:1px;background:var(--border);}
+.sp-past-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:7px 15px;cursor:pointer;transition:all .16s;white-space:nowrap;}
+.sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
+/* Creator: quick end-date presets */
+.sp-preset-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.sp-preset{background:none;border:1px solid var(--border);color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:6px 11px;cursor:pointer;transition:all .16s;}
+.sp-preset:hover{border-color:var(--ink);color:var(--ink);}
+.sp-preset.on{background:var(--ink);border-color:var(--ink);color:#fff;}
+.sp-ends-hint{font-size:10px;color:var(--soft);margin-top:7px;font-style:italic;min-height:14px;}
+@media(max-width:600px){.sp-status{margin-left:0;display:flex;margin-top:6px;}}
 .sp-link-only{padding:4px 0;}
 .sp-drag-handle{position:absolute;top:14px;right:14px;width:26px;height:26px;display:none;align-items:center;justify-content:center;cursor:grab;color:var(--faint);font-size:16px;background:var(--white);border:1px solid var(--border);border-radius:2px;z-index:5;user-select:none;}
 body.creator .sp-drag-handle{display:flex;}
@@ -2250,6 +2272,50 @@ async function renderJournal(){
   }
 }
 
+// ══ SALE EXPIRY ══
+// expires_at is the END of that day, local time, so a sale "ending 9/25" stays
+// live all through the 25th. No expires_at means an evergreen post that never ends.
+function spEndOfDay(v){
+  if(!v)return null;
+  const d=new Date(v);
+  if(isNaN(d))return null;
+  d.setHours(23,59,59,999);
+  return d;
+}
+function spDaysLeft(v){
+  const end=spEndOfDay(v);
+  if(!end)return null;
+  const today=new Date();today.setHours(0,0,0,0);
+  const last=new Date(end);last.setHours(0,0,0,0);
+  return Math.round((last-today)/86400000);
+}
+function spIsEnded(p){const d=spDaysLeft(p.expires_at);return d!==null&&d<0;}
+// The line a reader sees: urgency when it is close, nothing shouty when it is not
+function spStatus(p){
+  const d=spDaysLeft(p.expires_at);
+  if(d===null)return '';
+  if(d<0)return '<span class="sp-status ended">Ended</span>';
+  if(d===0)return '<span class="sp-status urgent">Ends today</span>';
+  if(d===1)return '<span class="sp-status urgent">Ends tomorrow</span>';
+  if(d<=3)return `<span class="sp-status urgent">${d} days left</span>`;
+  if(d<=14)return `<span class="sp-status live">${d} days left</span>`;
+  const end=spEndOfDay(p.expires_at);
+  return `<span class="sp-status live">Ends ${end.toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>`;
+}
+// Live sales first, soonest ending at the top; evergreen next; ended last
+function spSort(list){
+  const rank=p=>{const d=spDaysLeft(p.expires_at);return d===null?1:0;};
+  return list.slice().sort((x,y)=>{
+    const rx=rank(x),ry=rank(y);
+    if(rx!==ry)return rx-ry;
+    if(rx===0)return spDaysLeft(x.expires_at)-spDaysLeft(y.expires_at);
+    return (x.sort_order??999)-(y.sort_order??999)||new Date(y.published_at||0)-new Date(x.published_at||0);
+  });
+}
+
+let _spShowPast=false;
+function spTogglePast(){_spShowPast=!_spShowPast;renderSales();}
+
 async function renderSales(){
   const feed=document.getElementById('feed');
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
@@ -2260,7 +2326,23 @@ async function renderSales(){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`;
     return;
   }
-  feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${_posts.map(renderPostEntry).join('')}</div>`;
+  const live=spSort(_posts.filter(p=>!spIsEnded(p)));
+  const ended=_posts.filter(spIsEnded)
+    .sort((a,b)=>new Date(b.expires_at||0)-new Date(a.expires_at||0));
+
+  let inner=live.map(renderPostEntry).join('');
+  if(!live.length){
+    inner=`<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon — new ones go up as they land.'}</p></div>`;
+  }
+  if(ended.length){
+    inner+=`<div class="sp-past-bar">
+      <div class="sp-past-line"></div>
+      <button class="sp-past-btn" onclick="spTogglePast()">${_spShowPast?'Hide':'Show'} past sales (${ended.length})</button>
+      <div class="sp-past-line"></div>
+    </div>`;
+    if(_spShowPast)inner+=ended.map(renderPostEntry).join('');
+  }
+  feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`;
   if(isCreator)initPostDrag();
 }
 
@@ -2306,7 +2388,7 @@ async function reorderPosts(srcId,targetId){
   toast('Order saved');
   // Persist: use sort_order field on posts table
   try{
-    await Promise.all(_posts.map((p,i)=>sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',published_at:p.published_at||new Date().toISOString(),sort_order:i})})));
+    await Promise.all(_posts.map((p,i)=>sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',expires_at:p.expires_at??null,published_at:p.published_at||new Date().toISOString(),sort_order:i})})));
   }catch(e){console.error('post reorder save failed',e);}
 }
 
@@ -2319,9 +2401,10 @@ function renderPostEntry(p){
   </div>`:'';
   const imagesHtml=(p.images||[]).map(img=>renderPostImage(img,p.id)).join('');
   const addImgBtn=isCreator?`<button class="sp-add-img" onclick="openAddImageForm('${h(p.id)}')">＋ Add Image</button>`:'';
-  return `<div class="sp" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
+  const ended=spIsEnded(p);
+  return `<div class="sp${ended?' is-ended':''}" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
     ${dragHandle}
-    <div class="sp-meta">${date}</div>
+    <div class="sp-meta">${date}${spStatus(p)}</div>
     <div class="sp-title">${h(p.title)}</div>
     ${p.subtitle?'<div class="sp-subtitle">'+h(p.subtitle)+'</div>':''}
     ${p.body?'<div class="sp-body">'+h(p.body)+'</div>':''}
@@ -2369,7 +2452,7 @@ function renderPostImage(img,postId){
 
 // ── Supabase helpers ──
 async function savePost(p){
-  await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',published_at:p.published_at||new Date().toISOString()})});
+  await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',expires_at:p.expires_at??null,published_at:p.published_at||new Date().toISOString()})});
 }
 async function deletePostFromCloud(id){
   await sbFetch(`posts?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
@@ -2389,6 +2472,7 @@ function openNewPostForm(){
   document.getElementById('sp-f-title').value='';
   document.getElementById('sp-f-subtitle').value='';
   document.getElementById('sp-f-body').value='';
+  spInitEndsField(null);
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
@@ -2399,24 +2483,64 @@ function openEditPostForm(id){
   document.getElementById('sp-f-title').value=p.title||'';
   document.getElementById('sp-f-subtitle').value=p.subtitle||'';
   document.getElementById('sp-f-body').value=p.body||'';
+  spInitEndsField(p.expires_at);
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
 function closeSPForm(){document.getElementById('sp-ov').classList.remove('open');}
+
+// Date <input> wants YYYY-MM-DD in LOCAL time, so build it by parts rather than
+// via toISOString, which shifts to UTC and can land on the wrong day.
+function spToDateInput(v){
+  if(!v)return '';
+  const d=new Date(v);
+  if(isNaN(d))return '';
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function spSetEnds(n){
+  const el=document.getElementById('sp-f-expires');
+  if(n===null){el.value='';spSyncEndsHint();return;}
+  const d=new Date();d.setHours(12,0,0,0);
+  if(n==='sunday'){const away=(7-d.getDay())%7;d.setDate(d.getDate()+(away===0?7:away));}
+  else d.setDate(d.getDate()+n);
+  el.value=spToDateInput(d);
+  spSyncEndsHint();
+}
+// Show, in plain words, exactly what readers will see
+function spSyncEndsHint(){
+  const el=document.getElementById('sp-f-expires');
+  const hint=document.getElementById('sp-ends-hint');
+  if(!el||!hint)return;
+  document.querySelectorAll('#sp-ov .sp-preset').forEach(b=>b.classList.remove('on'));
+  if(!el.value){hint.textContent='No end date. This stays on the page until you remove it.';return;}
+  const d=spDaysLeft(el.value);
+  const label=spStatus({expires_at:el.value}).replace(/<[^>]+>/g,'');
+  hint.textContent=d<0
+    ? `Readers see "Ended" and it moves into past sales.`
+    : `Readers see "${label}". It moves into past sales on its own after that.`;
+}
+
+function spInitEndsField(v){
+  const el=document.getElementById('sp-f-expires');
+  if(el){el.value=spToDateInput(v);}
+  spSyncEndsHint();
+}
 async function savePostForm(){
   const title=document.getElementById('sp-f-title').value.trim();
   if(!title){toast('Title required');return;}
   const subtitle=document.getElementById('sp-f-subtitle').value.trim();
   const body=document.getElementById('sp-f-body').value.trim();
+  const rawEnds=document.getElementById('sp-f-expires').value;
+  const expires_at=rawEnds?new Date(rawEnds+'T23:59:59').toISOString():null;
   const btn=document.querySelector('#sp-ov .btn-p');
   btn.textContent='Saving…';btn.disabled=true;
   try{
     if(_editingPostId){
       const p=_posts.find(x=>x.id===_editingPostId);
-      if(p){p.title=title;p.subtitle=subtitle;p.body=body;}
-      await savePost({id:_editingPostId,title,subtitle,body});
+      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;}
+      await savePost({id:_editingPostId,title,subtitle,body,expires_at});
     } else {
-      const newPost={id:uid(),title,subtitle,body,published_at:new Date().toISOString(),images:[]};
+      const newPost={id:uid(),title,subtitle,body,expires_at,published_at:new Date().toISOString(),images:[]};
       _posts.unshift(newPost);
       await savePost(newPost);
     }
@@ -3839,6 +3963,19 @@ async function runFetchImages(){
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional — e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
     <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale — what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
+    <div class="fg">
+      <label class="fl">Sale ends <span class="flh">(leave empty if it has no end date)</span></label>
+      <input type="date" class="fi" id="sp-f-expires" onchange="spSyncEndsHint()">
+      <div class="sp-preset-row">
+        <button type="button" class="sp-preset" onclick="spSetEnds(0)">Today</button>
+        <button type="button" class="sp-preset" onclick="spSetEnds(1)">Tomorrow</button>
+        <button type="button" class="sp-preset" onclick="spSetEnds(3)">3 days</button>
+        <button type="button" class="sp-preset" onclick="spSetEnds(7)">1 week</button>
+        <button type="button" class="sp-preset" onclick="spSetEnds('sunday')">Sunday</button>
+        <button type="button" class="sp-preset" onclick="spSetEnds(null)">No end date</button>
+      </div>
+      <div class="sp-ends-hint" id="sp-ends-hint"></div>
+    </div>
     <button class="btn-p" onclick="savePostForm()">Save Post</button>
     <button class="btn-g" onclick="closeSPForm()">Cancel</button>
   </div>
