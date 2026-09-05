@@ -483,6 +483,20 @@ body.creator .sp-add-img{display:flex;}
 
 /* ══ WIDGETS TAB ══ */
 .widgets-wrap{padding:32px 40px;}
+.wg-head-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+.wg-build-btn{padding:11px 22px;background:var(--ink);color:#fff;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.15em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;white-space:nowrap;flex-shrink:0;}
+.wg-build-btn:hover{opacity:.82;}
+/* Clearing the product catalogue */
+.wg-danger{margin-top:44px;border-top:1px solid var(--border);padding-top:26px;}
+.wg-danger-h{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
+.wg-danger-p{font-size:12px;color:var(--soft);line-height:1.7;max-width:560px;margin-bottom:16px;}
+.wg-danger-acts{display:flex;gap:8px;flex-wrap:wrap;}
+.wg-danger-btn{background:none;border:1px solid var(--border);color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:9px 15px;cursor:pointer;transition:all .16s;}
+.wg-danger-btn:hover:not(:disabled){border-color:var(--ink);color:var(--ink);}
+.wg-danger-btn.hot{color:#A33030;border-color:#e2c9c9;}
+.wg-danger-btn.hot:hover:not(:disabled){background:#A33030;border-color:#A33030;color:#fff;}
+.wg-danger-btn:disabled{opacity:.4;cursor:default;}
+@media(max-width:700px){.wg-head-row{flex-direction:column;gap:14px;}.wg-build-btn{width:100%;}}
 .widgets-hd h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
 .widgets-hd p{font-size:13px;color:var(--mid);line-height:1.6;max-width:520px;margin-bottom:20px;}
 .widget-row{border:1px solid var(--border);margin-bottom:-1px;display:flex;align-items:center;}
@@ -876,7 +890,6 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
   <div class="hdr-top-links">
     <div style="flex:1;display:flex;justify-content:flex-end;padding-right:16px;">
       <button class="btn-new creator-only" onclick="openNewList()" style="font-size:9px;padding:4px 10px;">+ New List</button>
-      <button class="btn-new creator-only" onclick="openWB()" style="font-size:9px;padding:4px 10px;">⊞ Build Widget</button>
     </div>
     <div class="hdr-top-links-center">
       <a href="https://instagram.com/maisontheposh" target="_blank" class="hdr-link">
@@ -3530,8 +3543,18 @@ async function renderWidgets(){
   }).join('');
   feed.innerHTML=`<div class="widgets-wrap">
     ${analyticsHtml}
-    <div class="widgets-hd" style="margin-top:32px;"><h2>My Widgets</h2><p>Generate an embeddable product grid for any list. Paste the HTML into any Substack post using the HTML block.</p><p style="font-size:11.5px;color:var(--soft);margin-top:-14px;">${impLastImportLine()}</p></div>
+    <div class="widgets-hd" style="margin-top:32px;">
+      <div class="wg-head-row">
+        <div>
+          <h2>My Widgets</h2>
+          <p>Generate an embeddable product grid for any list. Paste the HTML into any Substack post using the HTML block.</p>
+        </div>
+        <button class="wg-build-btn" onclick="openWB()">⊞ Build a Widget</button>
+      </div>
+      <p style="font-size:11.5px;color:var(--soft);margin-top:-8px;">${impLastImportLine()}</p>
+    </div>
     ${rows||'<div class="empty"><h3>No lists yet</h3></div>'}
+    ${wgDangerZone()}
   </div>`;
 }
 
@@ -4868,6 +4891,71 @@ async function runImport(){
   if(noPics)_impLog(`${noPics} items still have no picture. Hit "Fetch Images" to pull them.`);
   try{localStorage.setItem(IMP_LAST_KEY,JSON.stringify({at:new Date().toISOString(),added,refreshed}));}catch(e){}
   if(added||refreshed)render();
+}
+
+// Everything below the widget list: clearing out the product catalogue.
+function wgDangerZone(){
+  const all=[...(D.lists||[]).flatMap(l=>l.items||[]),...(D.unassigned||[])];
+  if(!all.length)return '';
+  const noImg=all.filter(it=>!it.image||!String(it.image).trim()).length;
+  const loose=(D.unassigned||[]).length;
+  return `<div class="wg-danger">
+    <div class="wg-danger-h">Product catalogue</div>
+    <p class="wg-danger-p">${all.length} products, ${noImg} of them with no picture. Clearing them does not touch The Edits, Stockist, The List or your Substack posts.</p>
+    <div class="wg-danger-acts">
+      ${loose?`<button class="wg-danger-btn" onclick="wgClearItems('loose')">Delete the ${loose} not used by a widget</button>`:''}
+      ${noImg?`<button class="wg-danger-btn" onclick="wgClearItems('noimage')">Delete the ${noImg} with no picture</button>`:''}
+      <button class="wg-danger-btn hot" onclick="wgClearItems('all')">Delete all ${all.length} products</button>
+    </div>
+  </div>`;
+}
+
+// scope: 'loose' = not in any widget, 'noimage' = missing a picture, 'all' = everything
+async function wgClearItems(scope){
+  const inLists=(D.lists||[]).flatMap(l=>(l.items||[]).map(it=>({...it,_listName:l.name})));
+  const all=[...inLists,...(D.unassigned||[])];
+  let doomed, what;
+  if(scope==='loose'){ doomed=(D.unassigned||[]).slice(); what='products not used by any widget'; }
+  else if(scope==='noimage'){ doomed=all.filter(it=>!it.image||!String(it.image).trim()); what='products with no picture'; }
+  else { doomed=all.slice(); what='products'; }
+  if(!doomed.length){toast('Nothing to delete');return;}
+
+  // Say plainly which live widgets this empties, because those links may already
+  // be sitting inside published Substack posts
+  const hitLists=[...new Set(doomed.map(d=>d._listName).filter(Boolean))];
+  const emptied=(D.lists||[]).filter(l=>{
+    const ids=new Set(doomed.map(d=>d.id));
+    return (l.items||[]).length && (l.items||[]).every(it=>ids.has(it.id));
+  }).map(l=>l.name);
+
+  let msg=`Delete ${doomed.length} ${what}?\n\nThis cannot be undone.`;
+  if(emptied.length){
+    msg+=`\n\nWARNING: these widgets will go blank, and any widget link already published in a Substack post will show an empty page:\n\n`
+       + emptied.slice(0,10).map(n=>'  · '+n).join('\n')
+       + (emptied.length>10?`\n  and ${emptied.length-10} more`:'');
+  }else if(hitLists.length){
+    msg+=`\n\nWidgets affected but not emptied: ${hitLists.slice(0,6).join(', ')}`;
+  }
+  if(!confirm(msg))return;
+  if(scope==='all'&&!confirm(`Last check. Delete every product on the site?\n\n${doomed.length} products, gone.`))return;
+
+  const btns=document.querySelectorAll('.wg-danger-btn');
+  btns.forEach(b=>{b.disabled=true;});
+  let done=0,failed=0;
+  const BATCH=60;
+  for(let i=0;i<doomed.length;i+=BATCH){
+    const ids=doomed.slice(i,i+BATCH).map(d=>d.id);
+    try{
+      await sbFetch(`items?id=in.(${ids.map(encodeURIComponent).join(',')})`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+      done+=ids.length;
+    }catch(e){console.error('clear items failed:',e);failed+=ids.length;}
+  }
+  const gone=new Set(doomed.map(d=>d.id));
+  (D.lists||[]).forEach(l=>{l.items=(l.items||[]).filter(it=>!gone.has(it.id));});
+  D.unassigned=(D.unassigned||[]).filter(it=>!gone.has(it.id));
+  try{localStorage.removeItem(IMP_LAST_KEY);}catch(e){}
+  renderWidgets();
+  toast(failed?`Deleted ${done}, ${failed} failed`:`Deleted ${done} products`);
 }
 
 // Delete a widget. The products it held are kept and become available to the
