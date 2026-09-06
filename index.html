@@ -1,3 +1,4 @@
+<!-- MTP BUILD 2026-09-06b picks-no-divider -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -456,8 +457,12 @@ body.creator .sp-creator-acts{display:flex;}
    images so it reads as her choice, not just another product in the sale. */
 /* MY PICKS: a short text list under the sale, no photos. Brand above, product
    below, the way a boutique lists it. Reads the same on a phone as on a laptop. */
-.sp-picks{border-top:1px solid var(--ink);margin:28px 0 0;padding:16px 0 0;}
+/* No full-width rule here. That reads as a section break and cuts the picks
+   loose from the sale they belong to. A short kicker plus tight spacing keeps
+   them tucked under the post instead. */
+.sp-picks{margin:20px 0 0;padding:0;}
 .sp-picks-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+.sp-picks-lbl::before{content:'';display:block;width:22px;height:1px;background:var(--faint);margin-bottom:10px;}
 .sp-pick-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:opacity .15s;}
 .sp-pick-row:last-child{border-bottom:none;padding-bottom:2px;}
 .sp-pick-main{display:block;min-width:0;}
