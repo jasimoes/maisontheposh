@@ -454,46 +454,49 @@ body.creator .sp-creator-acts{display:flex;}
 .sp-act-btn.red:hover{border-color:#B03030;color:#B03030;}
 /* MY PICK: one optional featured item per post. Set apart from the other
    images so it reads as her choice, not just another product in the sale. */
-.sp-pick{display:flex;gap:20px;align-items:flex-start;margin:0 0 24px;padding:20px;background:var(--surf);border-left:2px solid var(--ink);}
-.sp-pick-wrap{flex:0 0 150px;}
-.sp-pick-wrap img{width:100%;display:block;object-fit:cover;background:var(--bg);}
-.sp-pick-body{flex:1;display:flex;flex-direction:column;gap:6px;}
-.sp-pick-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);}
-.sp-pick-title{font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);line-height:1.3;}
-.sp-pick-price{font-size:13px;color:var(--mid);}
-.sp-pick-note{font-size:13px;color:var(--mid);line-height:1.75;white-space:pre-wrap;}
-.sp-pick-cta{display:inline-block;margin-top:8px;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;align-self:flex-start;}
-.sp-pick-cta:hover{opacity:.8;}
-/* Phone: stack it, full-bleed photo, full-width button, same as the sale images
-   directly below it so the two read as one column rather than two layouts. */
+/* MY PICKS: a short text list under the sale, no photos. Just the item, the shop
+   it is at, and her link. Reads the same on a phone as on a laptop. */
+.sp-picks{border:1px solid var(--border);padding:18px 20px;margin:24px 0 0;background:var(--surf);}
+.sp-picks-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:12px;}
+.sp-pick-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--border);text-decoration:none;color:inherit;transition:opacity .15s;}
+.sp-pick-row:first-of-type{border-top:none;padding-top:0;}
+.sp-pick-row:hover .sp-pick-name{text-decoration:underline;text-underline-offset:3px;}
+.sp-pick-row:hover{opacity:.75;}
+.sp-pick-main{min-width:0;}
+.sp-pick-name{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--ink);line-height:1.3;}
+.sp-pick-shop{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:4px;}
+.sp-pick-go{font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);white-space:nowrap;flex-shrink:0;}
 @media(max-width:700px){
-  .sp-pick{flex-direction:column;gap:14px;padding:16px;}
-  .sp-pick-wrap{flex:none;width:100%;}
-  /* Capped so the photo, the name and the button all land in one glance
-     instead of the photo pushing everything below the fold. */
-  .sp-pick-wrap img{width:100%;height:52vw;max-height:300px;object-position:center top;}
-  .sp-pick-title{font-size:20px;}
-  .sp-pick-note{font-size:14px;}
-  .sp-pick-cta{width:100%;text-align:center;margin-top:4px;}
+  .sp-picks{padding:16px;margin-top:20px;}
+  .sp-pick-row{padding:14px 0;}
+  .sp-pick-name{font-size:17px;}
+  .sp-pick-go{font-size:9px;}
 }
-/* MY PICK form section */
+/* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
 .sp-pick-fs-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;}
 .sp-pick-fs-lbl{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--mid);}
 .sp-pick-fs-toggle{background:none;border:none;padding:0;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);}
 .sp-pick-fs-toggle:hover{color:var(--ink);}
 .sp-pick-fs-body{margin-top:14px;}
+.sp-pick-card{border:1px solid var(--border);padding:14px;margin-bottom:12px;background:var(--white);}
+.sp-pick-card-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;}
+.sp-pick-card-n{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);}
+.sp-pick-card-acts{display:flex;gap:6px;}
+.sp-pick-mini{min-width:34px;min-height:30px;padding:0 10px;font-family:var(--sans);font-size:11px;line-height:1;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
+.sp-pick-mini:hover{border-color:var(--ink);color:var(--ink);}
+.sp-pick-mini.red:hover{border-color:#B03030;color:#B03030;}
 .sp-pick-fetch-row{display:flex;gap:8px;align-items:stretch;}
-.sp-pick-fetch-row .fi{flex:1;}
-.sp-pick-fetch{padding:0 16px;white-space:nowrap;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--ink);background:var(--ink);color:white;cursor:pointer;transition:opacity .15s;}
+.sp-pick-fetch-row .fi{flex:1;min-width:0;}
+.sp-pick-fetch{padding:0 14px;white-space:nowrap;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--ink);background:var(--ink);color:white;cursor:pointer;transition:opacity .15s;}
 .sp-pick-fetch:hover{opacity:.82;}
 .sp-pick-fetch:disabled{opacity:.5;cursor:default;}
-.sp-pick-msg{font-size:11px;color:var(--soft);line-height:1.6;margin-top:8px;min-height:1px;}
-.sp-pick-prev{display:flex;gap:12px;align-items:flex-start;margin-top:12px;}
-.sp-pick-prev img{width:80px;height:100px;object-fit:cover;background:var(--bg);flex:0 0 80px;}
+.sp-pick-msg{font-size:11px;color:var(--soft);line-height:1.6;margin-top:8px;}
+.sp-pick-add{width:100%;padding:11px;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;border:1px dashed var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
+.sp-pick-add:hover{border-color:var(--ink);color:var(--ink);}
 @media(max-width:700px){
   .sp-pick-fetch-row{flex-direction:column;}
-  .sp-pick-fetch{padding:12px 16px;}
+  .sp-pick-fetch{padding:12px 14px;}
 }
 .sp-images{display:flex;flex-direction:column;gap:24px;}
 .sp-img-item{display:flex;gap:20px;align-items:flex-start;}
@@ -3013,8 +3016,7 @@ async function spPersistOrder(list){
       id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',
       expires_at:p.expires_at??null,
       published_at:p.published_at||new Date().toISOString(),
-      pick_link:p.pick_link||'',pick_image:p.pick_image||'',
-      pick_title:p.pick_title||'',pick_price:p.pick_price||'',pick_note:p.pick_note||'',
+      picks:spPicksOf(p),
       sort_order:i
     })
   })));
@@ -3121,31 +3123,45 @@ function renderPostEntry(p){
     <div class="sp-title">${h(p.title)}</div>
     ${p.subtitle?'<div class="sp-subtitle">'+h(p.subtitle)+'</div>':''}
     ${p.body?'<div class="sp-body">'+h(p.body)+'</div>':''}
-    ${renderPick(p)}
     ${creatorActs}
     <div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>
     ${addImgBtn}
+    ${renderPicks(p)}
   </div>`;
 }
 
-// One optional featured item per post. Nothing renders unless she added one.
-function renderPick(p){
-  const link=(p.pick_link||'').trim();
-  const img=(p.pick_image||'').trim();
-  const title=(p.pick_title||'').trim();
-  const note=(p.pick_note||'').trim();
-  const price=(p.pick_price||'').trim();
-  if(!link&&!img&&!title&&!note)return '';
-  const photo=img?`<div class="sp-pick-wrap"><img src="${h(img)}" alt="${h(title)}" loading="lazy" onerror="this.closest('.sp-pick-wrap').style.display='none'"></div>`:'';
-  return `<div class="sp-pick">
-    ${photo}
-    <div class="sp-pick-body">
-      <div class="sp-pick-lbl">My Pick</div>
-      ${title?`<div class="sp-pick-title">${h(title)}</div>`:''}
-      ${price?`<div class="sp-pick-price">$${h(price)}</div>`:''}
-      ${note?`<div class="sp-pick-note">${h(note)}</div>`:''}
-      ${link?`<a class="sp-pick-cta" href="${h(link)}" target="_blank" rel="noopener noreferrer">Shop My Pick →</a>`:''}
-    </div>
+// A short list of items she rates, under the sale. Text only by design: the
+// photos above already carry the sale, and a second row of images competed with
+// them. Nothing renders unless she added at least one.
+function spPicksOf(p){
+  let arr=[];
+  if(Array.isArray(p.picks))arr=p.picks;
+  else if(typeof p.picks==='string'&&p.picks.trim()){try{arr=JSON.parse(p.picks)||[];}catch{arr=[];}}
+  // Carry over anything saved under the old single-pick shape
+  if(!arr.length&&(p.pick_title||p.pick_link)){
+    arr=[{id:'legacy',name:p.pick_title||'',shop:'',link:p.pick_link||''}];
+  }
+  return arr.filter(x=>x&&((x.name||'').trim()||(x.link||'').trim()));
+}
+function renderPicks(p){
+  const picks=spPicksOf(p);
+  if(!picks.length)return '';
+  const rows=picks.map(x=>{
+    const name=(x.name||'').trim();
+    const shop=(x.shop||'').trim();
+    const link=(x.link||'').trim();
+    const inner=`<div class="sp-pick-main">
+        <div class="sp-pick-name">${h(name||shop||'View item')}</div>
+        ${shop&&name?`<div class="sp-pick-shop">${h(shop)}</div>`:''}
+      </div>
+      ${link?'<span class="sp-pick-go">Shop &rarr;</span>':''}`;
+    return link
+      ? `<a class="sp-pick-row" href="${h(link)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
+      : `<div class="sp-pick-row">${inner}</div>`;
+  }).join('');
+  return `<div class="sp-picks">
+    <div class="sp-picks-lbl">${picks.length>1?'My Picks':'My Pick'}</div>
+    ${rows}
   </div>`;
 }
 
@@ -3187,7 +3203,7 @@ function renderPostImage(img,postId){
 
 // ── Supabase helpers ──
 async function savePost(p){
-  await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',expires_at:p.expires_at??null,published_at:p.published_at||new Date().toISOString(),pick_link:p.pick_link||'',pick_image:p.pick_image||'',pick_title:p.pick_title||'',pick_price:p.pick_price||'',pick_note:p.pick_note||''})});
+  await sbFetch('posts',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:p.id,title:p.title,subtitle:p.subtitle||'',body:p.body||'',expires_at:p.expires_at??null,published_at:p.published_at||new Date().toISOString(),picks:Array.isArray(p.picks)?p.picks:[]})});
 }
 async function deletePostFromCloud(id){
   await sbFetch(`posts?id=eq.${encodeURIComponent(id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
@@ -3228,74 +3244,113 @@ function openEditPostForm(id){
 }
 function closeSPForm(){document.getElementById('sp-ov').classList.remove('open');}
 
-// ══ MY PICK ══
-// One optional featured item per post. Paste the affiliate link, hit Get details
-// and the edge function reads the product page for the name, photo and price.
-// Every field stays editable, because plenty of retailers refuse a server fetch.
-const SP_PICK_FIELDS=['link','title','price','image','note'];
-function spPickEl(k){return document.getElementById('sp-pick-'+k);}
+// ══ MY PICKS ══
+// A short list of items, each one a name, the shop it is at, and her link.
+// No photos: the sale images above already carry the page. Paste a link and
+// Get details reads the product page for the name and shop, which plenty of
+// retailers refuse, so both fields stay editable either way.
+let _spPicks=[];
 function spPickSetOpen(open){
   document.getElementById('sp-pick-body').style.display=open?'block':'none';
   document.getElementById('sp-pick-toggle').textContent=open?'Hide':'Add';
 }
 function spPickToggle(){
   const open=document.getElementById('sp-pick-body').style.display==='none';
+  if(open&&!_spPicks.length)_spPicks=[spPickBlank()];
   spPickSetOpen(open);
-  if(open)setTimeout(()=>spPickEl('link').focus(),60);
+  if(open){spPickRender();setTimeout(()=>{const el=document.querySelector('#sp-pick-list .sp-pick-link');if(el)el.focus();},60);}
 }
-function spPickPreview(){
-  const v=(spPickEl('image').value||'').trim();
-  const box=document.getElementById('sp-pick-prev');
-  const img=document.getElementById('sp-pick-prev-img');
-  if(!v){box.style.display='none';return;}
-  img.src=v;box.style.display='flex';
-}
+function spPickBlank(){return {id:uid(),name:'',shop:'',link:''};}
 function spPickReset(p){
-  SP_PICK_FIELDS.forEach(k=>{spPickEl(k).value=p?(p['pick_'+k]||''):'';});
-  spPickPreview();
-  document.getElementById('sp-pick-msg').textContent='';
-  const has=!!(p&&(p.pick_link||p.pick_image||p.pick_title||p.pick_note));
-  spPickSetOpen(has);
+  _spPicks=p?spPicksOf(p).map(x=>({id:x.id||uid(),name:x.name||'',shop:x.shop||'',link:x.link||''})):[];
+  spPickRender();
+  spPickSetOpen(_spPicks.length>0);
 }
-function spPickClear(){
-  SP_PICK_FIELDS.forEach(k=>{spPickEl(k).value='';});
-  spPickPreview();
-  document.getElementById('sp-pick-msg').textContent='';
-  spPickSetOpen(false);
+function spPickAdd(){
+  spPickSync();
+  _spPicks.push(spPickBlank());
+  spPickRender();
+  const rows=document.querySelectorAll('#sp-pick-list .sp-pick-link');
+  if(rows.length)rows[rows.length-1].focus();
+}
+function spPickRemove(id){
+  spPickSync();
+  _spPicks=_spPicks.filter(x=>x.id!==id);
+  spPickRender();
+  if(!_spPicks.length)spPickSetOpen(false);
+}
+function spPickMove(id,dir){
+  spPickSync();
+  const i=_spPicks.findIndex(x=>x.id===id), j=i+dir;
+  if(i<0||j<0||j>=_spPicks.length)return;
+  [_spPicks[i],_spPicks[j]]=[_spPicks[j],_spPicks[i]];
+  spPickRender();
+}
+// Read what is on screen back into the array before any redraw
+function spPickSync(){
+  _spPicks.forEach(x=>{
+    const row=document.querySelector(`[data-pick="${x.id}"]`);
+    if(!row)return;
+    x.link=(row.querySelector('.sp-pick-link').value||'').trim();
+    x.name=(row.querySelector('.sp-pick-name-in').value||'').trim();
+    x.shop=(row.querySelector('.sp-pick-shop-in').value||'').trim();
+  });
+}
+function spPickRender(){
+  const wrap=document.getElementById('sp-pick-list');
+  if(!wrap)return;
+  wrap.innerHTML=_spPicks.map((x,i)=>`
+    <div class="sp-pick-card" data-pick="${h(x.id)}">
+      <div class="sp-pick-card-hd">
+        <span class="sp-pick-card-n">Pick ${i+1}</span>
+        <span class="sp-pick-card-acts">
+          <button type="button" class="sp-pick-mini" onclick="spPickMove('${h(x.id)}',-1)" title="Move up">↑</button>
+          <button type="button" class="sp-pick-mini" onclick="spPickMove('${h(x.id)}',1)" title="Move down">↓</button>
+          <button type="button" class="sp-pick-mini red" onclick="spPickRemove('${h(x.id)}')" title="Remove">✕</button>
+        </span>
+      </div>
+      <div class="fg">
+        <label class="fl">Your link</label>
+        <div class="sp-pick-fetch-row">
+          <input type="url" class="fi sp-pick-link" placeholder="https://…" value="${h(x.link)}">
+          <button type="button" class="sp-pick-fetch" onclick="spPickFetch('${h(x.id)}',this)">Get details</button>
+        </div>
+        <div class="sp-pick-msg" data-msg="${h(x.id)}"></div>
+      </div>
+      <div class="fg"><label class="fl">Item</label><input type="text" class="fi sp-pick-name-in" placeholder="e.g. Spira Necklace" value="${h(x.name)}"></div>
+      <div class="fg" style="margin-bottom:0;"><label class="fl">Shop <span class="flh">(optional)</span></label><input type="text" class="fi sp-pick-shop-in" placeholder="e.g. Julietta" value="${h(x.shop)}"></div>
+    </div>`).join('');
 }
 function spPickValues(){
-  const v={};
-  SP_PICK_FIELDS.forEach(k=>{v['pick_'+k]=(spPickEl(k).value||'').trim();});
-  return v;
+  spPickSync();
+  return _spPicks
+    .filter(x=>(x.name||'').trim()||(x.link||'').trim())
+    .map(x=>({id:x.id,name:x.name||'',shop:x.shop||'',link:x.link||''}));
 }
-async function spPickFetch(){
-  const url=(spPickEl('link').value||'').trim();
-  const msg=document.getElementById('sp-pick-msg');
-  const btn=document.getElementById('sp-pick-fetch-btn');
-  if(!url){msg.textContent='Paste the product link first.';return;}
-  btn.disabled=true;btn.textContent='Reading…';msg.textContent='';
+async function spPickFetch(id,btn){
+  spPickSync();
+  const pick=_spPicks.find(x=>x.id===id);
+  const row=document.querySelector(`[data-pick="${id}"]`);
+  const msg=row?row.querySelector('[data-msg]'):null;
+  const say=t=>{if(msg)msg.textContent=t;};
+  if(!pick||!pick.link){say('Paste your link first.');return;}
+  btn.disabled=true;btn.textContent='Reading…';say('');
   try{
     const r=await fetch(`${SUPA_URL}/functions/v1/fetch-meta`,{
       method:'POST',
       headers:{'Content-Type':'application/json','apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY},
-      body:JSON.stringify({urls:[url]})
+      body:JSON.stringify({urls:[pick.link]})
     });
     const data=await r.json();
     const res=(data.results||[])[0];
-    if(!res||!res.ok){
-      msg.textContent='That shop would not let me read the page. Fill in the name and photo below yourself, the link still works.';
-      return;
-    }
-    let filled=[];
-    if(res.title&&!spPickEl('title').value.trim()){spPickEl('title').value=res.title;filled.push('name');}
-    if(res.image&&!spPickEl('image').value.trim()){spPickEl('image').value=res.image;spPickPreview();filled.push('photo');}
-    if(res.price&&!spPickEl('price').value.trim()){spPickEl('price').value=res.price;filled.push('price');}
-    msg.textContent=filled.length
-      ?`Got the ${filled.join(', ')}. Edit anything that looks off.`
-      :'Nothing new to fill in. Everything below is already set.';
+    if(!res||!res.ok){say('That shop would not let me read the page. Type the item and shop below, the link still works.');return;}
+    const got=[];
+    if(res.title&&!pick.name){pick.name=res.title;row.querySelector('.sp-pick-name-in').value=res.title;got.push('item');}
+    if(res.brand&&!pick.shop){pick.shop=res.brand;row.querySelector('.sp-pick-shop-in').value=res.brand;got.push('shop');}
+    say(got.length?`Got the ${got.join(' and ')}. Edit anything that looks off.`:'Nothing new to fill in.');
   }catch(e){
     console.error('pick fetch failed:',e);
-    msg.textContent='Could not reach the shop just now. Fill it in below and save as normal.';
+    say('Could not reach the shop just now. Type it in below and save as normal.');
   }finally{
     btn.disabled=false;btn.textContent='Get details';
   }
@@ -3576,16 +3631,16 @@ async function savePostForm(){
   const body=document.getElementById('sp-f-body').value.trim();
   const rawEnds=document.getElementById('sp-f-expires').value;
   const expires_at=rawEnds?new Date(rawEnds+'T23:59:59').toISOString():null;
-  const pick=spPickValues();
+  const picks=spPickValues();
   const btn=document.querySelector('#sp-ov .btn-p');
   btn.textContent='Saving…';btn.disabled=true;
   try{
     if(_editingPostId){
       const p=_posts.find(x=>x.id===_editingPostId);
-      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;Object.assign(p,pick);}
-      await savePost({id:_editingPostId,title,subtitle,body,expires_at,...pick});
+      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;}
+      await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks});
     } else {
-      const newPost={id:uid(),title,subtitle,body,expires_at,...pick,published_at:new Date().toISOString(),images:[]};
+      const newPost={id:uid(),title,subtitle,body,expires_at,picks,published_at:new Date().toISOString(),images:[]};
       await savePost(newPost);
       // Anything the pasted email gave us becomes the post's banner in one go
       if(_spPastedImage||_spPastedLink){
@@ -5343,27 +5398,12 @@ async function runFetchImages(){
     </div>
     <div class="sp-pick-fs">
       <div class="sp-pick-fs-hd">
-        <span class="sp-pick-fs-lbl">My Pick <span class="flh">(optional)</span></span>
+        <span class="sp-pick-fs-lbl">My Picks <span class="flh">(optional)</span></span>
         <button type="button" class="sp-pick-fs-toggle" id="sp-pick-toggle" onclick="spPickToggle()">Add</button>
       </div>
       <div class="sp-pick-fs-body" id="sp-pick-body" style="display:none;">
-        <div class="fg">
-          <label class="fl">Product link <span class="flh">(your affiliate link)</span></label>
-          <div class="sp-pick-fetch-row">
-            <input type="url" class="fi" id="sp-pick-link" placeholder="https://…">
-            <button type="button" class="sp-pick-fetch" id="sp-pick-fetch-btn" onclick="spPickFetch()">Get details</button>
-          </div>
-          <div class="sp-pick-msg" id="sp-pick-msg"></div>
-        </div>
-        <div class="fg"><label class="fl">Item name</label><input type="text" class="fi" id="sp-pick-title" placeholder="e.g. Toteme Wool Scarf"></div>
-        <div class="fg"><label class="fl">Price <span class="flh">(optional)</span></label><input type="text" class="fi" id="sp-pick-price" placeholder="290"></div>
-        <div class="fg">
-          <label class="fl">Photo URL</label>
-          <input type="url" class="fi" id="sp-pick-image" placeholder="https://…" oninput="spPickPreview()">
-          <div class="sp-pick-prev" id="sp-pick-prev" style="display:none;"><img id="sp-pick-prev-img" src="" alt=""></div>
-        </div>
-        <div class="fg"><label class="fl">Why you picked it <span class="flh">(optional)</span></label><textarea class="fi fta" id="sp-pick-note" rows="3" placeholder="One or two lines on why this is the one worth buying…" style="font-style:normal;min-height:70px;"></textarea></div>
-        <button type="button" class="btn-g" onclick="spPickClear()" style="margin-top:0;">Remove pick</button>
+        <div id="sp-pick-list"></div>
+        <button type="button" class="sp-pick-add" onclick="spPickAdd()">＋ Add another pick</button>
       </div>
     </div>
     <button class="btn-p" onclick="savePostForm()">Save Post</button>
