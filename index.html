@@ -454,23 +454,23 @@ body.creator .sp-creator-acts{display:flex;}
 .sp-act-btn.red:hover{border-color:#B03030;color:#B03030;}
 /* MY PICK: one optional featured item per post. Set apart from the other
    images so it reads as her choice, not just another product in the sale. */
-/* MY PICKS: a short text list under the sale, no photos. Just the item, the shop
-   it is at, and her link. Reads the same on a phone as on a laptop. */
-.sp-picks{border:1px solid var(--border);padding:18px 20px;margin:24px 0 0;background:var(--surf);}
-.sp-picks-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:12px;}
-.sp-pick-row{display:flex;align-items:baseline;justify-content:space-between;gap:14px;padding:12px 0;border-top:1px solid var(--border);text-decoration:none;color:inherit;transition:opacity .15s;}
-.sp-pick-row:first-of-type{border-top:none;padding-top:0;}
-.sp-pick-row:hover .sp-pick-name{text-decoration:underline;text-underline-offset:3px;}
-.sp-pick-row:hover{opacity:.75;}
-.sp-pick-main{min-width:0;}
-.sp-pick-name{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--ink);line-height:1.3;}
-.sp-pick-shop{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:4px;}
-.sp-pick-go{font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink);white-space:nowrap;flex-shrink:0;}
+/* MY PICKS: a short text list under the sale, no photos. Brand above, product
+   below, the way a boutique lists it. Reads the same on a phone as on a laptop. */
+.sp-picks{border-top:1px solid var(--ink);margin:28px 0 0;padding:16px 0 0;}
+.sp-picks-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+.sp-pick-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:opacity .15s;}
+.sp-pick-row:last-child{border-bottom:none;padding-bottom:2px;}
+.sp-pick-main{display:block;min-width:0;}
+.sp-pick-brand{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:5px;}
+.sp-pick-name{display:block;font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);line-height:1.3;}
+.sp-pick-go{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);white-space:nowrap;flex-shrink:0;transition:color .15s;}
+.sp-pick-go::after{content:' \2192';}
+.sp-pick-row:hover .sp-pick-go{color:var(--ink);}
+.sp-pick-row:hover .sp-pick-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
 @media(max-width:700px){
-  .sp-picks{padding:16px;margin-top:20px;}
-  .sp-pick-row{padding:14px 0;}
-  .sp-pick-name{font-size:17px;}
-  .sp-pick-go{font-size:9px;}
+  .sp-picks{margin-top:24px;}
+  .sp-pick-row{gap:16px;padding:15px 0;}
+  .sp-pick-name{font-size:18px;}
 }
 /* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
@@ -3133,6 +3133,22 @@ function renderPostEntry(p){
 // A short list of items she rates, under the sale. Text only by design: the
 // photos above already carry the sale, and a second row of images competed with
 // them. Nothing renders unless she added at least one.
+// Retailers title their pages "BRAND | Product name". Pasted in whole that reads
+// like a database field, so pull the brand out and let it sit on its own line.
+const PICK_SEP=/\s*[|\uFF5C\u2022]\s*|\s+[\u2013\u2014]\s+|\s+\u00B7\s+/;
+function spSplitPickTitle(raw){
+  const s=String(raw||'').trim();
+  if(!s)return {name:'',shop:''};
+  const parts=s.split(PICK_SEP).map(x=>x.trim()).filter(Boolean);
+  if(parts.length<2)return {name:s,shop:''};
+  // The shouting one is the brand; failing that, the shorter one
+  const shouts=x=>x.length<=42&&x===x.toUpperCase()&&/[A-Z]/.test(x);
+  let i=parts.findIndex(shouts);
+  if(i<0)i=parts[0].length<=parts[parts.length-1].length?0:parts.length-1;
+  const shop=parts[i];
+  const name=parts.filter((_,n)=>n!==i).join(' ').trim();
+  return name?{name,shop}:{name:shop,shop:''};
+}
 function spPicksOf(p){
   let arr=[];
   if(Array.isArray(p.picks))arr=p.picks;
@@ -3141,7 +3157,14 @@ function spPicksOf(p){
   if(!arr.length&&(p.pick_title||p.pick_link)){
     arr=[{id:'legacy',name:p.pick_title||'',shop:'',link:p.pick_link||''}];
   }
-  return arr.filter(x=>x&&((x.name||'').trim()||(x.link||'').trim()));
+  return arr
+    .filter(x=>x&&((x.name||'').trim()||(x.link||'').trim()))
+    .map(x=>{
+      let name=(x.name||'').trim(), shop=(x.shop||'').trim();
+      // Tidies rows saved before this existed, without her reopening them
+      if(!shop&&PICK_SEP.test(name)){const sp=spSplitPickTitle(name);name=sp.name;shop=sp.shop;}
+      return {...x,name,shop};
+    });
 }
 function renderPicks(p){
   const picks=spPicksOf(p);
@@ -3150,11 +3173,12 @@ function renderPicks(p){
     const name=(x.name||'').trim();
     const shop=(x.shop||'').trim();
     const link=(x.link||'').trim();
-    const inner=`<div class="sp-pick-main">
-        <div class="sp-pick-name">${h(name||shop||'View item')}</div>
-        ${shop&&name?`<div class="sp-pick-shop">${h(shop)}</div>`:''}
-      </div>
-      ${link?'<span class="sp-pick-go">Shop &rarr;</span>':''}`;
+    // Brand sits above the product, the way a boutique lists it
+    const inner=`<span class="sp-pick-main">
+        ${shop?`<span class="sp-pick-brand">${h(shop)}</span>`:''}
+        <span class="sp-pick-name">${h(name||shop||'View item')}</span>
+      </span>
+      ${link?'<span class="sp-pick-go">Shop</span>':''}`;
     return link
       ? `<a class="sp-pick-row" href="${h(link)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
       : `<div class="sp-pick-row">${inner}</div>`;
@@ -3345,8 +3369,10 @@ async function spPickFetch(id,btn){
     const res=(data.results||[])[0];
     if(!res||!res.ok){say('That shop would not let me read the page. Type the item and shop below, the link still works.');return;}
     const got=[];
-    if(res.title&&!pick.name){pick.name=res.title;row.querySelector('.sp-pick-name-in').value=res.title;got.push('item');}
-    if(res.brand&&!pick.shop){pick.shop=res.brand;row.querySelector('.sp-pick-shop-in').value=res.brand;got.push('shop');}
+    const split=spSplitPickTitle(res.title||'');
+    const brand=split.shop||res.brand||'';
+    if(split.name&&!pick.name){pick.name=split.name;row.querySelector('.sp-pick-name-in').value=split.name;got.push('item');}
+    if(brand&&!pick.shop){pick.shop=brand;row.querySelector('.sp-pick-shop-in').value=brand;got.push('brand');}
     say(got.length?`Got the ${got.join(' and ')}. Edit anything that looks off.`:'Nothing new to fill in.');
   }catch(e){
     console.error('pick fetch failed:',e);
