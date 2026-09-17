@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-17 about-rewrite -->
+<!-- MTP BUILD 2026-09-17b about-save-errors -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -405,6 +405,7 @@ body:not(.creator) .ab-slot{display:none;}
 .ab-editbtn{display:none;margin-top:18px;padding:7px 15px;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
 .ab-editbtn:hover{border-color:var(--ink);color:var(--ink);}
 body.creator .ab-editbtn{display:inline-block;}
+.ab-err{background:#F6EAE8;border-left:2px solid #B03030;color:#8C3A32;font-size:12.5px;line-height:1.6;padding:11px 14px;margin-bottom:14px;}
 .ab-photo-prev{width:110px;display:block;margin-top:10px;background:var(--bg);}
 @media(max-width:700px){
   .ab-wrap{padding:30px 18px 16px;}
@@ -2582,6 +2583,7 @@ function abOpenEdit(){
   document.getElementById('ab-e-alt').value=a.photo_alt||'';
   document.getElementById('ab-e-photo').value=a.photo||'';
   abPhotoPreview();
+  abSaveErr('');
   document.getElementById('ab-ov').classList.add('open');
 }
 function abCloseEdit(){document.getElementById('ab-ov').classList.remove('open');}
@@ -2606,8 +2608,26 @@ function abPhotoClear(){
   document.getElementById('ab-e-photo').value='';
   abPhotoPreview();
 }
+// Turns a Supabase error into something she can act on, instead of a shrug
+function abSaveProblem(msg){
+  const t=String(msg||'');
+  if(/PGRST205|Could not find the table/i.test(t))
+    return 'The About table is not in your database yet. Run about-setup.sql in Supabase, then save again.';
+  if(/permission denied|42501|JWT|401|403/i.test(t))
+    return 'Your database refused the write. The About table needs its policy applied, which is the second half of about-setup.sql.';
+  if(/413|too large|payload/i.test(t))
+    return 'That photo is too big to store. Try a smaller one, or crop it first.';
+  return 'Could not save. '+t.slice(0,140);
+}
+function abSaveErr(msg){
+  const el=document.getElementById('ab-e-err');
+  if(!el)return;
+  if(!msg){el.style.display='none';el.textContent='';return;}
+  el.textContent=msg;el.style.display='block';
+}
 async function abSaveEdit(){
   const btn=document.getElementById('ab-e-save');
+  abSaveErr('');
   const row={
     id:'main',
     lead:document.getElementById('ab-e-lead').value.trim(),
@@ -2619,6 +2639,11 @@ async function abSaveEdit(){
     photo_alt:document.getElementById('ab-e-alt').value.trim(),
     updated_at:new Date().toISOString()
   };
+  // A phone photo can be enormous. Say so here rather than failing at the server.
+  if(row.photo.length>900000){
+    abSaveErr('That photo is still very large after compressing. Crop it tighter or pick a smaller file.');
+    return;
+  }
   btn.textContent='Saving…';btn.disabled=true;
   try{
     await sbFetch('site_about',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
@@ -2628,7 +2653,7 @@ async function abSaveEdit(){
     toast('About updated');
   }catch(e){
     console.error('abSaveEdit failed:',e);
-    toast('⚠ Could not save the About page');
+    abSaveErr(abSaveProblem(e&&e.message));
   }
   btn.textContent='Save';btn.disabled=false;
 }
@@ -5607,6 +5632,7 @@ async function runFetchImages(){
     </div>
     <div class="fg"><label class="fl">How often you publish</label><input type="text" class="fi" id="ab-e-cadence" placeholder="A new edit every Saturday morning"></div>
     <div class="fg"><label class="fl">Sign off</label><input type="text" class="fi" id="ab-e-signoff" placeholder="Buy well, live well."></div>
+    <div id="ab-e-err" class="ab-err" style="display:none;"></div>
     <button class="btn-p" id="ab-e-save" onclick="abSaveEdit()">Save</button>
     <button class="btn-g" onclick="abCloseEdit()">Cancel</button>
   </div>
