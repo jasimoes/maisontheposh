@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-06b picks-no-divider -->
+<!-- MTP BUILD 2026-09-17 about-rewrite -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -378,18 +378,40 @@ body.creator .tl-add-row{display:flex;}
 .sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
 /* About & Partnerships */
 .ab-wrap{max-width:680px;margin:0 auto;padding:44px 40px 20px;}
-.ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:16px;}
-.ab-lead{font-family:var(--serif);font-size:24px;font-weight:300;line-height:1.5;color:var(--ink);margin-bottom:26px;}
-.ab-body p{font-size:13.5px;line-height:1.85;color:var(--mid);margin-bottom:16px;}
-.ab-body strong{color:var(--ink);font-weight:400;}
+.ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:22px;}
+/* Portrait tucked top right with the copy running around it, so there is no
+   dead column under the opening line. Stacks above the text on a phone. */
+.ab-top{margin-bottom:26px;}
+.ab-top::after{content:'';display:block;clear:both;}
+.ab-lead{font-family:var(--serif);font-size:25px;font-weight:300;line-height:1.45;color:var(--ink);margin:0 0 18px;text-wrap:balance;}
+.ab-portrait{float:right;width:190px;margin:4px 0 18px 30px;}
+.ab-portrait img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center top;display:block;background:var(--bg);}
+.ab-portrait figcaption{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-top:9px;}
+.ab-body p{font-size:14px;line-height:1.85;color:var(--mid);margin:0 0 16px;}
+.ab-body p:last-child{margin-bottom:0;}
+/* The one line that carries the thesis gets the ink, nothing else in the run */
+.ab-body p.ab-turn{color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.55;margin:22px 0;}
 .ab-sec{border-top:1px solid var(--border);margin-top:38px;padding-top:30px;}
-.ab-h{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:16px;}
-.ab-cover{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px;}
-.ab-pill{border:1px solid var(--border);padding:6px 13px;font-family:var(--serif);font-size:13px;color:var(--ink);}
-.ab-pill.soft{color:var(--mid);font-family:var(--sans);font-size:11px;letter-spacing:.04em;}
-.ab-note{font-size:11.5px;color:var(--soft);line-height:1.7;margin-top:12px;font-style:italic;}
+.ab-h{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:18px;}
+/* A list, not a heap of chips. Hairlines keep it even however long the items run */
+.ab-list{list-style:none;margin:0;padding:0;}
+.ab-list li{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.4;padding:11px 0;border-bottom:1px solid var(--rule-soft,#EFEDE7);}
+.ab-list li:first-child{padding-top:0;}
+.ab-list li:last-child{border-bottom:none;padding-bottom:0;}
+.ab-note{font-size:12px;color:var(--soft);line-height:1.7;margin-top:18px;}
+.ab-signoff{font-family:var(--serif);font-size:19px;color:var(--ink);margin-top:30px;font-style:italic;}
 .ab-slot{border:1px dashed var(--faint);background:var(--surf);padding:16px 18px;font-size:11.5px;color:var(--soft);line-height:1.7;}
 body:not(.creator) .ab-slot{display:none;}
+.ab-editbtn{display:none;margin-top:18px;padding:7px 15px;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
+.ab-editbtn:hover{border-color:var(--ink);color:var(--ink);}
+body.creator .ab-editbtn{display:inline-block;}
+.ab-photo-prev{width:110px;display:block;margin-top:10px;background:var(--bg);}
+@media(max-width:700px){
+  .ab-wrap{padding:30px 18px 16px;}
+  .ab-portrait{float:none;width:200px;margin:0 0 20px;}
+  .ab-lead{font-size:22px;}
+  .ab-list li{font-size:15px;}
+}
 /* Contact form */
 .ab-form{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
 .ab-form .ab-full{grid-column:1 / -1;}
@@ -1674,7 +1696,7 @@ function render(){
   feed.style.display='block';
   if(activeT1==='widgets'){renderWidgets();return;}
   if(activeT1==='sales'){renderSales();return;}
-  if(activeT1==='about'){renderAbout();return;}
+  if(activeT1==='about'){(async()=>{if(!_about)await loadAbout();renderAbout();})();return;}
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
@@ -2481,35 +2503,61 @@ function filterDetailItems(q){
 const MTP_CONTACT_EMAIL='maisontheposh@outlook.com';
 let _abSent=false;
 
+// ── About: copy and portrait live in Supabase so she can edit them here ──
+const AB_FALLBACK={
+  lead:"I am an engineer with more than 20 years of experience leading hardware product development, and I love fashion.",
+  body:"Engineering taught me to be curious about how things are made: why certain decisions get made, how materials perform, how something fits, what it costs, and whether the finished product actually delivers what was intended.\n\nI bring that same curiosity to fashion. I love beautiful clothes and the excitement of a new collection, but looking has never been enough for me. I want to understand it.\n\nWhy did a designer choose that fabric? Why does one coat hang beautifully while another does not? How much cashmere, wool, leather or viscose was actually used? How have prices changed? Does the construction justify the price? And sometimes, why does something that looks extraordinary on the runway make no sense in real life?\n\nThat makes me a fashion engineer.\n\nMaisonThePosh began with my love of shopping and discovering beautiful things, and grew into something much more analytical. I follow the collections, study the runway, try the clothes, compare materials and fit, track prices and availability, and look at the data behind what the maisons are doing.\n\nThe focus is luxury, with high street mixed in. Price alone does not make something good, and affordable does not mean something cannot be beautifully designed.\n\nBecause I actually shop, wear, return, resell and live with many of the things I write about, there is always a practical side to the analysis.\n\nThe question I keep coming back to is simple: is it worth buying, and why?",
+  cover:"In-depth maison and collection reviews\nRunway analysis\nMaterial and construction deep dives\nFit notes\nPrice and value comparisons\nShopping edits\nResale and authentication\nStockist research\nThe occasional spreadsheet, when fashion requires one",
+  photo:"",photo_alt:"Juliana",
+  cadence:"A new edit every Saturday morning, and some weeks a second post midweek.",
+  signoff:"Buy well, live well."
+};
+let _about=null;
+
+async function loadAbout(){
+  try{
+    const rows=await sbFetch('site_about?select=*&id=eq.main');
+    _about=(rows&&rows[0])?rows[0]:{...AB_FALLBACK};
+  }catch(e){
+    // Never leave the page blank because the network had a bad moment
+    console.error('loadAbout failed:',e);
+    _about={...AB_FALLBACK};
+  }
+}
+
+// The line that turns the piece gets its own weight. Everything else stays even.
+const AB_TURNS=['That makes me a fashion engineer.','The question I keep coming back to is simple: is it worth buying, and why?'];
+
 function renderAbout(){
   const feed=document.getElementById('feed');
+  const a=_about||AB_FALLBACK;
+  const paras=String(a.body||'').split(/\n\s*\n/).map(p=>p.trim()).filter(Boolean);
+  const bodyHtml=paras.map(p=>{
+    const turn=AB_TURNS.some(t=>p===t)||p.length<70&&/fashion engineer/i.test(p);
+    return `<p${turn?' class="ab-turn"':''}>${h(p)}</p>`;
+  }).join('');
+  const cover=String(a.cover||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  const photo=(a.photo||'').trim();
+  const portrait=photo
+    ? `<figure class="ab-portrait"><img src="${h(photo)}" alt="${h(a.photo_alt||'Juliana')}" loading="lazy" onerror="this.closest('.ab-portrait').remove()">${a.photo_alt?`<figcaption>${h(a.photo_alt)}</figcaption>`:''}</figure>`
+    : '';
+
   feed.innerHTML=`
   <div class="ab-wrap">
     <div class="ab-eyebrow">About</div>
-    <p class="ab-lead">MaisonThePosh looks at clothes the way an engineer would: construction, materials, what a piece costs you per wear, and whether it holds up after a season of real use.</p>
-    <div class="ab-body">
-      <p>I'm Juliana. I write MaisonThePosh, a fashion publication about <strong>the things I actually love</strong> and keep going back to. It runs as a weekly newsletter, a set of curated edits, and long-form collection analyses built from my own datasets rather than press releases.</p>
-      <p>It is not a luxury-only publication. The Row, Toteme and Phoebe Philo sit alongside <strong>Massimo Dutti, COS, Uniqlo and Mango</strong>, because the useful comparison is usually between the two. When I call something an alternative I mean the vibe, shape or a design detail, never equivalent construction, and I say so.</p>
-      <p>Everything is written from pieces I own or have handled. Reviews come with a scorecard and, increasingly, a short video. If something is not worth the money I say that too, which is the part readers tend to write in about.</p>
+    <div class="ab-top">
+      ${portrait}
+      <p class="ab-lead">${h(a.lead||'')}</p>
+      <div class="ab-body">${bodyHtml}</div>
     </div>
+    ${a.signoff?`<p class="ab-signoff">${h(a.signoff)}</p>`:''}
+    <button class="ab-editbtn" onclick="abOpenEdit()">✎ Edit this page</button>
 
-    <div class="ab-sec">
-      <div class="ab-h">What I cover</div>
-      <div class="ab-cover">
-        <span class="ab-pill">The Row</span>
-        <span class="ab-pill">Toteme</span>
-        <span class="ab-pill">Phoebe Philo</span>
-      </div>
-      <div class="ab-cover" style="margin-top:9px;">
-        <span class="ab-pill soft">Collection analyses</span>
-        <span class="ab-pill soft">Weekly edits</span>
-        <span class="ab-pill soft">Affordable alternatives</span>
-        <span class="ab-pill soft">Materials &amp; construction</span>
-        <span class="ab-pill soft">Resale &amp; authentication</span>
-        <span class="ab-pill soft">Video reviews</span>
-      </div>
-      <p class="ab-note">Written since October 2025. Published weekly on Saturdays, plus collection coverage as it drops.</p>
-    </div>
+    ${cover.length?`<div class="ab-sec">
+      <div class="ab-h">What you'll find here</div>
+      <ul class="ab-list">${cover.map(x=>`<li>${h(x)}</li>`).join('')}</ul>
+      ${a.cadence?`<p class="ab-note">${h(a.cadence)}</p>`:''}
+    </div>`:''}
 
     <div class="ab-slot" style="margin-top:34px;">
       <strong>Only you can see this.</strong> When you want reach figures on the page, tell me what to publish and I will add a stats row here, subscribers, open rate, monthly clicks, countries, whatever you are comfortable with. Brands ask for these, so it is worth filling in before a pitch.
@@ -2521,6 +2569,68 @@ function renderAbout(){
       <div id="ab-form-slot">${abFormHTML()}</div>
     </div>
   </div>`+subscribeBlock();
+}
+
+// ── About editor ──
+function abOpenEdit(){
+  const a=_about||AB_FALLBACK;
+  document.getElementById('ab-e-lead').value=a.lead||'';
+  document.getElementById('ab-e-body').value=a.body||'';
+  document.getElementById('ab-e-cover').value=a.cover||'';
+  document.getElementById('ab-e-cadence').value=a.cadence||'';
+  document.getElementById('ab-e-signoff').value=a.signoff||'';
+  document.getElementById('ab-e-alt').value=a.photo_alt||'';
+  document.getElementById('ab-e-photo').value=a.photo||'';
+  abPhotoPreview();
+  document.getElementById('ab-ov').classList.add('open');
+}
+function abCloseEdit(){document.getElementById('ab-ov').classList.remove('open');}
+function abPhotoPreview(){
+  const v=document.getElementById('ab-e-photo').value.trim();
+  const img=document.getElementById('ab-e-prev');
+  if(!v){img.style.display='none';return;}
+  img.src=v;img.style.display='block';
+}
+// Same compression the sale images use, so a phone photo does not bloat the row
+function abPhotoFile(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=async e=>{
+    const small=await compressImage(e.target.result,700);
+    document.getElementById('ab-e-photo').value=small;
+    abPhotoPreview();
+  };
+  r.readAsDataURL(file);
+}
+function abPhotoClear(){
+  document.getElementById('ab-e-photo').value='';
+  abPhotoPreview();
+}
+async function abSaveEdit(){
+  const btn=document.getElementById('ab-e-save');
+  const row={
+    id:'main',
+    lead:document.getElementById('ab-e-lead').value.trim(),
+    body:document.getElementById('ab-e-body').value.trim(),
+    cover:document.getElementById('ab-e-cover').value.trim(),
+    cadence:document.getElementById('ab-e-cadence').value.trim(),
+    signoff:document.getElementById('ab-e-signoff').value.trim(),
+    photo:document.getElementById('ab-e-photo').value.trim(),
+    photo_alt:document.getElementById('ab-e-alt').value.trim(),
+    updated_at:new Date().toISOString()
+  };
+  btn.textContent='Saving…';btn.disabled=true;
+  try{
+    await sbFetch('site_about',{method:'POST',headers:{'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(row)});
+    _about=row;
+    abCloseEdit();
+    renderAbout();
+    toast('About updated');
+  }catch(e){
+    console.error('abSaveEdit failed:',e);
+    toast('⚠ Could not save the About page');
+  }
+  btn.textContent='Save';btn.disabled=false;
 }
 
 function abFormHTML(){
@@ -5465,6 +5575,40 @@ async function runFetchImages(){
     </div>
     <button class="btn-p" onclick="savePostForm()">Save Post</button>
     <button class="btn-g" onclick="closeSPForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ABOUT: PAGE EDITOR -->
+<div class="fov" id="ab-ov" onclick="if(event.target===this)abCloseEdit()">
+  <div class="fp" style="max-width:600px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Edit About</h3>
+    <div class="fg">
+      <label class="fl">Opening line <span class="flh">(the large one at the top)</span></label>
+      <textarea class="fi fta" id="ab-e-lead" rows="2" style="font-style:normal;min-height:56px;"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Your photo <span class="flh">(optional)</span></label>
+      <div class="dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])abPhotoFile(event.dataTransfer.files[0])">
+        <input type="file" accept="image/*" onchange="abPhotoFile(this.files[0])">
+        <p>Click, drag or paste a picture of you</p>
+      </div>
+      <input type="hidden" id="ab-e-photo">
+      <img id="ab-e-prev" class="ab-photo-prev" src="" alt="" style="display:none;">
+      <button type="button" class="btn-g" onclick="abPhotoClear()" style="margin-top:8px;font-size:10px;letter-spacing:.12em;">Remove photo</button>
+    </div>
+    <div class="fg"><label class="fl">Caption under the photo <span class="flh">(optional)</span></label><input type="text" class="fi" id="ab-e-alt" placeholder="Juliana"></div>
+    <div class="fg">
+      <label class="fl">About you <span class="flh">(leave a blank line between paragraphs)</span></label>
+      <textarea class="fi fta" id="ab-e-body" rows="14" style="font-style:normal;min-height:280px;"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">What you'll find here <span class="flh">(one per line)</span></label>
+      <textarea class="fi fta" id="ab-e-cover" rows="9" style="font-style:normal;min-height:170px;"></textarea>
+    </div>
+    <div class="fg"><label class="fl">How often you publish</label><input type="text" class="fi" id="ab-e-cadence" placeholder="A new edit every Saturday morning"></div>
+    <div class="fg"><label class="fl">Sign off</label><input type="text" class="fi" id="ab-e-signoff" placeholder="Buy well, live well."></div>
+    <button class="btn-p" id="ab-e-save" onclick="abSaveEdit()">Save</button>
+    <button class="btn-g" onclick="abCloseEdit()">Cancel</button>
   </div>
 </div>
 
