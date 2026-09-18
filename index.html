@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-17b about-save-errors -->
+<!-- MTP BUILD 2026-09-18 pick-shop-button -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -496,19 +496,21 @@ body.creator .sp-creator-acts{display:flex;}
 .sp-picks{margin:20px 0 0;padding:0;}
 .sp-picks-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
 .sp-picks-lbl::before{content:'';display:block;width:22px;height:1px;background:var(--faint);margin-bottom:10px;}
-.sp-pick-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:14px 0;border-bottom:1px solid var(--border);text-decoration:none;color:inherit;transition:opacity .15s;}
+.sp-pick-row{display:block;padding:16px 0 18px;border-bottom:1px solid var(--border);}
 .sp-pick-row:last-child{border-bottom:none;padding-bottom:2px;}
 .sp-pick-main{display:block;min-width:0;}
 .sp-pick-brand{display:block;font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:5px;}
-.sp-pick-name{display:block;font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);line-height:1.3;}
-.sp-pick-go{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);white-space:nowrap;flex-shrink:0;transition:color .15s;}
-.sp-pick-go::after{content:' \2192';}
-.sp-pick-row:hover .sp-pick-go{color:var(--ink);}
-.sp-pick-row:hover .sp-pick-name{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+.sp-pick-name{display:block;font-family:var(--serif);font-size:19px;font-weight:400;color:var(--ink);line-height:1.3;text-decoration:none;}
+a.sp-pick-name:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
+/* The pick has to earn a click on its own, so it gets a real button sitting
+   directly under the item, not a faint label floated off to the right. */
+.sp-pick-btn{display:inline-block;margin-top:12px;padding:10px 22px;border:1px solid var(--ink);background:none;color:var(--ink);font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:background .18s,color .18s;}
+.sp-pick-btn:hover{background:var(--ink);color:white;}
 @media(max-width:700px){
   .sp-picks{margin-top:24px;}
-  .sp-pick-row{gap:16px;padding:15px 0;}
+  .sp-pick-row{padding:16px 0 18px;}
   .sp-pick-name{font-size:18px;}
+  .sp-pick-btn{display:block;text-align:center;}
 }
 /* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
@@ -3339,15 +3341,22 @@ function renderPicks(p){
     const name=(x.name||'').trim();
     const shop=(x.shop||'').trim();
     const link=(x.link||'').trim();
-    // Brand sits above the product, the way a boutique lists it
-    const inner=`<span class="sp-pick-main">
+    // Brand sits above the product, the way a boutique lists it, and the
+    // button goes straight underneath so the click is obvious.
+    const label=name||shop||'View item';
+    const title=link
+      ? `<a class="sp-pick-name" href="${h(link)}" target="_blank" rel="noopener noreferrer">${h(label)}</a>`
+      : `<span class="sp-pick-name">${h(label)}</span>`;
+    const btn=link
+      ? `<a class="sp-pick-btn" href="${h(link)}" target="_blank" rel="noopener noreferrer">Shop This Item &rarr;</a>`
+      : '';
+    return `<div class="sp-pick-row">
+      <span class="sp-pick-main">
         ${shop?`<span class="sp-pick-brand">${h(shop)}</span>`:''}
-        <span class="sp-pick-name">${h(name||shop||'View item')}</span>
+        ${title}
       </span>
-      ${link?'<span class="sp-pick-go">Shop</span>':''}`;
-    return link
-      ? `<a class="sp-pick-row" href="${h(link)}" target="_blank" rel="noopener noreferrer">${inner}</a>`
-      : `<div class="sp-pick-row">${inner}</div>`;
+      ${btn}
+    </div>`;
   }).join('');
   return `<div class="sp-picks">
     <div class="sp-picks-lbl">${picks.length>1?'My Picks':'My Pick'}</div>
