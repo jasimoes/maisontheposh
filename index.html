@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-20 boards-paste -->
+<!-- MTP BUILD 2026-09-20b boards-pins -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -750,6 +750,45 @@ body.creator .bd-tile-acts{display:flex;}
 .bd-drop-h{display:block;font-size:11px;color:var(--soft);line-height:1.6;}
 .bd-paste-btn{width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);background:none;color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
 .bd-paste-btn:hover{border-color:var(--ink);color:var(--ink);}
+/* Pins on a look, and the card one opens */
+.bd-pin{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;padding:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.92);background:rgba(0,0,0,.7);color:#fff;font-family:var(--sans);font-size:10px;font-weight:400;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.4);transition:transform .15s,background .15s;z-index:2;}
+.bd-pin::before{content:'';position:absolute;inset:-8px;border-radius:50%;}
+.bd-pin:hover,.bd-pin.on{background:var(--ink);transform:scale(1.18);}
+.bd-count{position:absolute;left:8px;top:8px;padding:5px 10px;border:none;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;cursor:pointer;opacity:.9;transition:opacity .18s;z-index:2;}
+.bd-count:hover{opacity:1;}
+.bd-shot{position:relative;display:block;line-height:0;}
+.bd-pop{position:relative;display:none;background:var(--surf);border:1px solid var(--border);border-top:none;padding:13px 32px 14px 14px;text-align:left;line-height:normal;}
+.bd-pop.open{display:block;}
+.bd-pop-n{display:block;font-family:var(--sans);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;}
+.bd-pop-b{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:3px;}
+.bd-pop-t{display:block;font-family:var(--serif);font-size:16px;line-height:1.25;color:var(--ink);margin-bottom:10px;}
+.bd-pop-go{display:inline-block;padding:7px 14px;border:1px solid var(--ink);color:var(--ink);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:all .15s;}
+.bd-pop-go:hover{background:var(--ink);color:#fff;}
+.bd-pop-no{font-family:var(--sans);font-size:10px;color:var(--faint);letter-spacing:.02em;}
+.bd-pop-x{position:absolute;top:7px;right:8px;background:none;border:none;font-size:16px;line-height:1;color:var(--soft);cursor:pointer;padding:2px 5px;}
+.bd-pop-x:hover{color:var(--ink);}
+/* The tagging editor */
+.bd-tag-hint{font-size:11.5px;color:var(--soft);line-height:1.6;margin:-10px 0 14px;}
+.bd-tag-msg{background:#F6EAE8;border-left:2px solid #B03030;color:#8C3A32;font-size:12px;padding:9px 12px;margin-bottom:12px;}
+.bd-tag-body{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start;}
+/* outline, not border: a border would sit inside the box this element measures
+   clicks against, and shift every pin by a pixel */
+.bd-tag-photo{position:relative;display:block;line-height:0;background:var(--surf);outline:1px solid var(--border);cursor:crosshair;}
+/* No max-height and no object-fit here on purpose. The moment the photo is
+   letterboxed inside its box, a pin dropped at 20% lands somewhere else on the
+   reader's tile, where the photo fills the box. Same geometry, same pin. */
+.bd-tag-photo img{width:100%;height:auto;display:block;}
+.bd-tag-pin{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;padding:0;border-radius:50%;border:1.5px solid #fff;background:var(--ink);color:#fff;font-family:var(--sans);font-size:11px;line-height:1;display:flex;align-items:center;justify-content:center;cursor:grab;box-shadow:0 1px 7px rgba(0,0,0,.45);touch-action:none;}
+.bd-tag-pin:active{cursor:grabbing;}
+.bd-tag-list{padding-right:2px;}
+.bd-tag-empty{font-size:12px;color:var(--soft);line-height:1.7;border:1px dashed var(--border);padding:22px 14px;text-align:center;}
+.bd-tag-row{border:1px solid var(--border);padding:12px;margin-bottom:10px;background:var(--white);}
+.bd-tag-row-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;}
+.bd-tag-num{width:22px;height:22px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;display:flex;align-items:center;justify-content:center;}
+.bd-tag-del{background:none;border:none;padding:0;font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);cursor:pointer;}
+.bd-tag-del:hover{color:#B03030;}
+.bd-tag-row .fi{margin-bottom:7px;}
+.bd-tag-row .fi:last-child{margin-bottom:0;}
 .bd-full{border:1px dashed var(--border);padding:15px;text-align:center;font-size:11px;color:var(--soft);margin-top:12px;letter-spacing:.02em;}
 .bd-empty{padding:70px 20px;text-align:center;}
 .bd-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
@@ -766,7 +805,11 @@ body.creator .bd-tile-acts{display:flex;}
   .bd-mosaic{column-count:2;column-gap:6px;}
   .bd-tile,.bd-add{margin-bottom:6px;}
   .bd-drop{padding:26px 10px;}
-  .bd-tile-acts{top:4px;right:4px;}
+  .bd-pin{width:28px;height:28px;margin:-14px 0 0 -14px;font-size:11px;}
+  .bd-pop-t{font-size:15px;}
+  .bd-tag-body{grid-template-columns:1fr;gap:14px;}
+  .bd-tile-acts{top:4px;right:4px;gap:3px;}
+  .bd-tile-act{min-width:24px;height:24px;line-height:24px;font-size:10px;padding:0 5px;}
 }
 
 /* ══ FORMS ══ */
@@ -2966,27 +3009,95 @@ function renderBoardIndex(){
   feed.innerHTML=hdr+`<div class="bd-wrap">${errBox}<div class="bd-index">${cards}</div></div>`+subscribeBlock();
 }
 
+// A look can credit several things at once: a coat, the bag, the shoes. Each
+// one gets a numbered pin sitting where it is in the photo, the way a magazine
+// credits a look, and the pin opens that item's own card.
+function bdItemsOf(x){
+  const a=x&&x.items;
+  return Array.isArray(a)?a.filter(i=>i&&(i.name||i.link||i.maison)):[];
+}
+
 function bdTileHtml(x,i,total){
   const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
+  const items=bdItemsOf(x);
+  const pin=(it,n,handler)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+n))}" onclick="${handler}">${n}</button>`;
+
   if(isCreator){
     // In creator mode the tile is a plain block, so the buttons on it are not
     // fighting a link for the click. Reader mode below turns it back into one.
-    const openBtn=x.link?`<button class="bd-tile-act" title="Open link" onclick="window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
-    return `<div class="bd-tile">${img}
+    const openBtn=(x.link&&!items.length)?`<button class="bd-tile-act" title="Open link" onclick="event.stopPropagation();window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
+    const pins=items.map((it,n)=>pin(it,n+1,`event.stopPropagation();bdTagOpen('${h(x.id)}')`)).join('');
+    const mark=items.length
+      ? `<span class="bd-shop">${items.length} tagged</span>`
+      : (x.link?`<span class="bd-shop">Shoppable</span>`:'');
+    return `<div class="bd-tile"><span class="bd-shot">${img}${pins}</span>
       <span class="bd-tile-acts">
         <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
         <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
+        <button class="bd-tile-act" title="Tag the items" onclick="bdTagOpen('${h(x.id)}')">◎</button>
         <button class="bd-tile-act" title="Link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
         ${openBtn}
         <button class="bd-tile-act red" title="Remove" onclick="bdRemove('${h(x.id)}')">×</button>
       </span>
-      ${x.link?`<span class="bd-shop">Shoppable</span>`:''}
+      ${mark}
+    </div>`;
+  }
+
+  if(items.length){
+    // The card opens underneath the photo rather than over it, so a pin near
+    // the hem of a coat is never buried under the card that just opened.
+    const pins=items.map((it,n)=>pin(it,n+1,`bdPinTap(event,'${h(x.id)}','${h(it.id)}')`)).join('');
+    return `<div class="bd-tile" data-look="${h(x.id)}">
+      <span class="bd-shot">${img}${pins}
+        <button class="bd-count" onclick="bdPinTap(event,'${h(x.id)}','${h(items[0].id)}')">${items.length} item${items.length===1?'':'s'}</button>
+      </span>
+      <div class="bd-pop" id="pop-${h(x.id)}"></div>
     </div>`;
   }
   if(x.link){
     return `<a class="bd-tile" href="${h(x.link)}" target="_blank" rel="noopener noreferrer">${img}<span class="bd-shop">Shop</span></a>`;
   }
   return `<div class="bd-tile">${img}</div>`;
+}
+
+// ── reader: tapping a pin ──
+function bdClosePops(){
+  document.querySelectorAll('.bd-pop.open').forEach(p=>p.classList.remove('open'));
+  document.querySelectorAll('.bd-pin.on').forEach(p=>p.classList.remove('on'));
+}
+function bdPinTap(ev,lookId,itemId){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const b=_boardOpen;if(!b)return;
+  const look=bdLooks(b).find(l=>l.id===lookId);if(!look)return;
+  const items=bdItemsOf(look);
+  const it=items.find(i=>i.id===itemId)||items[0];
+  if(!it)return;
+  const pop=document.getElementById('pop-'+lookId);
+  if(!pop)return;
+  const wasOpen=pop.classList.contains('open')&&pop.dataset.item===it.id;
+  bdClosePops();
+  if(wasOpen)return;   // tapping the same pin again closes it
+  const n=items.indexOf(it)+1;
+  pop.dataset.item=it.id;
+  pop.innerHTML=`<button class="bd-pop-x" onclick="bdClosePops()" aria-label="Close">&times;</button>
+    <span class="bd-pop-n">${n} of ${items.length}</span>
+    ${it.maison?`<span class="bd-pop-b">${h(it.maison)}</span>`:''}
+    <span class="bd-pop-t">${h(it.name||it.maison||'This item')}</span>
+    ${it.link
+      ? `<a class="bd-pop-go" href="${h(it.link)}" target="_blank" rel="noopener noreferrer">Shop this &rarr;</a>`
+      : `<span class="bd-pop-no">No link on this one</span>`}`;
+  pop.classList.add('open');
+  const tile=pop.closest('.bd-tile');
+  if(tile)tile.querySelectorAll('.bd-pin').forEach((p,k)=>p.classList.toggle('on',k===n-1));
+}
+let _bdPopWired=false;
+function bdWirePops(){
+  if(_bdPopWired)return;
+  _bdPopWired=true;
+  document.addEventListener('click',e=>{
+    if(e.target.closest('.bd-pop')||e.target.closest('.bd-pin')||e.target.closest('.bd-count'))return;
+    bdClosePops();
+  });
 }
 
 function renderBoardDetail(){
@@ -3030,6 +3141,7 @@ function renderBoardDetail(){
       ${full}
     </div>`+subscribeBlock();
   if(isCreator){initBoardDrop();bdWirePaste();}
+  else bdWirePops();
 }
 
 // Dropping onto the board itself, not just the dashed box, is the whole point
@@ -3289,6 +3401,142 @@ async function bdTileSave(){
   btn.textContent='Save';btn.disabled=false;
   if(ok){bdTileClose();renderBoardDetail();toast('Saved');}
   else{bdTileClose();renderBoardDetail();}
+}
+
+// ── tagging: pins on the photo, one per item ──
+const BD_TAG_MAX=8;
+let _bdTagLookId=null, _bdTagItems=[], _bdTagDragging=false;
+
+function bdTagOpen(lookId){
+  const b=_boardOpen;if(!b)return;
+  const look=bdLooks(b).find(l=>l.id===lookId);
+  if(!look)return;
+  _bdTagLookId=lookId;
+  _bdTagItems=(Array.isArray(look.items)?look.items:[]).map(it=>({
+    id:it.id||uid(),maison:it.maison||'',name:it.name||'',link:it.link||'',
+    x:Number(it.x)||50,y:Number(it.y)||50
+  }));
+  document.getElementById('bd-tag-img').src=look.image||'';
+  bdTagMsg('');
+  bdTagRender();
+  document.getElementById('bd-tag-ov').classList.add('open');
+}
+function bdTagClose(){
+  document.getElementById('bd-tag-ov').classList.remove('open');
+  _bdTagLookId=null;_bdTagItems=[];
+}
+function bdTagMsg(m){
+  const el=document.getElementById('bd-tag-msg');
+  if(el){el.textContent=m||'';el.style.display=m?'block':'none';}
+}
+
+// Reading the fields back before every repaint, so typing is never thrown away
+function bdTagSync(){
+  document.querySelectorAll('#bd-tag-list .bd-tag-row').forEach(row=>{
+    const it=_bdTagItems.find(i=>i.id===row.dataset.item);
+    if(!it)return;
+    it.maison=(row.querySelector('.bd-tg-maison').value||'').trim();
+    it.name=(row.querySelector('.bd-tg-name').value||'').trim();
+    it.link=(row.querySelector('.bd-tg-link').value||'').trim();
+  });
+}
+function bdTagRender(){
+  const wrap=document.getElementById('bd-tag-photo');
+  wrap.querySelectorAll('.bd-tag-pin').forEach(p=>p.remove());
+  _bdTagItems.forEach((it,n)=>{
+    const b=document.createElement('button');
+    b.type='button';
+    b.className='bd-tag-pin';
+    b.textContent=n+1;
+    b.style.left=it.x+'%';b.style.top=it.y+'%';
+    b.title='Drag to move';
+    b.addEventListener('pointerdown',e=>bdTagPinDown(e,it.id));
+    wrap.appendChild(b);
+  });
+  const list=document.getElementById('bd-tag-list');
+  if(!_bdTagItems.length){
+    list.innerHTML=`<p class="bd-tag-empty">No items tagged yet. Click the photo where an item sits.</p>`;
+    return;
+  }
+  list.innerHTML=_bdTagItems.map((it,n)=>`
+    <div class="bd-tag-row" data-item="${h(it.id)}">
+      <div class="bd-tag-row-hd">
+        <span class="bd-tag-num">${n+1}</span>
+        <button type="button" class="bd-tag-del" onclick="bdTagRemove('${h(it.id)}')">Remove</button>
+      </div>
+      <input type="text" class="fi bd-tg-maison" placeholder="Maison, e.g. The Row" value="${h(it.maison)}">
+      <input type="text" class="fi bd-tg-name" placeholder="Item, e.g. Marlo coat in camel" value="${h(it.name)}">
+      <input type="text" class="fi bd-tg-link" placeholder="Your affiliate link" value="${h(it.link)}">
+    </div>`).join('');
+}
+function bdTagPhotoClick(e){
+  if(_bdTagDragging)return;
+  if(e.target.classList&&e.target.classList.contains('bd-tag-pin'))return;
+  if(_bdTagItems.length>=BD_TAG_MAX){bdTagMsg(`That is ${BD_TAG_MAX} items, which is as many as one photo can carry.`);return;}
+  const r=e.currentTarget.getBoundingClientRect();
+  if(!r.width||!r.height)return;
+  const x=Math.min(100,Math.max(0,((e.clientX-r.left)/r.width)*100));
+  const y=Math.min(100,Math.max(0,((e.clientY-r.top)/r.height)*100));
+  bdTagSync();
+  const id=uid();
+  _bdTagItems.push({id,maison:'',name:'',link:'',x:+x.toFixed(1),y:+y.toFixed(1)});
+  bdTagMsg('');
+  bdTagRender();
+  const row=document.querySelector(`#bd-tag-list .bd-tag-row[data-item="${id}"]`);
+  if(row){row.scrollIntoView({block:'nearest'});row.querySelector('.bd-tg-maison').focus();}
+}
+function bdTagPinDown(e,id){
+  e.preventDefault();e.stopPropagation();
+  const wrap=document.getElementById('bd-tag-photo');
+  const pin=e.currentTarget;
+  let moved=false;
+  const move=ev=>{
+    moved=true;_bdTagDragging=true;
+    const r=wrap.getBoundingClientRect();
+    if(!r.width||!r.height)return;
+    const x=Math.min(100,Math.max(0,((ev.clientX-r.left)/r.width)*100));
+    const y=Math.min(100,Math.max(0,((ev.clientY-r.top)/r.height)*100));
+    const it=_bdTagItems.find(i=>i.id===id);
+    if(it){it.x=+x.toFixed(1);it.y=+y.toFixed(1);}
+    pin.style.left=x+'%';pin.style.top=y+'%';
+  };
+  const up=()=>{
+    document.removeEventListener('pointermove',move);
+    document.removeEventListener('pointerup',up);
+    if(moved)setTimeout(()=>{_bdTagDragging=false;},0);
+    else{
+      const row=document.querySelector(`#bd-tag-list .bd-tag-row[data-item="${id}"]`);
+      if(row){row.scrollIntoView({block:'nearest'});row.querySelector('.bd-tg-maison').focus();}
+    }
+  };
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',up);
+}
+function bdTagRemove(id){
+  bdTagSync();
+  _bdTagItems=_bdTagItems.filter(i=>i.id!==id);
+  bdTagMsg('');
+  bdTagRender();
+}
+async function bdTagSave(){
+  const b=_boardOpen;
+  if(!b||!_bdTagLookId)return;
+  bdTagSync();
+  // A pin with nothing on it says nothing to a reader, so it does not ship
+  const items=_bdTagItems.filter(i=>i.maison||i.name||i.link);
+  const noLink=items.filter(i=>!i.link).length;
+  const btn=document.getElementById('bd-tag-save');
+  btn.textContent='Saving…';btn.disabled=true;
+  const looks=bdLooks(b).map(l=>l.id===_bdTagLookId?{...l,items}:l);
+  const ok=await bdSaveLooks(looks);
+  btn.textContent='Save';btn.disabled=false;
+  bdTagClose();
+  renderBoardDetail();
+  if(ok){
+    toast(!items.length?'Tags cleared'
+      :noLink?`Saved ${items.length} item${items.length===1?'':'s'}. ${noLink} of them has no link yet.`
+      :`Saved ${items.length} item${items.length===1?'':'s'}`);
+  }
 }
 
 // ── header editor: the writing at the top of the board ──
@@ -6172,13 +6420,30 @@ async function runFetchImages(){
   </div>
 </div>
 
+<!-- BOARDS: TAG THE ITEMS IN A LOOK -->
+<div class="fov" id="bd-tag-ov" onclick="bdTagClose()">
+  <div class="fp" style="max-width:840px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Tag the items in this look</h3>
+    <p class="bd-tag-hint">Click the photo where an item sits to drop a numbered pin. Drag a pin to move it. Readers tap a pin to see that item and shop it.</p>
+    <div class="bd-tag-msg" id="bd-tag-msg" style="display:none;"></div>
+    <div class="bd-tag-body">
+      <div class="bd-tag-photo" id="bd-tag-photo" onclick="bdTagPhotoClick(event)">
+        <img id="bd-tag-img" src="" alt="">
+      </div>
+      <div class="bd-tag-list" id="bd-tag-list"></div>
+    </div>
+    <button class="btn-p" id="bd-tag-save" onclick="bdTagSave()">Save</button>
+    <button class="btn-g" onclick="bdTagClose()">Cancel</button>
+  </div>
+</div>
+
 <!-- BOARDS: LOOK EDITOR -->
 <div class="fov" id="bd-tile-ov" onclick="bdTileClose()">
   <div class="fp" style="max-width:420px;" onclick="event.stopPropagation()">
     <h3 class="ftitle">This look</h3>
     <div class="iprev" style="width:100%;height:190px;margin-bottom:14px;"><img id="bd-t-prev" src="" alt=""></div>
     <div class="fg">
-      <label class="fl">Affiliate link <span class="flh">(optional, makes the photo shoppable)</span></label>
+      <label class="fl">Affiliate link <span class="flh">(one link for the whole photo, used only when nothing is pinned)</span></label>
       <input type="text" class="fi" id="bd-t-link" placeholder="https://…">
     </div>
     <div class="fg">
