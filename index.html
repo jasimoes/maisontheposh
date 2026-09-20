@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-20b boards-pins -->
+<!-- MTP BUILD 2026-09-20c boards-shop-reveal -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -742,6 +742,8 @@ body.creator .bd-tile-acts{display:flex;}
 .bd-tile-act{min-width:27px;height:27px;padding:0 7px;border:none;background:rgba(255,255,255,.93);color:var(--ink);font-family:var(--sans);font-size:11px;line-height:27px;cursor:pointer;transition:all .15s;}
 .bd-tile-act:hover{background:#fff;}
 .bd-tile-act.red:hover{background:#B03030;color:#fff;}
+.bd-tile-act.filled{background:var(--ink);color:#fff;}
+.bd-tile-act.filled:hover{background:var(--ink);opacity:.85;}
 .bd-add{break-inside:avoid;margin:0 0 7px;}
 .bd-drop{display:block;border:1px dashed var(--border);background:var(--surf);padding:34px 14px;text-align:center;cursor:pointer;position:relative;transition:all .18s;}
 .bd-drop:hover,.bd-drop.over{border-color:var(--ink);background:var(--white);}
@@ -751,22 +753,29 @@ body.creator .bd-tile-acts{display:flex;}
 .bd-paste-btn{width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);background:none;color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
 .bd-paste-btn:hover{border-color:var(--ink);color:var(--ink);}
 /* Pins on a look, and the card one opens */
-.bd-pin{position:absolute;width:24px;height:24px;margin:-12px 0 0 -12px;padding:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.92);background:rgba(0,0,0,.7);color:#fff;font-family:var(--sans);font-size:10px;font-weight:400;line-height:1;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.4);transition:transform .15s,background .15s;z-index:2;}
-.bd-pin::before{content:'';position:absolute;inset:-8px;border-radius:50%;}
-.bd-pin:hover,.bd-pin.on{background:var(--ink);transform:scale(1.18);}
-.bd-count{position:absolute;left:8px;top:8px;padding:5px 10px;border:none;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;cursor:pointer;opacity:.9;transition:opacity .18s;z-index:2;}
-.bd-count:hover{opacity:1;}
 .bd-shot{position:relative;display:block;line-height:0;}
-.bd-pop{position:relative;display:none;background:var(--surf);border:1px solid var(--border);border-top:none;padding:13px 32px 14px 14px;text-align:left;line-height:normal;}
-.bd-pop.open{display:block;}
-.bd-pop-n{display:block;font-family:var(--sans);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-bottom:6px;}
-.bd-pop-b{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:3px;}
-.bd-pop-t{display:block;font-family:var(--serif);font-size:16px;line-height:1.25;color:var(--ink);margin-bottom:10px;}
-.bd-pop-go{display:inline-block;padding:7px 14px;border:1px solid var(--ink);color:var(--ink);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:all .15s;}
-.bd-pop-go:hover{background:var(--ink);color:#fff;}
-.bd-pop-no{font-family:var(--sans);font-size:10px;color:var(--faint);letter-spacing:.02em;}
-.bd-pop-x{position:absolute;top:7px;right:8px;background:none;border:none;font-size:16px;line-height:1;color:var(--soft);cursor:pointer;padding:2px 5px;}
-.bd-pop-x:hover{color:var(--ink);}
+/* Pins do not exist until a reader asks to shop. Before that the photo is
+   just a photo, which is the whole point of a board. */
+.bd-pin{position:absolute;display:none;width:24px;height:24px;margin:-12px 0 0 -12px;padding:0;border-radius:50%;border:1.5px solid rgba(255,255,255,.92);background:rgba(0,0,0,.7);color:#fff;font-family:var(--sans);font-size:10px;font-weight:400;line-height:1;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.4);transition:transform .15s,background .15s;z-index:2;}
+.bd-pin::before{content:'';position:absolute;inset:-8px;border-radius:50%;}
+.bd-tile.bd-open .bd-pin{display:flex;}
+.bd-pin:hover,.bd-pin.on{background:var(--ink);transform:scale(1.18);}
+button.bd-shop{border:none;cursor:pointer;font-family:var(--sans);z-index:3;transition:opacity .18s,background .18s;}
+button.bd-shop:hover{opacity:1;}
+.bd-tile.bd-open button.bd-shop{background:var(--ink);opacity:1;}
+.bd-shoplist{display:none;background:var(--surf);border:1px solid var(--border);border-top:none;text-align:left;line-height:normal;}
+.bd-tile.bd-open .bd-shoplist{display:block;}
+.bd-items{list-style:none;margin:0;padding:0;}
+.bd-item{display:flex;align-items:center;gap:11px;padding:11px 13px;border-bottom:1px solid var(--border);transition:background .15s;}
+.bd-item:last-child{border-bottom:none;}
+.bd-item.on{background:var(--white);}
+.bd-item-n{flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--sans);font-size:9px;display:flex;align-items:center;justify-content:center;}
+.bd-item-main{flex:1;min-width:0;}
+.bd-item-b{display:block;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+.bd-item-t{display:block;font-family:var(--serif);font-size:15px;line-height:1.3;color:var(--ink);}
+.bd-item-go{flex-shrink:0;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px;transition:opacity .15s;}
+.bd-item-go:hover{opacity:.6;}
+.bd-item-no{flex-shrink:0;font-family:var(--sans);font-size:9px;color:var(--faint);letter-spacing:.02em;}
 /* The tagging editor */
 .bd-tag-hint{font-size:11.5px;color:var(--soft);line-height:1.6;margin:-10px 0 14px;}
 .bd-tag-msg{background:#F6EAE8;border-left:2px solid #B03030;color:#8C3A32;font-size:12px;padding:9px 12px;margin-bottom:12px;}
@@ -806,7 +815,8 @@ body.creator .bd-tile-acts{display:flex;}
   .bd-tile,.bd-add{margin-bottom:6px;}
   .bd-drop{padding:26px 10px;}
   .bd-pin{width:28px;height:28px;margin:-14px 0 0 -14px;font-size:11px;}
-  .bd-pop-t{font-size:15px;}
+  .bd-item-t{font-size:14.5px;}
+  .bd-item{gap:9px;padding:10px 11px;}
   .bd-tag-body{grid-template-columns:1fr;gap:14px;}
   .bd-tile-acts{top:4px;right:4px;gap:3px;}
   .bd-tile-act{min-width:24px;height:24px;line-height:24px;font-size:10px;padding:0 5px;}
@@ -3017,41 +3027,57 @@ function bdItemsOf(x){
   return Array.isArray(a)?a.filter(i=>i&&(i.name||i.link||i.maison)):[];
 }
 
+// The photo stays a photo. Nothing sits on it but one Shop tag in the corner.
+// The numbers only exist once a reader asks to shop, and then they show up
+// together with the full list underneath.
+function bdShopList(lookId,items){
+  const rows=items.map((it,n)=>`
+    <li class="bd-item" data-item="${h(it.id)}">
+      <span class="bd-item-n">${n+1}</span>
+      <span class="bd-item-main">
+        ${it.maison?`<span class="bd-item-b">${h(it.maison)}</span>`:''}
+        <span class="bd-item-t">${h(it.name||it.maison||'This item')}</span>
+      </span>
+      ${it.link
+        ? `<a class="bd-item-go" href="${h(it.link)}" target="_blank" rel="noopener noreferrer">Shop &rarr;</a>`
+        : `<span class="bd-item-no">No link</span>`}
+    </li>`).join('');
+  return `<div class="bd-shoplist"><ul class="bd-items">${rows}</ul></div>`;
+}
+
 function bdTileHtml(x,i,total){
   const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
   const items=bdItemsOf(x);
-  const pin=(it,n,handler)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+n))}" onclick="${handler}">${n}</button>`;
+  const pins=items.map((it,n)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+(n+1)))}" onclick="bdPinFocus(event,'${h(it.id)}')">${n+1}</button>`).join('');
+  const shopTag=`<button class="bd-shop bd-shop-btn" onclick="bdShopToggle(event,this)">Shop</button>`;
 
   if(isCreator){
     // In creator mode the tile is a plain block, so the buttons on it are not
     // fighting a link for the click. Reader mode below turns it back into one.
     const openBtn=(x.link&&!items.length)?`<button class="bd-tile-act" title="Open link" onclick="event.stopPropagation();window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
-    const pins=items.map((it,n)=>pin(it,n+1,`event.stopPropagation();bdTagOpen('${h(x.id)}')`)).join('');
-    const mark=items.length
-      ? `<span class="bd-shop">${items.length} tagged</span>`
-      : (x.link?`<span class="bd-shop">Shoppable</span>`:'');
-    return `<div class="bd-tile"><span class="bd-shot">${img}${pins}</span>
+    const tagBtn=`<button class="bd-tile-act${items.length?' filled':''}" title="${items.length?('Tagged: '+items.length+' items'):'Tag the items'}" onclick="bdTagOpen('${h(x.id)}')">◎</button>`;
+    return `<div class="bd-tile" data-look="${h(x.id)}">
+      <span class="bd-shot">${img}${pins}
+        ${items.length?shopTag:(x.link?`<span class="bd-shop">Shop</span>`:'')}
+      </span>
       <span class="bd-tile-acts">
         <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
         <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
-        <button class="bd-tile-act" title="Tag the items" onclick="bdTagOpen('${h(x.id)}')">◎</button>
+        ${tagBtn}
         <button class="bd-tile-act" title="Link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
         ${openBtn}
         <button class="bd-tile-act red" title="Remove" onclick="bdRemove('${h(x.id)}')">×</button>
       </span>
-      ${mark}
+      ${items.length?bdShopList(x.id,items):''}
     </div>`;
   }
 
   if(items.length){
-    // The card opens underneath the photo rather than over it, so a pin near
-    // the hem of a coat is never buried under the card that just opened.
-    const pins=items.map((it,n)=>pin(it,n+1,`bdPinTap(event,'${h(x.id)}','${h(it.id)}')`)).join('');
+    // The list opens underneath the photo rather than over it, so a pin near
+    // the hem of a coat is never buried under the panel that just opened.
     return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${pins}
-        <button class="bd-count" onclick="bdPinTap(event,'${h(x.id)}','${h(items[0].id)}')">${items.length} item${items.length===1?'':'s'}</button>
-      </span>
-      <div class="bd-pop" id="pop-${h(x.id)}"></div>
+      <span class="bd-shot">${img}${pins}${shopTag}</span>
+      ${bdShopList(x.id,items)}
     </div>`;
   }
   if(x.link){
@@ -3060,43 +3086,53 @@ function bdTileHtml(x,i,total){
   return `<div class="bd-tile">${img}</div>`;
 }
 
-// ── reader: tapping a pin ──
-function bdClosePops(){
-  document.querySelectorAll('.bd-pop.open').forEach(p=>p.classList.remove('open'));
-  document.querySelectorAll('.bd-pin.on').forEach(p=>p.classList.remove('on'));
+// ── reader: the Shop tag ──
+function bdCloseShop(except){
+  document.querySelectorAll('.bd-tile.bd-open').forEach(t=>{
+    if(t===except)return;
+    t.classList.remove('bd-open');
+    t.querySelectorAll('.bd-pin.on').forEach(p=>p.classList.remove('on'));
+    t.querySelectorAll('.bd-item.on').forEach(r=>r.classList.remove('on'));
+    const tag=t.querySelector('.bd-shop-btn');
+    if(tag)tag.textContent='Shop';
+  });
 }
-function bdPinTap(ev,lookId,itemId){
+function bdShopToggle(ev,btn){
   if(ev){ev.preventDefault();ev.stopPropagation();}
-  const b=_boardOpen;if(!b)return;
-  const look=bdLooks(b).find(l=>l.id===lookId);if(!look)return;
-  const items=bdItemsOf(look);
-  const it=items.find(i=>i.id===itemId)||items[0];
-  if(!it)return;
-  const pop=document.getElementById('pop-'+lookId);
-  if(!pop)return;
-  const wasOpen=pop.classList.contains('open')&&pop.dataset.item===it.id;
-  bdClosePops();
-  if(wasOpen)return;   // tapping the same pin again closes it
-  const n=items.indexOf(it)+1;
-  pop.dataset.item=it.id;
-  pop.innerHTML=`<button class="bd-pop-x" onclick="bdClosePops()" aria-label="Close">&times;</button>
-    <span class="bd-pop-n">${n} of ${items.length}</span>
-    ${it.maison?`<span class="bd-pop-b">${h(it.maison)}</span>`:''}
-    <span class="bd-pop-t">${h(it.name||it.maison||'This item')}</span>
-    ${it.link
-      ? `<a class="bd-pop-go" href="${h(it.link)}" target="_blank" rel="noopener noreferrer">Shop this &rarr;</a>`
-      : `<span class="bd-pop-no">No link on this one</span>`}`;
-  pop.classList.add('open');
-  const tile=pop.closest('.bd-tile');
-  if(tile)tile.querySelectorAll('.bd-pin').forEach((p,k)=>p.classList.toggle('on',k===n-1));
+  const tile=btn.closest('.bd-tile');
+  if(!tile)return;
+  const open=tile.classList.contains('bd-open');
+  bdCloseShop();
+  if(open)return;   // tapping Shop again puts the photo back the way it was
+  tile.classList.add('bd-open');
+  btn.textContent='Close';
+}
+// Tapping a pin just points at its line in the list. No card, no covering up.
+function bdPinFocus(ev,itemId){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const pin=ev&&ev.currentTarget;
+  const tile=pin&&pin.closest('.bd-tile');
+  if(!tile)return;
+  if(!tile.classList.contains('bd-open')){
+    bdCloseShop();
+    tile.classList.add('bd-open');
+    const tag=tile.querySelector('.bd-shop-btn');
+    if(tag)tag.textContent='Close';
+  }
+  tile.querySelectorAll('.bd-pin').forEach(p=>p.classList.toggle('on',p===pin));
+  tile.querySelectorAll('.bd-item').forEach(r=>{
+    const on=r.dataset.item===itemId;
+    r.classList.toggle('on',on);
+    if(on)r.scrollIntoView({block:'nearest'});
+  });
 }
 let _bdPopWired=false;
 function bdWirePops(){
   if(_bdPopWired)return;
   _bdPopWired=true;
   document.addEventListener('click',e=>{
-    if(e.target.closest('.bd-pop')||e.target.closest('.bd-pin')||e.target.closest('.bd-count'))return;
-    bdClosePops();
+    if(e.target.closest('.bd-tile'))return;
+    bdCloseShop();
   });
 }
 
