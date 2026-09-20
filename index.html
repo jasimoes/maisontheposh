@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-18 pick-shop-button -->
+<!-- MTP BUILD 2026-09-18b inspiration-boards -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -694,6 +694,71 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
 .picard-alt{display:block;width:100%;margin-top:4px;padding:5px 0;text-align:center;font-size:9px;letter-spacing:.12em;text-transform:uppercase;border:1px solid var(--border);color:var(--soft);background:none;cursor:pointer;font-family:var(--sans);transition:all .15s;}
 .picard-alt:hover{border-color:var(--mid);color:var(--ink);}
 
+/* ══ INSPIRATION BOARDS ══
+   The looks sit in a masonry column flow rather than a fixed grid, so nothing
+   is cropped and the board reflows itself every time a photo is added. */
+.bd-hdr{padding:28px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.bd-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
+.bd-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
+.bd-hdr-aff{font-size:10px;color:var(--faint);margin-top:6px;}
+.bd-wrap{padding:26px 40px 80px;}
+.bd-err{background:#F6EAE8;border-left:2px solid #B03030;color:#8C3A32;font-size:12.5px;padding:11px 14px;margin-bottom:18px;line-height:1.55;}
+.bd-index{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:28px 22px;}
+.bd-card{display:block;text-align:left;background:none;border:none;padding:0;cursor:pointer;font-family:var(--sans);color:inherit;}
+.bd-card-img{width:100%;aspect-ratio:4/5;background:var(--surf);border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.bd-card-img img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s;}
+.bd-card:hover .bd-card-img img{opacity:.84;}
+.bd-card-ph{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);}
+.bd-card-t{display:block;font-family:var(--serif);font-size:18px;font-weight:400;margin-top:11px;line-height:1.3;color:var(--ink);}
+.bd-card-m{display:block;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--soft);margin-top:5px;}
+.bd-draft{display:inline-block;margin-left:7px;padding:2px 6px;border:1px solid var(--faint);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
+.bd-back{background:none;border:none;padding:0;margin-bottom:20px;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);cursor:pointer;transition:color .15s;}
+.bd-back:hover{color:var(--ink);}
+.bd-head{max-width:640px;margin:0 0 26px;}
+.bd-head h2{font-family:var(--serif);font-size:32px;font-weight:300;line-height:1.2;margin-bottom:12px;text-wrap:balance;}
+.bd-head p{font-family:var(--serif);font-size:17px;line-height:1.65;color:var(--mid);white-space:pre-wrap;}
+.bd-head-acts{display:none;gap:8px;margin-top:18px;flex-wrap:wrap;}
+body.creator .bd-head-acts{display:flex;}
+.bd-act{padding:7px 14px;font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;border:1px solid var(--border);background:none;color:var(--mid);cursor:pointer;transition:all .15s;}
+.bd-act:hover{border-color:var(--ink);color:var(--ink);}
+.bd-act.solid{border-color:var(--ink);background:var(--ink);color:white;}
+.bd-act.solid:hover{opacity:.82;}
+.bd-act.red:hover{border-color:#B03030;color:#B03030;}
+.bd-mosaic{column-count:4;column-gap:7px;}
+.bd-mosaic.over{outline:2px dashed var(--ink);outline-offset:10px;}
+.bd-tile{break-inside:avoid;margin:0 0 7px;position:relative;display:block;line-height:0;background:var(--surf);}
+.bd-tile img{width:100%;display:block;}
+.bd-shop{position:absolute;left:8px;bottom:8px;padding:5px 10px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;opacity:.85;transition:opacity .18s;}
+a.bd-tile:hover .bd-shop{opacity:1;}
+.bd-tile-acts{position:absolute;top:6px;right:6px;display:none;gap:4px;}
+body.creator .bd-tile-acts{display:flex;}
+.bd-tile-act{min-width:27px;height:27px;padding:0 7px;border:none;background:rgba(255,255,255,.93);color:var(--ink);font-family:var(--sans);font-size:11px;line-height:27px;cursor:pointer;transition:all .15s;}
+.bd-tile-act:hover{background:#fff;}
+.bd-tile-act.red:hover{background:#B03030;color:#fff;}
+.bd-drop{break-inside:avoid;margin:0 0 7px;border:1px dashed var(--border);background:var(--surf);padding:38px 14px;text-align:center;cursor:pointer;position:relative;transition:all .18s;}
+.bd-drop:hover,.bd-drop.over{border-color:var(--ink);background:var(--white);}
+.bd-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.bd-drop-t{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);margin-bottom:7px;}
+.bd-drop-h{font-size:11px;color:var(--soft);line-height:1.6;}
+.bd-full{border:1px dashed var(--border);padding:15px;text-align:center;font-size:11px;color:var(--soft);margin-top:12px;letter-spacing:.02em;}
+.bd-empty{padding:70px 20px;text-align:center;}
+.bd-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
+.bd-empty p{font-size:13px;color:var(--soft);line-height:1.7;}
+@media(max-width:1180px){.bd-mosaic{column-count:3;}}
+@media(max-width:900px){.bd-mosaic{column-count:2;}}
+@media(max-width:700px){
+  .bd-hdr{padding:20px 18px 16px;flex-direction:column;gap:10px;}
+  .bd-wrap{padding:20px 18px 80px;}
+  .bd-index{grid-template-columns:1fr 1fr;gap:22px 12px;}
+  .bd-card-t{font-size:16px;}
+  .bd-head h2{font-size:26px;}
+  .bd-head p{font-size:16px;}
+  .bd-mosaic{column-count:2;column-gap:6px;}
+  .bd-tile,.bd-drop{margin-bottom:6px;}
+  .bd-drop{padding:28px 10px;}
+  .bd-tile-acts{top:4px;right:4px;}
+}
+
 /* ══ FORMS ══ */
 .fov{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:400;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(3px);overflow-y:auto;}
 .fov.open{display:flex;}
@@ -1002,7 +1067,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">The Edits</button>
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
-    <button class="t1"    data-t1="latest"      onclick="setT1('latest',this)">The List</button>
+    <button class="t1"    data-t1="boards"      onclick="setT1('boards',this)">Boards</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1"    data-t1="about"       onclick="setT1('about',this)">About</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
@@ -1571,7 +1636,7 @@ function toggleMode(){
     document.body.classList.remove('creator');
     document.getElementById('creator-bar').classList.add('hide');
     document.querySelector('.btn-toggle-mode').textContent='Preview as Visitor';
-    if(activeT1==='widgets') setT1('latest',document.querySelector('[data-t1="latest"]'));
+    if(activeT1==='widgets') setT1('journal',document.querySelector('[data-t1="journal"]'));
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='none');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='none');
   }
@@ -1675,12 +1740,14 @@ function goHome(){
 // The tab is called The Edits but its key, and its rows in wc_carousels, stay
 // 'weekly'. These two keep the shared URL readable without touching either.
 const TAB_SLUG={weekly:'edits'};
-const SLUG_TAB={edits:'weekly'};
+// latest is kept so links shared back when this tab was The List still land somewhere
+const SLUG_TAB={edits:'weekly',latest:'boards'};
 function tabToSlug(t){return TAB_SLUG[t]||t;}
 function slugToTab(s){return SLUG_TAB[s]||s;}
 
 function setT1(val,btn){
   activeT1=val;activeCat='all';
+  _boardOpen=null;
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
@@ -1700,6 +1767,7 @@ function render(){
   if(activeT1==='widgets'){renderWidgets();return;}
   if(activeT1==='sales'){renderSales();return;}
   if(activeT1==='about'){(async()=>{if(!_about)await loadAbout();renderAbout();})();return;}
+  if(activeT1==='boards'){renderBoards();return;}
   if(activeT1==='latest'){renderLatest();return;}
   if(activeT1==='journal'){renderJournal();return;}
 
@@ -1744,6 +1812,7 @@ const TAB_META={
   weekly:{t:'The Edits | MaisonThePosh',d:'My shoppable edits, brand by brand and category by category.'},
   stockist:{t:'Stockist | MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
   latest:{t:'The List | MaisonThePosh',d:'The things I actually love and keep going back to.'},
+  boards:{t:'Inspiration Boards | MaisonThePosh',d:'Looks I am building around, gathered one board at a time.'},
   sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
   about:{t:'About & Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
   widgets:{t:'MaisonThePosh',d:''}
@@ -2768,6 +2837,434 @@ function tlRefresh(){
   _tlLoaded=false;
   tlFetchCloud().then(()=>{_tlLoaded=true;renderLatest();toast('Up to date');})
     .catch(()=>toast('⚠ Could not reach the cloud'));
+}
+
+// ══════════════════════════════════════════════════════════════════
+// INSPIRATION BOARDS
+// A board is one row: a title, a paragraph of writing, and up to 12
+// looks in a jsonb array. Photos are dropped straight onto the board,
+// the masonry reflows itself, and any look can carry an affiliate link.
+// ══════════════════════════════════════════════════════════════════
+const BD_MAX=12;
+const BD_TILE_CAP=180000;   // per photo, after compressing
+const BD_ROW_CAP=2600000;   // whole board, so a save never bounces off Supabase
+let _boards=null;           // index rows: everything except the looks
+let _boardOpen=null;        // the full row currently open
+let _bdLoadErr='';
+
+function bdLooks(b){const l=b&&b.looks;return Array.isArray(l)?l:[];}
+
+function bdProblem(msg){
+  const t=String(msg||'');
+  if(/PGRST205|Could not find the table/i.test(t))
+    return 'The boards table is not in your database yet. Run boards-setup.sql in Supabase, then reload this page.';
+  if(/permission denied|42501|JWT|401|403/i.test(t))
+    return 'Your database refused the write. The boards table needs its policy applied, which is the second half of boards-setup.sql.';
+  if(/413|too large|payload/i.test(t))
+    return 'That board is too heavy to store. Remove a photo, or use smaller files.';
+  return 'Something went wrong. '+t.slice(0,140);
+}
+function bdErr(msg){
+  const el=document.getElementById('bd-err');
+  if(!el)return;
+  el.textContent=msg||'';
+  el.style.display=msg?'block':'none';
+  if(msg)el.scrollIntoView({behavior:'smooth',block:'center'});
+}
+
+// Shrink to something a jsonb row can hold without turning the board to mush
+function bdShrink(dataUrl,maxW,cap){
+  return new Promise(res=>{
+    if(!dataUrl||!dataUrl.startsWith('data:image')){res(dataUrl);return;}
+    const img=new Image();
+    img.onload=()=>{
+      const scale=Math.min(1,maxW/Math.max(img.width,img.height));
+      const w=Math.max(1,Math.round(img.width*scale));
+      const hh=Math.max(1,Math.round(img.height*scale));
+      const c=document.createElement('canvas');c.width=w;c.height=hh;
+      c.getContext('2d').drawImage(img,0,0,w,hh);
+      let out=c.toDataURL('image/jpeg',0.72);
+      if(out.length>cap)out=c.toDataURL('image/jpeg',0.55);
+      if(out.length>cap)out=c.toDataURL('image/jpeg',0.40);
+      res(out);
+    };
+    img.onerror=()=>res('');
+    img.src=dataUrl;
+  });
+}
+function bdReadFile(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result);
+    r.onerror=()=>res('');
+    r.readAsDataURL(file);
+  });
+}
+
+async function loadBoards(){
+  _bdLoadErr='';
+  try{
+    _boards=await sbFetch('boards?select=id,title,intro,cover,look_count,published,sort_order,created_at&order=sort_order.asc,created_at.desc')||[];
+  }catch(e){
+    console.error('loadBoards failed:',e);
+    _boards=[];
+    _bdLoadErr=bdProblem(e&&e.message);
+  }
+}
+
+async function renderBoards(skipLoad){
+  const feed=document.getElementById('feed');
+  if(_boardOpen){renderBoardDetail();return;}
+  if(!skipLoad||!_boards){
+    feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
+    await loadBoards();
+  }
+  if(activeT1!=='boards')return;
+  renderBoardIndex();
+}
+
+function renderBoardIndex(){
+  const feed=document.getElementById('feed');
+  const all=_boards||[];
+  const shown=isCreator?all:all.filter(b=>b.published);
+  const addBtn=isCreator?`<button class="btn-new-sale" onclick="bdNew()">+ New Board</button>`:'';
+  const hdr=`<div class="bd-hdr"><div class="bd-hdr-left">
+      <h2>Inspiration Boards</h2>
+      <p>Looks I am building around, gathered one board at a time.</p>
+      <p class="bd-hdr-aff">${h(AFF_DISCLOSURE)}</p>
+    </div>${addBtn}</div>`;
+  const errBox=`<div class="bd-err" id="bd-err" style="display:${_bdLoadErr?'block':'none'};">${h(_bdLoadErr)}</div>`;
+  if(!shown.length){
+    feed.innerHTML=hdr+`<div class="bd-wrap">${errBox}<div class="bd-empty">
+      <h3>No boards yet</h3>
+      <p>${isCreator?'Hit "+ New Board" to start one, then drag photos straight onto it.':'Check back soon. The first board is on its way.'}</p>
+    </div></div>`+subscribeBlock();
+    return;
+  }
+  const cards=shown.map(b=>{
+    const n=b.look_count||0;
+    const cover=b.cover
+      ? `<img src="${h(b.cover)}" alt="${h(b.title||'Board')}" loading="lazy">`
+      : `<span class="bd-card-ph">Empty board</span>`;
+    const draft=(!b.published&&isCreator)?`<span class="bd-draft">Draft</span>`:'';
+    return `<button class="bd-card" onclick="bdOpen('${h(b.id)}')">
+      <span class="bd-card-img">${cover}</span>
+      <span class="bd-card-t">${h(b.title||'Untitled board')}${draft}</span>
+      <span class="bd-card-m">${n} look${n===1?'':'s'}</span>
+    </button>`;
+  }).join('');
+  feed.innerHTML=hdr+`<div class="bd-wrap">${errBox}<div class="bd-index">${cards}</div></div>`+subscribeBlock();
+}
+
+function bdTileHtml(x,i,total){
+  const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy">`;
+  if(isCreator){
+    // In creator mode the tile is a plain block, so the buttons on it are not
+    // fighting a link for the click. Reader mode below turns it back into one.
+    const openBtn=x.link?`<button class="bd-tile-act" title="Open link" onclick="window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
+    return `<div class="bd-tile">${img}
+      <span class="bd-tile-acts">
+        <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
+        <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
+        <button class="bd-tile-act" title="Link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
+        ${openBtn}
+        <button class="bd-tile-act red" title="Remove" onclick="bdRemove('${h(x.id)}')">×</button>
+      </span>
+      ${x.link?`<span class="bd-shop">Shoppable</span>`:''}
+    </div>`;
+  }
+  if(x.link){
+    return `<a class="bd-tile" href="${h(x.link)}" target="_blank" rel="noopener noreferrer">${img}<span class="bd-shop">Shop</span></a>`;
+  }
+  return `<div class="bd-tile">${img}</div>`;
+}
+
+function renderBoardDetail(){
+  const feed=document.getElementById('feed');
+  const b=_boardOpen;
+  if(!b){renderBoardIndex();return;}
+  const looks=bdLooks(b);
+  const tiles=looks.map((x,i)=>bdTileHtml(x,i,looks.length)).join('');
+  const room=BD_MAX-looks.length;
+  const drop=(isCreator&&room>0)?`<label class="bd-drop" id="bd-drop">
+      <input type="file" accept="image/*" multiple onchange="bdAddFiles(this.files);this.value='';">
+      <span class="bd-drop-t">Drop photos here</span>
+      <span class="bd-drop-h">Drag them straight off your desktop, or click to browse.<br>Room for ${room} more.</span>
+    </label>`:'';
+  const full=(isCreator&&room<=0)?`<div class="bd-full">This board is full at ${BD_MAX} looks. Remove one to add another.</div>`:'';
+  const acts=`<div class="bd-head-acts">
+      <button class="bd-act" onclick="bdHeadOpen()">Edit header</button>
+      <button class="bd-act ${b.published?'':'solid'}" onclick="bdTogglePub()">${b.published?'Unpublish':'Publish board'}</button>
+      <button class="bd-act red" onclick="bdDelete()">Delete board</button>
+    </div>`;
+  const draft=(!b.published&&isCreator)?`<span class="bd-draft">Draft</span>`:'';
+  const empty=(!looks.length&&!isCreator)
+    ? `<div class="bd-empty"><h3>Nothing on this board yet</h3><p>Check back soon.</p></div>`:'';
+  feed.innerHTML=`<div class="bd-hdr"><div class="bd-hdr-left">
+      <h2>Inspiration Boards</h2>
+      <p class="bd-hdr-aff">${h(AFF_DISCLOSURE)}</p>
+    </div></div>
+    <div class="bd-wrap">
+      <button class="bd-back" onclick="bdBack()">&larr; All boards</button>
+      <div class="bd-err" id="bd-err" style="display:none;"></div>
+      <div class="bd-head">
+        <h2>${h(b.title||'Untitled board')}${draft}</h2>
+        ${b.intro?`<p>${h(b.intro)}</p>`:''}
+        ${isCreator?acts:''}
+      </div>
+      ${empty}
+      <div class="bd-mosaic" id="bd-mosaic">${tiles}${drop}</div>
+      ${full}
+    </div>`+subscribeBlock();
+  if(isCreator)initBoardDrop();
+}
+
+// Dropping onto the board itself, not just the dashed box, is the whole point
+function initBoardDrop(){
+  const zone=document.getElementById('bd-mosaic');
+  if(!zone)return;
+  const on=()=>zone.classList.add('over');
+  const off=()=>zone.classList.remove('over');
+  zone.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy';on();});
+  zone.addEventListener('dragleave',e=>{if(!zone.contains(e.relatedTarget))off();});
+  zone.addEventListener('drop',e=>{
+    e.preventDefault();off();
+    const files=[...(e.dataTransfer.files||[])].filter(f=>f.type.startsWith('image/'));
+    if(files.length){bdAddFiles(files);return;}
+    // Dragged out of another browser tab rather than off the desktop
+    const uri=(e.dataTransfer.getData('text/uri-list')||e.dataTransfer.getData('text/plain')||'').trim();
+    if(uri)bdAddUrl(uri);
+  });
+}
+
+async function bdOpen(id){
+  const feed=document.getElementById('feed');
+  feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
+  try{
+    const rows=await sbFetch(`boards?select=*&id=eq.${encodeURIComponent(id)}`);
+    if(!rows||!rows.length){_bdLoadErr='That board is no longer there.';renderBoardIndex();return;}
+    _boardOpen=rows[0];
+  }catch(e){
+    console.error('bdOpen failed:',e);
+    _bdLoadErr=bdProblem(e&&e.message);
+    renderBoardIndex();
+    return;
+  }
+  renderBoardDetail();
+  window.scrollTo({top:0});
+  history.pushState({tab:'boards',board:id},'',`/?tab=boards&board=${encodeURIComponent(id)}`);
+}
+// Arriving straight on a board link, or coming back to one, must not push a
+// new history entry or the back button would need two presses.
+async function bdOpenFromUrl(id){
+  const feed=document.getElementById('feed');
+  feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
+  if(!_boards)await loadBoards();
+  if(activeT1!=='boards')return;
+  try{
+    const rows=await sbFetch(`boards?select=*&id=eq.${encodeURIComponent(id)}`);
+    if(rows&&rows.length){_boardOpen=rows[0];renderBoardDetail();return;}
+    _bdLoadErr='That board is no longer there.';
+  }catch(e){
+    console.error('bdOpenFromUrl failed:',e);
+    _bdLoadErr=bdProblem(e&&e.message);
+  }
+  renderBoardIndex();
+}
+
+function bdBack(push){
+  _boardOpen=null;
+  renderBoardIndex();
+  window.scrollTo({top:0});
+  if(push!==false)history.pushState({tab:'boards'},'','/?tab=boards');
+}
+
+async function bdNew(){
+  const row={
+    id:uid(),title:'Untitled board',intro:'',cover:'',looks:[],look_count:0,
+    published:false,
+    sort_order:(_boards||[]).reduce((m,b)=>Math.min(m,b.sort_order??0),0)-1,
+    created_at:new Date().toISOString(),updated_at:new Date().toISOString()
+  };
+  try{
+    await sbFetch('boards',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(row)});
+  }catch(e){
+    console.error('bdNew failed:',e);
+    _bdLoadErr=bdProblem(e&&e.message);
+    renderBoardIndex();
+    return;
+  }
+  _boards=[row,...(_boards||[])];
+  _boardOpen=row;
+  renderBoardDetail();
+  window.scrollTo({top:0});
+  history.pushState({tab:'boards',board:row.id},'',`/?tab=boards&board=${encodeURIComponent(row.id)}`);
+  bdHeadOpen();
+}
+
+// One write path for every change to an open board, so the index row, the
+// in-memory copy and the database never drift apart.
+async function bdPersist(patch){
+  const b=_boardOpen;
+  if(!b)return false;
+  const body={...patch,updated_at:new Date().toISOString()};
+  if(JSON.stringify(body).length>BD_ROW_CAP){
+    bdErr('This board is too heavy to save. Remove a photo, or add smaller files.');
+    return false;
+  }
+  try{
+    await sbFetch(`boards?id=eq.${encodeURIComponent(b.id)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify(body)});
+  }catch(e){
+    console.error('bdPersist failed:',e);
+    bdErr(bdProblem(e&&e.message));
+    return false;
+  }
+  Object.assign(b,body);
+  const idx=(_boards||[]).find(x=>x.id===b.id);
+  if(idx)Object.assign(idx,{title:b.title,intro:b.intro,cover:b.cover,look_count:b.look_count,published:b.published});
+  bdErr('');
+  return true;
+}
+
+// The cover is a small thumb of the first look, so the index stays light
+async function bdSaveLooks(looks){
+  const b=_boardOpen;
+  if(!b)return false;
+  const cover=looks.length?await bdShrink(looks[0].image,380,60000):'';
+  return bdPersist({looks,look_count:looks.length,cover});
+}
+
+async function bdAddFiles(files){
+  const b=_boardOpen;
+  if(!b)return;
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  if(!imgs.length){bdErr('Those were not image files. Drop a JPG, PNG or HEIC photo.');return;}
+  const looks=bdLooks(b);
+  const room=BD_MAX-looks.length;
+  if(room<=0){bdErr(`This board is full at ${BD_MAX} looks. Remove one first.`);return;}
+  const take=imgs.slice(0,room);
+  bdErr('');
+  toast(take.length===1?'Adding photo…':`Adding ${take.length} photos…`);
+  const added=[];
+  for(const f of take){
+    const raw=await bdReadFile(f);
+    const small=await bdShrink(raw,900,BD_TILE_CAP);
+    if(small)added.push({id:uid(),image:small,link:'',caption:''});
+  }
+  if(!added.length){bdErr('None of those photos could be read.');return;}
+  const next=[...looks,...added];
+  const ok=await bdSaveLooks(next);
+  renderBoardDetail();
+  if(ok){
+    const skipped=imgs.length-take.length;
+    toast(skipped>0?`Added ${added.length}. ${skipped} did not fit, the board holds ${BD_MAX}.`:`Added ${added.length} look${added.length===1?'':'s'}`);
+  }
+}
+
+async function bdAddUrl(url){
+  const b=_boardOpen;
+  if(!b)return;
+  if(!/^https?:\/\//i.test(url)){bdErr('That did not look like a web address.');return;}
+  const looks=bdLooks(b);
+  if(looks.length>=BD_MAX){bdErr(`This board is full at ${BD_MAX} looks. Remove one first.`);return;}
+  // A photo dragged from another site stays on that site's server, so it can
+  // vanish or be blocked later. Saving the file is always steadier.
+  const next=[...looks,{id:uid(),image:url,link:'',caption:'',remote:true}];
+  const ok=await bdSaveLooks(next);
+  renderBoardDetail();
+  if(ok)toast('Added. This one links to the other site, so save the file instead if it disappears.');
+}
+
+async function bdMove(id,dir){
+  const b=_boardOpen;if(!b)return;
+  const looks=bdLooks(b).slice();
+  const i=looks.findIndex(x=>x.id===id);
+  const j=i+dir;
+  if(i<0||j<0||j>=looks.length)return;
+  [looks[i],looks[j]]=[looks[j],looks[i]];
+  await bdSaveLooks(looks);
+  renderBoardDetail();
+}
+
+async function bdRemove(id){
+  const b=_boardOpen;if(!b)return;
+  if(!confirm('Remove this look from the board?'))return;
+  const looks=bdLooks(b).filter(x=>x.id!==id);
+  await bdSaveLooks(looks);
+  renderBoardDetail();
+}
+
+// ── tile editor: the affiliate link and caption behind a photo ──
+let _bdTileId=null;
+function bdTileOpen(id){
+  const b=_boardOpen;if(!b)return;
+  const x=bdLooks(b).find(t=>t.id===id);
+  if(!x)return;
+  _bdTileId=id;
+  document.getElementById('bd-t-prev').src=x.image||'';
+  document.getElementById('bd-t-link').value=x.link||'';
+  document.getElementById('bd-t-cap').value=x.caption||'';
+  document.getElementById('bd-tile-ov').classList.add('open');
+}
+function bdTileClose(){document.getElementById('bd-tile-ov').classList.remove('open');_bdTileId=null;}
+async function bdTileSave(){
+  const b=_boardOpen;if(!b||!_bdTileId)return;
+  const link=document.getElementById('bd-t-link').value.trim();
+  const caption=document.getElementById('bd-t-cap').value.trim();
+  const looks=bdLooks(b).map(x=>x.id===_bdTileId?{...x,link,caption}:x);
+  const btn=document.getElementById('bd-t-save');
+  btn.textContent='Saving…';btn.disabled=true;
+  const ok=await bdSaveLooks(looks);
+  btn.textContent='Save';btn.disabled=false;
+  if(ok){bdTileClose();renderBoardDetail();toast('Saved');}
+  else{bdTileClose();renderBoardDetail();}
+}
+
+// ── header editor: the writing at the top of the board ──
+function bdHeadOpen(){
+  const b=_boardOpen;if(!b)return;
+  document.getElementById('bd-h-title').value=b.title==='Untitled board'?'':(b.title||'');
+  document.getElementById('bd-h-intro').value=b.intro||'';
+  document.getElementById('bd-head-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('bd-h-title').focus(),60);
+}
+function bdHeadClose(){document.getElementById('bd-head-ov').classList.remove('open');}
+async function bdHeadSave(){
+  const b=_boardOpen;if(!b)return;
+  const title=document.getElementById('bd-h-title').value.trim()||'Untitled board';
+  const intro=document.getElementById('bd-h-intro').value.trim();
+  const btn=document.getElementById('bd-h-save');
+  btn.textContent='Saving…';btn.disabled=true;
+  const ok=await bdPersist({title,intro});
+  btn.textContent='Save';btn.disabled=false;
+  bdHeadClose();
+  renderBoardDetail();
+  if(ok)toast('Header saved');
+}
+
+async function bdTogglePub(){
+  const b=_boardOpen;if(!b)return;
+  if(!b.published&&!bdLooks(b).length){bdErr('Add at least one look before publishing.');return;}
+  const ok=await bdPersist({published:!b.published});
+  renderBoardDetail();
+  if(ok)toast(b.published?'Published. Readers can see it now.':'Unpublished. Only you can see it.');
+}
+
+async function bdDelete(){
+  const b=_boardOpen;if(!b)return;
+  if(!confirm(`Delete "${b.title||'this board'}" and all ${bdLooks(b).length} looks on it? This cannot be undone.`))return;
+  try{
+    await sbFetch(`boards?id=eq.${encodeURIComponent(b.id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  }catch(e){
+    console.error('bdDelete failed:',e);
+    bdErr(bdProblem(e&&e.message));
+    return;
+  }
+  _boards=(_boards||[]).filter(x=>x.id!==b.id);
+  _boardOpen=null;
+  renderBoardIndex();
+  history.pushState({tab:'boards'},'','/?tab=boards');
+  toast('Board deleted');
 }
 
 function renderLatest(){
@@ -5081,8 +5578,9 @@ function restoreFromURL(){
   const listId=params.get('list');
   const itemId=params.get('item');
   const lookId=params.get('look');
+  const boardId=params.get('board');
   // Set active tab
-  const validTabs=['latest','weekly','stockist','collections','journal','sales','about','widgets'];
+  const validTabs=['latest','boards','weekly','stockist','collections','journal','sales','about','widgets'];
   const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
   applyTabMeta(t);
@@ -5107,7 +5605,9 @@ function restoreFromURL(){
     document.getElementById('list-detail').classList.remove('open');
     document.getElementById('feed').style.display='block';
     currentListId=null;
-    render();
+    _boardOpen=null;
+    if(t==='boards'&&boardId){bdOpenFromUrl(boardId);}
+    else render();
   }
   // Open look panel if specified
   if(lookId&&(D.looks||[]).find(x=>x.id===lookId)){
@@ -5127,10 +5627,25 @@ window.addEventListener('popstate',function(e){
   const params=new URLSearchParams(location.search);
   const lookId=state.look||params.get('look');
   const listId=state.list||params.get('list');
-  const tab=state.tab||params.get('tab')||'latest';
+  const boardId=state.board||params.get('board');
+  const tab=slugToTab(state.tab||params.get('tab')||'latest');
 
   if(lookId&&(D.looks||[]).find(x=>x.id===lookId)){
     openLookPanel(lookId);return;
+  }
+
+  if(tab==='boards'){
+    document.getElementById('list-detail').classList.remove('open');
+    document.getElementById('feed').style.display='block';
+    currentListId=null;
+    activeT1='boards';activeCat='all';
+    document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1==='boards'));
+    document.getElementById('nav2').classList.add('hide');
+    applyTabMeta('boards');
+    if(boardId)bdOpenFromUrl(boardId);
+    else{_boardOpen=null;renderBoards();}
+    window.scrollTo({top:0});
+    return;
   }
 
   if(listId&&D.lists.find(x=>x.id===listId)){
@@ -5151,7 +5666,8 @@ window.addEventListener('popstate',function(e){
     document.getElementById('list-detail').classList.remove('open');
     document.getElementById('feed').style.display='block';
     currentListId=null;
-    const validTabs=['latest','weekly','stockist','collections','journal','sales','about','widgets'];
+    _boardOpen=null;
+    const validTabs=['latest','boards','weekly','stockist','collections','journal','sales','about','widgets'];
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
@@ -5347,7 +5863,7 @@ function wgDangerZone(){
   const loose=(D.unassigned||[]).length;
   return `<div class="wg-danger">
     <div class="wg-danger-h">Product catalogue</div>
-    <p class="wg-danger-p">${all.length} products, ${noImg} of them with no picture. Clearing them does not touch The Edits, Stockist, The List or your Substack posts.</p>
+    <p class="wg-danger-p">${all.length} products, ${noImg} of them with no picture. Clearing them does not touch The Edits, Stockist, Boards or your Substack posts.</p>
     <div class="wg-danger-acts">
       ${loose?`<button class="wg-danger-btn" onclick="wgClearItems('loose')">Delete the ${loose} not used by a widget</button>`:''}
       ${noImg?`<button class="wg-danger-btn" onclick="wgClearItems('noimage')">Delete the ${noImg} with no picture</button>`:''}
@@ -5571,6 +6087,38 @@ async function runFetchImages(){
 }
 </script>
 <!-- ON SALE NOW: POST EDITOR -->
+<!-- BOARDS: HEADER EDITOR -->
+<div class="fov" id="bd-head-ov" onclick="bdHeadClose()">
+  <div class="fp" style="max-width:520px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Board header</h3>
+    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="bd-h-title" placeholder="e.g. Quiet Luxury Neutrals"></div>
+    <div class="fg">
+      <label class="fl">Your writing <span class="flh">(sits under the title, above the photos)</span></label>
+      <textarea class="fi fta" id="bd-h-intro" rows="6" placeholder="What ties this board together, what you are looking for, what to buy first…" style="font-style:normal;min-height:130px;"></textarea>
+    </div>
+    <button class="btn-p" id="bd-h-save" onclick="bdHeadSave()">Save</button>
+    <button class="btn-g" onclick="bdHeadClose()">Cancel</button>
+  </div>
+</div>
+
+<!-- BOARDS: LOOK EDITOR -->
+<div class="fov" id="bd-tile-ov" onclick="bdTileClose()">
+  <div class="fp" style="max-width:420px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">This look</h3>
+    <div class="iprev" style="width:100%;height:190px;margin-bottom:14px;"><img id="bd-t-prev" src="" alt=""></div>
+    <div class="fg">
+      <label class="fl">Affiliate link <span class="flh">(optional, makes the photo shoppable)</span></label>
+      <input type="text" class="fi" id="bd-t-link" placeholder="https://…">
+    </div>
+    <div class="fg">
+      <label class="fl">Caption <span class="flh">(optional, read by screen readers)</span></label>
+      <input type="text" class="fi" id="bd-t-cap" placeholder="e.g. The Row Marlo in camel">
+    </div>
+    <button class="btn-p" id="bd-t-save" onclick="bdTileSave()">Save</button>
+    <button class="btn-g" onclick="bdTileClose()">Cancel</button>
+  </div>
+</div>
+
 <div class="fov" id="sp-ov">
   <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
     <h3 class="ftitle" id="sp-form-title">New Post</h3>
