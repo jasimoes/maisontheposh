@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-18b inspiration-boards -->
+<!-- MTP BUILD 2026-09-20 boards-paste -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -728,6 +728,13 @@ body.creator .bd-head-acts{display:flex;}
 .bd-mosaic.over{outline:2px dashed var(--ink);outline-offset:10px;}
 .bd-tile{break-inside:avoid;margin:0 0 7px;position:relative;display:block;line-height:0;background:var(--surf);}
 .bd-tile img{width:100%;display:block;}
+/* A photo pasted or dragged from another site lives on their server. If it
+   stops loading, readers see nothing rather than a broken box, and she gets a
+   panel telling her which one to replace. */
+.bd-tile.bd-broken{display:none;}
+body.creator .bd-tile.bd-broken{display:block;min-height:170px;background:var(--surf);border:1px dashed var(--border);}
+body.creator .bd-tile.bd-broken img{visibility:hidden;height:170px;}
+body.creator .bd-tile.bd-broken::after{content:'Photo did not load. Replace it.';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);line-height:1.6;}
 .bd-shop{position:absolute;left:8px;bottom:8px;padding:5px 10px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;opacity:.85;transition:opacity .18s;}
 a.bd-tile:hover .bd-shop{opacity:1;}
 .bd-tile-acts{position:absolute;top:6px;right:6px;display:none;gap:4px;}
@@ -735,11 +742,14 @@ body.creator .bd-tile-acts{display:flex;}
 .bd-tile-act{min-width:27px;height:27px;padding:0 7px;border:none;background:rgba(255,255,255,.93);color:var(--ink);font-family:var(--sans);font-size:11px;line-height:27px;cursor:pointer;transition:all .15s;}
 .bd-tile-act:hover{background:#fff;}
 .bd-tile-act.red:hover{background:#B03030;color:#fff;}
-.bd-drop{break-inside:avoid;margin:0 0 7px;border:1px dashed var(--border);background:var(--surf);padding:38px 14px;text-align:center;cursor:pointer;position:relative;transition:all .18s;}
+.bd-add{break-inside:avoid;margin:0 0 7px;}
+.bd-drop{display:block;border:1px dashed var(--border);background:var(--surf);padding:34px 14px;text-align:center;cursor:pointer;position:relative;transition:all .18s;}
 .bd-drop:hover,.bd-drop.over{border-color:var(--ink);background:var(--white);}
 .bd-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.bd-drop-t{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);margin-bottom:7px;}
-.bd-drop-h{font-size:11px;color:var(--soft);line-height:1.6;}
+.bd-drop-t{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--mid);margin-bottom:7px;}
+.bd-drop-h{display:block;font-size:11px;color:var(--soft);line-height:1.6;}
+.bd-paste-btn{width:100%;margin-top:6px;padding:10px;border:1px solid var(--border);background:none;color:var(--mid);font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.bd-paste-btn:hover{border-color:var(--ink);color:var(--ink);}
 .bd-full{border:1px dashed var(--border);padding:15px;text-align:center;font-size:11px;color:var(--soft);margin-top:12px;letter-spacing:.02em;}
 .bd-empty{padding:70px 20px;text-align:center;}
 .bd-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
@@ -754,8 +764,8 @@ body.creator .bd-tile-acts{display:flex;}
   .bd-head h2{font-size:26px;}
   .bd-head p{font-size:16px;}
   .bd-mosaic{column-count:2;column-gap:6px;}
-  .bd-tile,.bd-drop{margin-bottom:6px;}
-  .bd-drop{padding:28px 10px;}
+  .bd-tile,.bd-add{margin-bottom:6px;}
+  .bd-drop{padding:26px 10px;}
   .bd-tile-acts{top:4px;right:4px;}
 }
 
@@ -2957,7 +2967,7 @@ function renderBoardIndex(){
 }
 
 function bdTileHtml(x,i,total){
-  const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy">`;
+  const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
   if(isCreator){
     // In creator mode the tile is a plain block, so the buttons on it are not
     // fighting a link for the click. Reader mode below turns it back into one.
@@ -2986,11 +2996,14 @@ function renderBoardDetail(){
   const looks=bdLooks(b);
   const tiles=looks.map((x,i)=>bdTileHtml(x,i,looks.length)).join('');
   const room=BD_MAX-looks.length;
-  const drop=(isCreator&&room>0)?`<label class="bd-drop" id="bd-drop">
-      <input type="file" accept="image/*" multiple onchange="bdAddFiles(this.files);this.value='';">
-      <span class="bd-drop-t">Drop photos here</span>
-      <span class="bd-drop-h">Drag them straight off your desktop, or click to browse.<br>Room for ${room} more.</span>
-    </label>`:'';
+  const drop=(isCreator&&room>0)?`<div class="bd-add">
+      <label class="bd-drop" id="bd-drop">
+        <input type="file" accept="image/*" multiple onchange="bdAddFiles(this.files);this.value='';">
+        <span class="bd-drop-t">Drop or paste photos here</span>
+        <span class="bd-drop-h">Drag them off your desktop, press ${BD_PASTE_KEY} to paste, or click to browse.<br>Room for ${room} more.</span>
+      </label>
+      <button type="button" class="bd-paste-btn" onclick="bdPasteClick()">Paste from clipboard</button>
+    </div>`:'';
   const full=(isCreator&&room<=0)?`<div class="bd-full">This board is full at ${BD_MAX} looks. Remove one to add another.</div>`:'';
   const acts=`<div class="bd-head-acts">
       <button class="bd-act" onclick="bdHeadOpen()">Edit header</button>
@@ -3016,7 +3029,7 @@ function renderBoardDetail(){
       <div class="bd-mosaic" id="bd-mosaic">${tiles}${drop}</div>
       ${full}
     </div>`+subscribeBlock();
-  if(isCreator)initBoardDrop();
+  if(isCreator){initBoardDrop();bdWirePaste();}
 }
 
 // Dropping onto the board itself, not just the dashed box, is the whole point
@@ -3158,6 +3171,64 @@ async function bdAddFiles(files){
   if(ok){
     const skipped=imgs.length-take.length;
     toast(skipped>0?`Added ${added.length}. ${skipped} did not fit, the board holds ${BD_MAX}.`:`Added ${added.length} look${added.length===1?'':'s'}`);
+  }
+}
+
+// ── pasting ──
+// Two ways in: the keyboard, which hands us the photo through the paste event,
+// and the button, which asks the clipboard for it directly. The button is there
+// for a phone, and for the times Chrome swallows the keystroke.
+const BD_PASTE_KEY=/Mac|iPhone|iPad|iPod/i.test(navigator.platform||navigator.userAgent||'')?'Cmd V':'Ctrl V';
+let _bdPasteWired=false;
+function bdWirePaste(){
+  if(_bdPasteWired)return;
+  _bdPasteWired=true;
+  document.addEventListener('paste',e=>{
+    if(!isCreator||!_boardOpen||activeT1!=='boards')return;
+    // Never steal a paste meant for the title or the write-up
+    const t=e.target;
+    if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+    const dt=e.clipboardData;
+    if(!dt)return;
+    let imgs=[...(dt.files||[])].filter(f=>f.type.startsWith('image/'));
+    if(!imgs.length){
+      imgs=[...(dt.items||[])]
+        .filter(it=>it.kind==='file'&&it.type.startsWith('image/'))
+        .map(it=>it.getAsFile()).filter(Boolean);
+    }
+    if(imgs.length){e.preventDefault();bdAddFiles(imgs);return;}
+    // Copied off a web page: the image often arrives only as markup
+    const html=dt.getData('text/html')||'';
+    const src=(html.match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1];
+    const txt=(dt.getData('text/plain')||'').trim();
+    const url=(src&&/^https?:\/\//i.test(src))?src:(/^https?:\/\/\S+$/i.test(txt)?txt:'');
+    if(url){e.preventDefault();bdAddUrl(url);}
+  });
+}
+
+async function bdPasteClick(){
+  if(!_boardOpen)return;
+  if(!navigator.clipboard||!navigator.clipboard.read){
+    bdErr(`This browser will not let a page read the clipboard. Press ${BD_PASTE_KEY} instead, or drag the photo in.`);
+    return;
+  }
+  try{
+    const items=await navigator.clipboard.read();
+    const files=[];
+    for(const it of items){
+      const type=(it.types||[]).find(t=>t.startsWith('image/'));
+      if(!type)continue;
+      const blob=await it.getType(type);
+      files.push(new File([blob],'pasted.'+(type.split('/')[1]||'png'),{type}));
+    }
+    if(!files.length){
+      bdErr('There was no photo on the clipboard. Copy an image first, then try again.');
+      return;
+    }
+    bdAddFiles(files);
+  }catch(e){
+    console.error('bdPasteClick failed:',e);
+    bdErr(`Could not read the clipboard. Your browser asks permission the first time, so allow it and try again, or press ${BD_PASTE_KEY}.`);
   }
 }
 
