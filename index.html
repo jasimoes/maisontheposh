@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-10-20b tile-arrows-stockists -->
+<!-- MTP BUILD 2026-10-20c hide-and-board-image -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -758,7 +758,7 @@ body.creator .bd-tile.bd-broken img{visibility:hidden;height:170px;}
 body.creator .bd-tile.bd-broken::after{content:'Photo did not load. Replace it.';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;font-family:var(--sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);line-height:1.6;}
 .bd-shop{position:absolute;left:8px;bottom:8px;padding:5px 10px;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;opacity:.85;transition:opacity .18s;}
 a.bd-tile:hover .bd-shop{opacity:1;}
-.bd-tile-acts{position:absolute;top:6px;right:6px;display:none;gap:4px;}
+.bd-tile-acts{position:absolute;top:6px;right:6px;display:none;gap:4px;flex-wrap:wrap;justify-content:flex-end;max-width:calc(100% - 12px);}
 body.creator .bd-tile-acts{display:flex;}
 .bd-tile-act{min-width:27px;height:27px;padding:0 7px;border:none;background:rgba(255,255,255,.93);color:var(--ink);font-family:var(--sans);font-size:11px;line-height:27px;cursor:pointer;transition:all .15s;}
 .bd-tile-act:hover{background:#fff;}
@@ -810,6 +810,18 @@ button.bd-shop:hover{opacity:1;}
 @media(hover:none){.bd-nav{opacity:.72;}}
 .bd-store .bd-item-main{padding-left:2px;}
 .bd-store+.bd-item:not(.bd-store){border-top:1px solid var(--border);}
+/* a piece she is holding back until she can link it */
+.bd-is-hidden .bd-shot img{opacity:.42;filter:grayscale(.55);}
+.bd-is-hidden .bd-label{opacity:.5;}
+.bd-hidden-tag{position:absolute;left:8px;top:8px;padding:5px 10px;background:rgba(0,0,0,.78);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;z-index:3;}
+.bd-hidden-note{font-family:var(--sans)!important;font-size:11px!important;color:var(--soft)!important;letter-spacing:.02em;margin-top:10px;}
+/* the board's own image, above the title */
+.bd-hero{margin:0 0 26px;line-height:0;background:var(--surf);}
+.bd-hero img{width:100%;max-height:360px;object-fit:cover;display:block;}
+.bd-h-hero-prev{margin-bottom:8px;line-height:0;border:1px solid var(--border);background:var(--surf);}
+.bd-h-hero-prev img{width:100%;max-height:180px;object-fit:cover;display:block;}
+.bd-h-hero-drop{padding:20px 14px;}
+@media(max-width:700px){.bd-hero{margin-bottom:20px;}.bd-hero img{max-height:220px;}}
 /* repeatable store rows in the piece editor */
 .bd-link-row{display:grid;grid-template-columns:1fr 1.4fr 30px;gap:6px;align-items:center;margin-bottom:7px;}
 .bd-link-row .fi{margin:0;}
@@ -3537,8 +3549,12 @@ function bdTileHtml(x,i,total){
     // fighting a link for the click. Reader mode below turns it back into one.
     const openBtn=links.length?`<button class="bd-tile-act" title="Open ${h(links[0].store||bdHost(links[0].link))}" onclick="event.stopPropagation();window.open('${h(links[0].link)}','_blank','noopener')">↗</button>`:'';
     const tagBtn=`<button class="bd-tile-act${items.length?' filled':''}" title="${items.length?('Tagged: '+items.length+' items'):'Tag the items'}" onclick="bdTagOpen('${h(x.id)}')">◎</button>`;
-    return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot" ${openSet}>${img}${pins}${arrows}${shopTag}</span>
+    const hid=bdIsHidden(x);
+    const hideBtn=`<button class="bd-tile-act${hid?' filled':''}" title="${hid?'Hidden from readers. Put it back.':'Hide from readers'}" onclick="event.stopPropagation();bdToggleHidden('${h(x.id)}')">${hid?'⊘':'◉'}</button>`;
+    return `<div class="bd-tile${hid?' bd-is-hidden':''}" data-look="${h(x.id)}">
+      <span class="bd-shot" ${openSet}>${img}${pins}${arrows}${shopTag}
+        ${hid?'<span class="bd-hidden-tag">Hidden</span>':''}
+      </span>
       <span class="bd-tile-acts">
         <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
         <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
@@ -3546,6 +3562,7 @@ function bdTileHtml(x,i,total){
         ${tagBtn}
         <button class="bd-tile-act${links.length>1?' filled':''}" title="Name and where to buy" onclick="event.stopPropagation();bdTileOpen('${h(x.id)}')">✎</button>
         ${openBtn}
+        ${hideBtn}
         <button class="bd-tile-act red" title="Remove" onclick="event.stopPropagation();bdRemove('${h(x.id)}')">×</button>
       </span>
       ${label}
@@ -3616,7 +3633,9 @@ function renderBoardDetail(){
   const feed=document.getElementById('feed');
   const b=_boardOpen;
   if(!b){renderBoardIndex();return;}
-  const looks=bdLooks(b);
+  const all=bdLooks(b);
+  const looks=isCreator?all:bdVisible(all);
+  const hiddenCount=all.length-bdVisible(all).length;
   const tiles=looks.map((x,i)=>bdTileHtml(x,i,looks.length)).join('');
   const drop=isCreator?`<div class="bd-add">
       <label class="bd-drop" id="bd-drop">
@@ -3642,9 +3661,11 @@ function renderBoardDetail(){
     <div class="bd-wrap">
       <button class="bd-back" onclick="bdBack()">&larr; All boards</button>
       <div class="bd-err" id="bd-err" style="display:none;"></div>
+      ${b.hero?`<div class="bd-hero"><img src="${h(b.hero)}" alt="${h(b.title||'Board')}"></div>`:''}
       <div class="bd-head">
         <h2>${h(b.title||'Untitled board')}${draft}</h2>
         ${b.intro?`<p>${h(b.intro)}</p>`:''}
+        ${(isCreator&&hiddenCount)?`<p class="bd-hidden-note">${hiddenCount} piece${hiddenCount===1?'':'s'} hidden from readers. Only you see ${hiddenCount===1?'it':'them'}.</p>`:''}
         ${isCreator?acts:''}
       </div>
       ${empty}
@@ -3763,11 +3784,31 @@ async function bdPersist(patch){
 }
 
 // The cover is a small thumb of the first look, so the index stays light
+// A piece she cannot get a link for stays on the board for her and drops out
+// of the reader's view entirely, rather than being deleted and re-added later.
+function bdIsHidden(x){return !!(x&&x.hidden);}
+function bdVisible(looks){return looks.filter(l=>!bdIsHidden(l));}
+
 async function bdSaveLooks(looks){
   const b=_boardOpen;
   if(!b)return false;
-  const cover=looks.length?await bdShrink(looks[0].image,380,60000):'';
-  return bdPersist({looks,look_count:looks.length,cover});
+  const shown=bdVisible(looks);
+  const cover=shown.length?await bdShrink(shown[0].image,380,60000):'';
+  // the count on the index card is what a reader will actually find
+  return bdPersist({looks,look_count:shown.length,cover});
+}
+
+async function bdToggleHidden(id){
+  const b=_boardOpen;if(!b)return;
+  let nowHidden=false;
+  const looks=bdLooks(b).map(x=>{
+    if(x.id!==id)return x;
+    nowHidden=!bdIsHidden(x);
+    return {...x,hidden:nowHidden};
+  });
+  const ok=await bdSaveLooks(looks);
+  renderBoardDetail();
+  if(ok)toast(nowHidden?'Hidden from readers':'Visible to readers again');
 }
 
 async function bdAddFiles(files){
@@ -4126,25 +4167,62 @@ async function bdTagSave(){
 }
 
 // ── header editor: the writing at the top of the board ──
+// ── the board header, including its own image ──
+let _bdHero=null;   // null means "unchanged", '' means "remove it"
 function bdHeadOpen(){
   const b=_boardOpen;if(!b)return;
   document.getElementById('bd-h-title').value=b.title==='Untitled board'?'':(b.title||'');
   document.getElementById('bd-h-intro').value=b.intro||'';
+  _bdHero=null;
+  bdHeroPreview(b.hero||'');
+  bdHeadMsg('');
   document.getElementById('bd-head-ov').classList.add('open');
   setTimeout(()=>document.getElementById('bd-h-title').focus(),60);
 }
-function bdHeadClose(){document.getElementById('bd-head-ov').classList.remove('open');}
+function bdHeadMsg(m){
+  const el=document.getElementById('bd-h-msg');
+  if(el){el.textContent=m||'';el.style.display=m?'block':'none';}
+}
+function bdHeroPreview(src){
+  const wrap=document.getElementById('bd-h-hero-prev');
+  const img=document.getElementById('bd-h-hero-img');
+  const rm=document.getElementById('bd-h-hero-rm');
+  if(!wrap)return;
+  if(src){img.src=src;wrap.style.display='block';rm.style.display='block';}
+  else{img.removeAttribute('src');wrap.style.display='none';rm.style.display='none';}
+}
+async function bdHeroFile(files){
+  const f=[...(files||[])].find(x=>x.type.startsWith('image/'));
+  if(!f){bdHeadMsg('That was not an image file.');return;}
+  bdHeadMsg('');
+  const raw=await bdReadFile(f);
+  const small=await bdShrink(raw,1600,420000);
+  if(!small){bdHeadMsg('That image could not be read.');return;}
+  _bdHero=small;
+  bdHeroPreview(small);
+}
+function bdHeroClear(){_bdHero='';bdHeroPreview('');}
+function bdHeadClose(){document.getElementById('bd-head-ov').classList.remove('open');_bdHero=null;}
 async function bdHeadSave(){
   const b=_boardOpen;if(!b)return;
   const title=document.getElementById('bd-h-title').value.trim()||'Untitled board';
   const intro=document.getElementById('bd-h-intro').value.trim();
   const btn=document.getElementById('bd-h-save');
   btn.textContent='Saving…';btn.disabled=true;
-  const ok=await bdPersist({title,intro});
+  const patch={title,intro};
+  if(_bdHero!==null){
+    patch.hero=_bdHero;
+    // the picture she chose is what the board should be known by, so it
+    // becomes the card on the index too
+    patch.cover=_bdHero?await bdShrink(_bdHero,380,60000)
+      :(bdVisible(bdLooks(b))[0]||{}).image||'';
+  }
+  const ok=await bdPersist(patch);
   btn.textContent='Save';btn.disabled=false;
+  if(!ok){bdHeadMsg('Could not save. The image may be too large, try a smaller one.');return;}
   bdHeadClose();
   renderBoardDetail();
-  if(ok)toast('Header saved');
+  toast('Header saved');
 }
 
 async function bdTogglePub(){
@@ -6994,7 +7072,18 @@ async function runFetchImages(){
 <div class="fov" id="bd-head-ov" onclick="bdHeadClose()">
   <div class="fp" style="max-width:520px;" onclick="event.stopPropagation()">
     <h3 class="ftitle">Board header</h3>
+    <div class="bd-tag-msg" id="bd-h-msg" style="display:none;"></div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="bd-h-title" placeholder="e.g. Quiet Luxury Neutrals"></div>
+    <div class="fg">
+      <label class="fl">Board image <span class="flh">(optional, sits above the title and becomes the card on the boards page)</span></label>
+      <div class="bd-h-hero-prev" id="bd-h-hero-prev" style="display:none;"><img id="bd-h-hero-img" src="" alt=""></div>
+      <label class="bd-drop bd-h-hero-drop" id="bd-h-hero-drop">
+        <input type="file" accept="image/*" onchange="bdHeroFile(this.files);this.value='';">
+        <span class="bd-drop-t">Drop or choose an image</span>
+        <span class="bd-drop-h">A wide photo works best. Yours, or one from the collection.</span>
+      </label>
+      <button type="button" class="btn-g" id="bd-h-hero-rm" style="display:none;margin-top:7px;" onclick="bdHeroClear()">Remove image</button>
+    </div>
     <div class="fg">
       <label class="fl">Your writing <span class="flh">(sits under the title, above the photos)</span></label>
       <textarea class="fi fta" id="bd-h-intro" rows="6" placeholder="What ties this board together, what you are looking for, what to buy first…" style="font-style:normal;min-height:130px;"></textarea>
