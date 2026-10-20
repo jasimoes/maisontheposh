@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-10-20d quiet-dots -->
+<!-- MTP BUILD 2026-10-20f honest-errors -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -823,6 +823,16 @@ button.bd-shop:hover{opacity:1;}
 .bd-is-hidden .bd-label{opacity:.5;}
 .bd-hidden-tag{position:absolute;left:8px;top:8px;padding:5px 10px;background:rgba(0,0,0,.78);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;z-index:3;}
 .bd-hidden-note{font-family:var(--sans)!important;font-size:11px!important;color:var(--soft)!important;letter-spacing:.02em;margin-top:10px;}
+/* category filter, in the same language as the sub-navigation elsewhere */
+.bd-cats{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin-bottom:22px;padding-bottom:0;}
+.bd-cats::-webkit-scrollbar{display:none;}
+.bd-cat{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 13px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
+.bd-cat:hover{color:var(--mid);}
+.bd-cat.on{color:var(--ink);border-bottom-color:var(--ink);}
+.bd-cat-n{font-size:8.5px;color:var(--faint);margin-left:4px;letter-spacing:.06em;}
+.bd-cat.on .bd-cat-n{color:var(--soft);}
+.bd-cat-note{font-family:var(--sans);font-size:11px;color:var(--soft);line-height:1.7;margin-top:14px;}
+@media(max-width:700px){.bd-cats{margin-bottom:16px;}.bd-cat{padding:10px 11px;}}
 /* the board's own image, above the title */
 .bd-hero{margin:0 0 26px;line-height:0;background:var(--surf);}
 .bd-hero img{width:100%;max-height:360px;object-fit:cover;display:block;}
@@ -3039,6 +3049,7 @@ const BD_TILE_CAP=90000;    // the cover thumb in the board row, kept small
 const BD_PHOTO_CAP=240000;  // a full photo in board_photos, sized for the viewer
 const BD_ROW_CAP=7000000;   // whole board row: covers only, so this goes a long way
 let _boards=null;           // index rows: everything except the looks
+let _bdCat='';              // the category filter on the open board
 let _boardOpen=null;        // the full row currently open
 let _bdLoadErr='';
 
@@ -3059,6 +3070,11 @@ function bdProblem(msg){
     return 'The boards table is not in your database yet. Run boards-setup.sql in Supabase, then reload this page.';
   if(/permission denied|42501|JWT|401|403/i.test(t))
     return 'Your database refused the write. The boards table needs its policy applied, which is the second half of boards-setup.sql.';
+  // A missing column used to surface as "the image is too large", which sent
+  // her off resizing a photo that was never the problem.
+  const col=t.match(/column ([a-z_.]+) does not exist/i);
+  if(col||/42703/.test(t))
+    return 'Your database is missing the '+(col?col[1].split('.').pop():'needed')+' column, so there is nowhere to put this. It is a setup step, not anything you did.';
   if(/413|too large|payload/i.test(t))
     return 'That board is too heavy to store. Remove a photo, or use smaller files.';
   return 'Something went wrong. '+t.slice(0,140);
@@ -3693,8 +3709,16 @@ function renderBoardDetail(){
   const b=_boardOpen;
   if(!b){renderBoardIndex();return;}
   const all=bdLooks(b);
-  const looks=isCreator?all:bdVisible(all);
+  const pool=isCreator?all:bdVisible(all);
   const hiddenCount=all.length-bdVisible(all).length;
+  const cats=bdCatList(pool);
+  // a filter that no longer matches anything would strand her on an empty board
+  if(_bdCat&&!cats.some(c=>c.name===_bdCat))_bdCat='';
+  const looks=_bdCat?pool.filter(l=>bdCatOf(l)===_bdCat):pool;
+  const catRow=cats.length>1?`<div class="bd-cats" id="bd-cats">
+      <button class="bd-cat${_bdCat?'':' on'}" onclick="bdSetCat('')">All<span class="bd-cat-n">${pool.length}</span></button>
+      ${cats.map(c=>`<button class="bd-cat${_bdCat===c.name?' on':''}" onclick="bdSetCat('${h(c.name).replace(/'/g,"\\'")}')">${h(c.name)}<span class="bd-cat-n">${c.count}</span></button>`).join('')}
+    </div>`:'';
   const tiles=looks.map((x,i)=>bdTileHtml(x,i,looks.length)).join('');
   const drop=isCreator?`<div class="bd-add">
       <label class="bd-drop" id="bd-drop">
@@ -3727,8 +3751,10 @@ function renderBoardDetail(){
         ${(isCreator&&hiddenCount)?`<p class="bd-hidden-note">${hiddenCount} piece${hiddenCount===1?'':'s'} hidden from readers. Only you see ${hiddenCount===1?'it':'them'}.</p>`:''}
         ${isCreator?acts:''}
       </div>
+      ${catRow}
       ${empty}
-      <div class="bd-mosaic" id="bd-mosaic">${tiles}${drop}</div>
+      <div class="bd-mosaic" id="bd-mosaic">${tiles}${_bdCat?'':drop}</div>
+      ${_bdCat&&isCreator?`<p class="bd-cat-note">Showing ${h(_bdCat)} only. Clear the filter to add photos to the board.</p>`:''}
       ${full}
     </div>`+subscribeBlock();
   bdWireTileSwipe();
@@ -3755,6 +3781,7 @@ function initBoardDrop(){
 }
 
 async function bdOpen(id){
+  _bdCat='';
   const feed=document.getElementById('feed');
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   try{
@@ -3774,6 +3801,7 @@ async function bdOpen(id){
 // Arriving straight on a board link, or coming back to one, must not push a
 // new history entry or the back button would need two presses.
 async function bdOpenFromUrl(id){
+  _bdCat='';
   const feed=document.getElementById('feed');
   feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
   if(!_boards)await loadBoards();
@@ -3790,7 +3818,7 @@ async function bdOpenFromUrl(id){
 }
 
 function bdBack(push){
-  _boardOpen=null;
+  _boardOpen=null;_bdCat='';
   renderBoardIndex();
   window.scrollTo({top:0});
   if(push!==false)history.pushState({tab:'boards'},'','/?tab=boards');
@@ -3848,6 +3876,31 @@ async function bdPersist(patch){
 // of the reader's view entirely, rather than being deleted and re-added later.
 function bdIsHidden(x){return !!(x&&x.hidden);}
 function bdVisible(looks){return looks.filter(l=>!bdIsHidden(l));}
+
+// ── categories ──
+// A drop of 80 pieces is a catalogue until it can be narrowed. The order below
+// is how a collection is usually shown, anything else follows alphabetically.
+const BD_CAT_ORDER=['Coats & jackets','Knitwear','Tops','Dresses','Skirts','Trousers','Handbags','Shoes','Accessories'];
+function bdCatOf(x){return String((x&&x.cat)||'').trim();}
+function bdCatList(looks){
+  const counts={};
+  looks.forEach(l=>{const c=bdCatOf(l);if(c)counts[c]=(counts[c]||0)+1;});
+  const names=Object.keys(counts);
+  names.sort((a,b)=>{
+    const ia=BD_CAT_ORDER.indexOf(a), ib=BD_CAT_ORDER.indexOf(b);
+    if(ia>=0&&ib>=0)return ia-ib;
+    if(ia>=0)return -1;
+    if(ib>=0)return 1;
+    return a.localeCompare(b);
+  });
+  return names.map(n=>({name:n,count:counts[n]}));
+}
+function bdSetCat(c){
+  _bdCat=(c===_bdCat)?'':c;      // tapping the one you are on clears it
+  renderBoardDetail();
+  const m=document.getElementById('bd-mosaic');
+  if(m)m.scrollIntoView({behavior:'smooth',block:'start'});
+}
 
 async function bdSaveLooks(looks){
   const b=_boardOpen;
@@ -4024,6 +4077,11 @@ function bdTileOpen(id){
   document.getElementById('bd-t-maison').value=x.maison||'';
   document.getElementById('bd-t-name').value=x.name||'';
   document.getElementById('bd-t-cap').value=x.caption||'';
+  document.getElementById('bd-t-cat').value=x.cat||'';
+  // offer the ones already on this board first, then the usual collection names
+  const used=bdCatList(bdLooks(b)).map(c=>c.name);
+  const opts=[...new Set([...used,...BD_CAT_ORDER])];
+  document.getElementById('bd-cat-options').innerHTML=opts.map(o=>`<option value="${h(o)}"></option>`).join('');
   _bdTileLinks=bdLinksOf(x).map(l=>({id:l.id==='main'?uid():l.id,store:l.store,link:l.link}));
   if(!_bdTileLinks.length)_bdTileLinks=[{id:uid(),store:'',link:''}];
   bdTileLinksRender();
@@ -4068,10 +4126,11 @@ async function bdTileSave(){
   const maison=document.getElementById('bd-t-maison').value.trim();
   const name=document.getElementById('bd-t-name').value.trim();
   const caption=document.getElementById('bd-t-cap').value.trim();
+  const cat=document.getElementById('bd-t-cat').value.trim();
   // A row with no address is just an empty row, it does not ship
   const links=_bdTileLinks.filter(l=>l.link).map(l=>({id:l.id,store:l.store,link:l.link}));
   const looks=bdLooks(b).map(x=>x.id===_bdTileId
-    ? {...x,maison,name,caption,links,link:links.length?links[0].link:''}
+    ? {...x,maison,name,caption,cat,links,link:links.length?links[0].link:''}
     : x);
   const btn=document.getElementById('bd-t-save');
   btn.textContent='Saving…';btn.disabled=true;
@@ -4279,7 +4338,12 @@ async function bdHeadSave(){
   }
   const ok=await bdPersist(patch);
   btn.textContent='Save';btn.disabled=false;
-  if(!ok){bdHeadMsg('Could not save. The image may be too large, try a smaller one.');return;}
+  if(!ok){
+    // say what actually went wrong, rather than blaming her photo
+    const real=document.getElementById('bd-err');
+    bdHeadMsg((real&&real.textContent)||'Could not save. Try again in a moment.');
+    return;
+  }
   bdHeadClose();
   renderBoardDetail();
   toast('Header saved');
@@ -7207,6 +7271,11 @@ async function runFetchImages(){
     <div class="fg">
       <label class="fl">Piece <span class="flh">(optional, shown on the board and in the viewer)</span></label>
       <input type="text" class="fi" id="bd-t-name" placeholder="e.g. Enuko coat in dark brown">
+    </div>
+    <div class="fg">
+      <label class="fl">Category <span class="flh">(optional, drives the filter at the top of the board)</span></label>
+      <input type="text" class="fi" id="bd-t-cat" list="bd-cat-options" placeholder="e.g. Coats &amp; jackets">
+      <datalist id="bd-cat-options"></datalist>
     </div>
     <div class="fg">
       <label class="fl">Where to buy <span class="flh">(add a row for each store that carries it)</span></label>
