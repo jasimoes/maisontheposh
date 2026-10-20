@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-09-26 legible-codes -->
+<!-- MTP BUILD 2026-10-20 piece-photo-sets -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -797,6 +797,65 @@ button.bd-shop:hover{opacity:1;}
 .bd-item-go{flex-shrink:0;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px;transition:opacity .15s;}
 .bd-item-go:hover{opacity:.6;}
 .bd-item-no{flex-shrink:0;font-family:var(--sans);font-size:9px;color:var(--faint);letter-spacing:.02em;}
+/* The mark that says a piece has more photos behind the cover */
+.bd-more{position:absolute;left:8px;top:8px;padding:5px 10px;border:none;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;cursor:pointer;opacity:.9;transition:opacity .18s,background .18s;z-index:2;}
+.bd-more:hover{opacity:1;background:var(--ink);}
+.bd-label{display:block;padding:9px 1px 2px;line-height:1.3;}
+.bd-label-b{display:block;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
+.bd-label-n{display:block;font-family:var(--serif);font-size:14px;color:var(--ink);}
+/* ── the photo set viewer ── */
+.bd-view-ov{position:fixed;inset:0;z-index:600;display:none;background:rgba(20,19,18,.93);backdrop-filter:blur(4px);overflow-y:auto;padding:20px;}
+.bd-view-ov.open{display:block;}
+.bd-view-ov.over{outline:2px dashed rgba(255,255,255,.65);outline-offset:-14px;}
+.bd-view-x{position:fixed;top:14px;right:18px;z-index:3;background:none;border:none;color:rgba(255,255,255,.75);font-size:30px;line-height:1;cursor:pointer;padding:4px 10px;transition:color .15s;}
+.bd-view-x:hover{color:#fff;}
+.bd-view-box{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px;max-width:1180px;margin:34px auto 40px;align-items:start;}
+.bd-view-stage{background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;min-height:52vh;}
+.bd-view-stage img{max-width:100%;max-height:72vh;display:block;}
+.bd-view-none{color:rgba(255,255,255,.6);font-family:var(--sans);font-size:12px;letter-spacing:.04em;padding:60px 20px;text-align:center;line-height:1.7;}
+.bd-view-nav{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:12px;}
+.bd-view-arrow{background:none;border:1px solid rgba(255,255,255,.3);color:#fff;font-family:var(--sans);font-size:14px;line-height:1;padding:8px 16px;cursor:pointer;transition:all .15s;}
+.bd-view-arrow:hover{background:#fff;color:var(--ink);border-color:#fff;}
+.bd-view-count{font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.65);}
+.bd-view-strip{display:flex;gap:7px;flex-wrap:wrap;margin-top:16px;}
+.bd-view-th{position:relative;width:66px;height:84px;padding:0;border:1px solid transparent;background:rgba(255,255,255,.07);cursor:pointer;overflow:hidden;transition:border-color .15s,opacity .15s;opacity:.62;}
+.bd-view-th img{width:100%;height:100%;object-fit:cover;display:block;}
+.bd-view-th:hover{opacity:.9;}
+.bd-view-th.on{border-color:#fff;opacity:1;}
+.bd-view-cov{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);color:#fff;font-family:var(--sans);font-size:7px;letter-spacing:.14em;text-transform:uppercase;padding:2px 0;text-align:center;}
+.bd-view-right{color:#fff;position:sticky;top:34px;}
+.bd-view-b{display:block;font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:5px;}
+.bd-view-n{display:block;font-family:var(--serif);font-size:25px;font-weight:300;line-height:1.25;color:#fff;}
+.bd-view-title{margin-bottom:18px;}
+.bd-view-msg{background:rgba(176,48,48,.22);border-left:2px solid #B03030;color:#F2D5D1;font-size:12px;padding:9px 12px;margin-bottom:14px;line-height:1.55;}
+.bd-view-go{display:inline-block;padding:10px 20px;border:1px solid #fff;color:#fff;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;transition:all .16s;margin-bottom:16px;}
+.bd-view-go:hover{background:#fff;color:var(--ink);}
+.bd-view-nolink{font-family:var(--sans);font-size:11px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:14px;}
+.bd-view-list{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);border-top:1px solid rgba(255,255,255,.16);}
+.bd-view-list .bd-item{border-bottom-color:rgba(255,255,255,.14);}
+.bd-view-list .bd-item.on{background:rgba(255,255,255,.1);}
+.bd-view-list .bd-item-n{background:#fff;color:var(--ink);}
+.bd-view-list .bd-item-b{color:rgba(255,255,255,.6);}
+.bd-view-list .bd-item-t{color:#fff;}
+.bd-view-list .bd-item-go{color:#fff;border-bottom-color:#fff;}
+.bd-view-list .bd-item-no{color:rgba(255,255,255,.45);}
+.bd-view-acts{display:none;flex-wrap:wrap;gap:7px;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.18);}
+.bd-view-acts .bd-act{border-color:rgba(255,255,255,.32);color:rgba(255,255,255,.88);}
+.bd-view-acts .bd-act:hover{border-color:#fff;color:#fff;background:rgba(255,255,255,.1);}
+.bd-view-acts .bd-act.red:hover{border-color:#E08A8A;color:#E08A8A;background:rgba(176,48,48,.2);}
+.bd-view-room{font-family:var(--sans);font-size:9px;letter-spacing:.13em;text-transform:uppercase;color:rgba(255,255,255,.45);align-self:center;}
+.bd-view-hint{font-family:var(--sans);font-size:10.5px;color:rgba(255,255,255,.45);line-height:1.7;margin-top:12px;}
+.bd-view-busy{position:fixed;inset:0;z-index:4;display:none;align-items:center;justify-content:center;background:rgba(20,19,18,.6);color:#fff;font-family:var(--sans);font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+/* While the viewer is up it owns the screen, so the piece and tag forms have
+   to come out above it or they open behind the backdrop, invisible. */
+body.bd-viewing .fov{z-index:700;}
+@media(max-width:900px){
+  .bd-view-box{grid-template-columns:1fr;gap:20px;margin-top:40px;}
+  .bd-view-right{position:static;}
+  .bd-view-stage img{max-height:58vh;}
+  .bd-view-n{font-size:22px;}
+  .bd-view-th{width:56px;height:72px;}
+}
 /* The tagging editor */
 .bd-tag-hint{font-size:11.5px;color:var(--soft);line-height:1.6;margin:-10px 0 14px;}
 .bd-tag-msg{background:#F6EAE8;border-left:2px solid #B03030;color:#8C3A32;font-size:12px;padding:9px 12px;margin-bottom:12px;}
@@ -2928,21 +2987,33 @@ function tlRefresh(){
 
 // ══════════════════════════════════════════════════════════════════
 // INSPIRATION BOARDS
-// A board is one row: a title, a paragraph of writing, and up to 12
-// looks in a jsonb array. Photos are dropped straight onto the board,
-// the masonry reflows itself, and any look can carry an affiliate link.
+// A board is one row: a title, a paragraph of writing, and a list of pieces.
+// Each piece carries a small cover thumb in that row and, in the board_photos
+// table, the full set of photos saved for it. Photos are dropped straight onto
+// the board, the masonry reflows itself, and any piece can carry a link.
 // ══════════════════════════════════════════════════════════════════
-const BD_MAX=12;
-const BD_TILE_CAP=180000;   // per photo, after compressing
-const BD_ROW_CAP=2600000;   // whole board, so a save never bounces off Supabase
+const BD_MAX=0;             // 0 means no ceiling on pieces per board
+const BD_PHOTO_MAX=15;      // photos saved against one piece
+const BD_TILE_CAP=90000;    // the cover thumb in the board row, kept small
+const BD_PHOTO_CAP=240000;  // a full photo in board_photos, sized for the viewer
+const BD_ROW_CAP=7000000;   // whole board row: covers only, so this goes a long way
 let _boards=null;           // index rows: everything except the looks
 let _boardOpen=null;        // the full row currently open
 let _bdLoadErr='';
 
 function bdLooks(b){const l=b&&b.looks;return Array.isArray(l)?l:[];}
+// How many photos a piece holds. Pieces saved before photo sets existed have
+// their one image in the board row and no count, so they read as 1.
+function bdPhotoCount(x){
+  const n=Number(x&&x.n);
+  if(Number.isFinite(n)&&n>0)return n;
+  return (x&&x.image)?1:0;
+}
 
 function bdProblem(msg){
   const t=String(msg||'');
+  if(/board_photos/.test(t)&&/PGRST205|Could not find the table/i.test(t))
+    return 'The photo sets table is not in your database yet. Run board-photos-setup.sql in Supabase, then reload this page.';
   if(/PGRST205|Could not find the table/i.test(t))
     return 'The boards table is not in your database yet. Run boards-setup.sql in Supabase, then reload this page.';
   if(/permission denied|42501|JWT|401|403/i.test(t))
@@ -3046,6 +3117,308 @@ function renderBoardIndex(){
 // A look can credit several things at once: a coat, the bag, the shoes. Each
 // one gets a numbered pin sitting where it is in the photo, the way a magazine
 // credits a look, and the pin opens that item's own card.
+// ══════════════════════════════════════════════════════════════════
+// PHOTO SETS
+// A piece is the Enuko coat, not one picture of it. These functions move its
+// photos in and out of board_photos, and the viewer below shows them the way a
+// product page does: one large image, a strip of thumbnails, and the shop
+// details sitting beside them rather than hidden behind a tap.
+// ══════════════════════════════════════════════════════════════════
+const _bdPhotoCache={};   // look id -> photos, so reopening a piece is instant
+
+async function bdPhotosLoad(lookId,force){
+  if(!force&&_bdPhotoCache[lookId])return _bdPhotoCache[lookId];
+  let rows=[];
+  try{
+    rows=await sbFetch(`board_photos?select=id,image,sort_order&look_id=eq.${encodeURIComponent(lookId)}&order=sort_order.asc`)||[];
+  }catch(e){
+    console.error('bdPhotosLoad failed:',e);
+    throw e;
+  }
+  _bdPhotoCache[lookId]=rows;
+  return rows;
+}
+
+// A piece saved before photo sets existed keeps its only picture in the board
+// row. The first time photos are added to it, that picture moves across so the
+// set is complete and in one place.
+async function bdPhotosSeed(look){
+  const existing=await bdPhotosLoad(look.id,true);
+  if(existing.length||!look.image)return existing;
+  const row={id:uid(),board_id:_boardOpen.id,look_id:look.id,image:look.image,sort_order:0};
+  await sbFetch('board_photos',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(row)});
+  _bdPhotoCache[look.id]=[{id:row.id,image:row.image,sort_order:0}];
+  return _bdPhotoCache[look.id];
+}
+
+// The board row carries only a thumb of photo 0, so the grid stays light
+// however many pieces the drop has.
+async function bdSyncPiece(lookId){
+  const b=_boardOpen;if(!b)return false;
+  const photos=_bdPhotoCache[lookId]||[];
+  const cover=photos.length?await bdShrink(photos[0].image,340,BD_TILE_CAP):'';
+  const looks=bdLooks(b).map(l=>l.id===lookId?{...l,image:cover||l.image,n:photos.length}:l);
+  return bdSaveLooks(looks);
+}
+
+async function bdPhotosAdd(lookId,files){
+  const b=_boardOpen;if(!b)return;
+  const look=bdLooks(b).find(l=>l.id===lookId);
+  if(!look)return;
+  const imgs=[...files].filter(f=>f.type.startsWith('image/'));
+  if(!imgs.length){bdViewMsg('Those were not image files. Drop a JPG, PNG or HEIC photo.');return;}
+  let photos;
+  try{ photos=await bdPhotosSeed(look); }
+  catch(e){ bdViewMsg(bdProblem(e&&e.message)); return; }
+  const room=BD_PHOTO_MAX-photos.length;
+  if(room<=0){bdViewMsg(`This piece holds ${BD_PHOTO_MAX} photos. Remove one first.`);return;}
+  const take=imgs.slice(0,room);
+  bdViewMsg('');
+  bdViewBusy(`Adding ${take.length} photo${take.length===1?'':'s'}…`);
+  const rows=[];
+  let order=photos.length?Math.max(...photos.map(p=>p.sort_order||0))+1:0;
+  for(const f of take){
+    const raw=await bdReadFile(f);
+    const small=await bdShrink(raw,1100,BD_PHOTO_CAP);
+    if(small)rows.push({id:uid(),board_id:b.id,look_id:lookId,image:small,sort_order:order++});
+  }
+  if(!rows.length){bdViewBusy('');bdViewMsg('None of those photos could be read.');return;}
+  try{
+    // One insert per photo, so a single oversized file cannot sink the batch
+    for(const r of rows){
+      await sbFetch('board_photos',{method:'POST',headers:{'Prefer':'return=minimal'},body:JSON.stringify(r)});
+      _bdPhotoCache[lookId]=[...(_bdPhotoCache[lookId]||[]),{id:r.id,image:r.image,sort_order:r.sort_order}];
+    }
+  }catch(e){
+    console.error('bdPhotosAdd failed:',e);
+    bdViewBusy('');
+    bdViewMsg(bdProblem(e&&e.message));
+    bdViewRender();
+    return;
+  }
+  await bdSyncPiece(lookId);
+  bdViewBusy('');
+  bdViewRender();
+  const skipped=imgs.length-take.length;
+  toast(skipped>0?`Added ${rows.length}. ${skipped} did not fit, a piece holds ${BD_PHOTO_MAX}.`:`Added ${rows.length} photo${rows.length===1?'':'s'}`);
+}
+
+async function bdPhotoOrderSave(lookId){
+  const photos=_bdPhotoCache[lookId]||[];
+  for(let i=0;i<photos.length;i++){
+    if(photos[i].sort_order===i)continue;
+    photos[i].sort_order=i;
+    await sbFetch(`board_photos?id=eq.${encodeURIComponent(photos[i].id)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({sort_order:i})});
+  }
+}
+
+async function bdPhotoMove(dir){
+  const v=_bdView;if(!v)return;
+  const photos=(_bdPhotoCache[v.lookId]||[]).slice();
+  const j=v.idx+dir;
+  if(j<0||j>=photos.length)return;
+  [photos[v.idx],photos[j]]=[photos[j],photos[v.idx]];
+  _bdPhotoCache[v.lookId]=photos;
+  v.idx=j;
+  bdViewRender();
+  try{ await bdPhotoOrderSave(v.lookId); await bdSyncPiece(v.lookId); }
+  catch(e){ bdViewMsg(bdProblem(e&&e.message)); }
+}
+
+async function bdPhotoMakeCover(){
+  const v=_bdView;if(!v||v.idx===0)return;
+  const photos=(_bdPhotoCache[v.lookId]||[]).slice();
+  const [pick]=photos.splice(v.idx,1);
+  photos.unshift(pick);
+  _bdPhotoCache[v.lookId]=photos;
+  v.idx=0;
+  bdViewRender();
+  try{ await bdPhotoOrderSave(v.lookId); await bdSyncPiece(v.lookId); toast('Cover set'); }
+  catch(e){ bdViewMsg(bdProblem(e&&e.message)); }
+}
+
+async function bdPhotoDelete(){
+  const v=_bdView;if(!v)return;
+  const photos=(_bdPhotoCache[v.lookId]||[]).slice();
+  const p=photos[v.idx];
+  if(!p)return;
+  if(!confirm('Remove this photo from the piece?'))return;
+  try{
+    await sbFetch(`board_photos?id=eq.${encodeURIComponent(p.id)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  }catch(e){
+    console.error('bdPhotoDelete failed:',e);
+    bdViewMsg(bdProblem(e&&e.message));
+    return;
+  }
+  photos.splice(v.idx,1);
+  _bdPhotoCache[v.lookId]=photos;
+  v.idx=Math.max(0,Math.min(v.idx,photos.length-1));
+  bdViewRender();
+  await bdPhotoOrderSave(v.lookId);
+  await bdSyncPiece(v.lookId);
+}
+
+// ── the viewer ──
+let _bdView=null;
+function bdViewMsg(m){
+  const el=document.getElementById('bd-view-msg');
+  if(el){el.textContent=m||'';el.style.display=m?'block':'none';}
+}
+function bdViewBusy(m){
+  const el=document.getElementById('bd-view-busy');
+  if(el){el.textContent=m||'';el.style.display=m?'flex':'none';}
+}
+
+async function bdViewOpen(lookId,ev){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const b=_boardOpen;if(!b)return;
+  const look=bdLooks(b).find(l=>l.id===lookId);
+  if(!look)return;
+  _bdView={lookId,idx:0};
+  document.getElementById('bd-view-ov').classList.add('open');
+  document.body.classList.add('bd-viewing');
+  document.body.style.overflow='hidden';
+  bdViewMsg('');bdViewBusy('Loading photos…');
+  bdViewRender();
+  try{
+    const photos=await bdPhotosLoad(lookId);
+    // A piece from before photo sets still has its picture in the board row
+    if(!photos.length&&look.image)_bdPhotoCache[lookId]=[{id:'row',image:look.image,sort_order:0}];
+  }catch(e){
+    bdViewMsg(bdProblem(e&&e.message));
+  }
+  bdViewBusy('');
+  bdViewRender();
+  bdWireViewKeys();
+}
+function bdViewClose(){
+  _bdView=null;
+  document.getElementById('bd-view-ov').classList.remove('open');
+  document.body.classList.remove('bd-viewing');
+  document.body.style.overflow='';
+  renderBoardDetail();
+}
+function bdViewGo(d){
+  const v=_bdView;if(!v)return;
+  const photos=_bdPhotoCache[v.lookId]||[];
+  if(photos.length<2)return;
+  v.idx=(v.idx+d+photos.length)%photos.length;
+  bdViewRender();
+}
+function bdViewSelect(i){
+  const v=_bdView;if(!v)return;
+  v.idx=i;bdViewRender();
+}
+
+function bdViewRender(){
+  const v=_bdView;if(!v)return;
+  const b=_boardOpen;if(!b)return;
+  const look=bdLooks(b).find(l=>l.id===v.lookId);
+  if(!look)return;
+  const photos=_bdPhotoCache[v.lookId]||[];
+  const cur=photos[v.idx];
+  const items=bdItemsOf(look);
+
+  const stage=document.getElementById('bd-view-stage');
+  stage.innerHTML=cur
+    ? `<img src="${h(cur.image)}" alt="${h(look.name||look.caption||'Photo')}">`
+    : `<div class="bd-view-none">${isCreator?'No photos on this piece yet. Drop or paste them here.':'No photos yet.'}</div>`;
+
+  const nav=document.getElementById('bd-view-nav');
+  nav.style.display=photos.length>1?'flex':'none';
+  const counter=document.getElementById('bd-view-count');
+  if(counter)counter.textContent=photos.length?`${v.idx+1} of ${photos.length}`:'';
+
+  const strip=document.getElementById('bd-view-strip');
+  strip.innerHTML=photos.map((p,i)=>
+    `<button type="button" class="bd-view-th${i===v.idx?' on':''}" onclick="bdViewSelect(${i})" aria-label="Photo ${i+1}">
+       <img src="${h(p.image)}" alt="" loading="lazy">${i===0?'<span class="bd-view-cov">Cover</span>':''}
+     </button>`).join('');
+
+  // the shop side
+  const title=document.getElementById('bd-view-title');
+  title.innerHTML=`${look.maison?`<span class="bd-view-b">${h(look.maison)}</span>`:''}
+    <span class="bd-view-n">${h(look.name||look.caption||'Untitled piece')}</span>`;
+
+  const shop=document.getElementById('bd-view-shop');
+  let shopHtml='';
+  if(look.link)shopHtml+=`<a class="bd-view-go" href="${h(look.link)}" target="_blank" rel="noopener noreferrer">Shop this piece &rarr;</a>`;
+  if(items.length)shopHtml+=bdShopList(look.id,items).replace('bd-shoplist','bd-shoplist bd-view-list');
+  if(!shopHtml)shopHtml=`<p class="bd-view-nolink">${isCreator?'No link on this piece yet. Add one with Edit piece.':'Not shoppable right now.'}</p>`;
+  shop.innerHTML=shopHtml;
+
+  const acts=document.getElementById('bd-view-acts');
+  acts.style.display=isCreator?'flex':'none';
+  const hint=document.getElementById('bd-view-hint');
+  if(hint){
+    hint.style.display=isCreator?'block':'none';
+    hint.innerHTML=isCreator?`Drag photos straight in, or press <b>${h(BD_PASTE_KEY)}</b> to paste.`:'';
+  }
+  if(isCreator){
+    const room=BD_PHOTO_MAX-photos.length;
+    acts.innerHTML=`
+      <button class="bd-act" onclick="bdViewPick()" ${room<=0?'disabled style="opacity:.45;"':''}>Add photos</button>
+      <button class="bd-act" onclick="bdPhotoMove(-1)" ${v.idx<=0?'disabled style="opacity:.45;"':''}>Move earlier</button>
+      <button class="bd-act" onclick="bdPhotoMove(1)" ${v.idx>=photos.length-1?'disabled style="opacity:.45;"':''}>Move later</button>
+      <button class="bd-act" onclick="bdPhotoMakeCover()" ${v.idx===0?'disabled style="opacity:.45;"':''}>Make cover</button>
+      <button class="bd-act" onclick="bdTileOpen('${h(look.id)}')">Edit piece</button>
+      <button class="bd-act" onclick="bdTagOpen('${h(look.id)}')">Tag items</button>
+      <button class="bd-act red" onclick="bdPhotoDelete()" ${!photos.length?'disabled style="opacity:.45;"':''}>Delete photo</button>
+      <span class="bd-view-room">${room>0?room+' more fit':'Full at '+BD_PHOTO_MAX}</span>`;
+  }
+}
+
+function bdViewPick(){
+  const inp=document.getElementById('bd-view-file');
+  if(inp){inp.value='';inp.click();}
+}
+
+let _bdViewWired=false;
+function bdWireViewKeys(){
+  if(_bdViewWired)return;
+  _bdViewWired=true;
+  document.addEventListener('keydown',e=>{
+    if(!_bdView)return;
+    if(e.key==='Escape'){bdViewClose();return;}
+    if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;
+    if(e.key==='ArrowRight'){e.preventDefault();bdViewGo(1);}
+    if(e.key==='ArrowLeft'){e.preventDefault();bdViewGo(-1);}
+  });
+  const ov=document.getElementById('bd-view-ov');
+  if(!ov)return;
+  // swipe, for a phone
+  let x0=null,y0=null;
+  ov.addEventListener('touchstart',e=>{const t=e.changedTouches[0];x0=t.clientX;y0=t.clientY;},{passive:true});
+  ov.addEventListener('touchend',e=>{
+    if(x0===null)return;
+    const t=e.changedTouches[0];
+    const dx=t.clientX-x0, dy=t.clientY-y0;
+    x0=null;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.6)bdViewGo(dx<0?1:-1);
+  },{passive:true});
+  // dropping and pasting straight into the open piece
+  ov.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy';ov.classList.add('over');});
+  ov.addEventListener('dragleave',e=>{if(!ov.contains(e.relatedTarget))ov.classList.remove('over');});
+  ov.addEventListener('drop',e=>{
+    e.preventDefault();ov.classList.remove('over');
+    if(!isCreator||!_bdView)return;
+    const files=[...(e.dataTransfer.files||[])].filter(f=>f.type.startsWith('image/'));
+    if(files.length)bdPhotosAdd(_bdView.lookId,files);
+  });
+  document.addEventListener('paste',e=>{
+    if(!isCreator||!_bdView)return;
+    const t=e.target;
+    if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable))return;
+    const dt=e.clipboardData;if(!dt)return;
+    let imgs=[...(dt.files||[])].filter(f=>f.type.startsWith('image/'));
+    if(!imgs.length){
+      imgs=[...(dt.items||[])].filter(it=>it.kind==='file'&&it.type.startsWith('image/'))
+        .map(it=>it.getAsFile()).filter(Boolean);
+    }
+    if(imgs.length){e.preventDefault();e.stopPropagation();bdPhotosAdd(_bdView.lookId,imgs);}
+  },true);
+}
+
 function bdItemsOf(x){
   const a=x&&x.items;
   return Array.isArray(a)?a.filter(i=>i&&(i.name||i.link||i.maison)):[];
@@ -3070,10 +3443,16 @@ function bdShopList(lookId,items){
 }
 
 function bdTileHtml(x,i,total){
-  const img=`<img src="${h(x.image)}" alt="${h(x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
+  const img=`<img src="${h(x.image)}" alt="${h(x.name||x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
   const items=bdItemsOf(x);
-  const pins=items.map((it,n)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+(n+1)))}" onclick="bdPinFocus(event,'${h(it.id)}')">${n+1}</button>`).join('');
+  const n=bdPhotoCount(x);
+  const pins=items.map((it,m)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+(m+1)))}" onclick="bdPinFocus(event,'${h(it.id)}')">${m+1}</button>`).join('');
   const shopTag=`<button class="bd-shop bd-shop-btn" onclick="bdShopToggle(event,this)">Shop</button>`;
+  // The mark that says this piece has more behind it, and opens the set
+  const more=`<button class="bd-more" onclick="bdViewOpen('${h(x.id)}',event)" title="See all photos of this piece">${n>1?n+' photos':'View'}</button>`;
+  const label=(x.maison||x.name)
+    ? `<span class="bd-label">${x.maison?`<span class="bd-label-b">${h(x.maison)}</span>`:''}${x.name?`<span class="bd-label-n">${h(x.name)}</span>`:''}</span>`
+    : '';
 
   if(isCreator){
     // In creator mode the tile is a plain block, so the buttons on it are not
@@ -3081,17 +3460,19 @@ function bdTileHtml(x,i,total){
     const openBtn=(x.link&&!items.length)?`<button class="bd-tile-act" title="Open link" onclick="event.stopPropagation();window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
     const tagBtn=`<button class="bd-tile-act${items.length?' filled':''}" title="${items.length?('Tagged: '+items.length+' items'):'Tag the items'}" onclick="bdTagOpen('${h(x.id)}')">◎</button>`;
     return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${pins}
+      <span class="bd-shot">${img}${pins}${more}
         ${items.length?shopTag:(x.link?`<span class="bd-shop">Shop</span>`:'')}
       </span>
       <span class="bd-tile-acts">
         <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
         <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
+        <button class="bd-tile-act${n>1?' filled':''}" title="Photos of this piece" onclick="bdViewOpen('${h(x.id)}',event)">▦</button>
         ${tagBtn}
-        <button class="bd-tile-act" title="Link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
+        <button class="bd-tile-act" title="Name, link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
         ${openBtn}
         <button class="bd-tile-act red" title="Remove" onclick="bdRemove('${h(x.id)}')">×</button>
       </span>
+      ${label}
       ${items.length?bdShopList(x.id,items):''}
     </div>`;
   }
@@ -3100,14 +3481,21 @@ function bdTileHtml(x,i,total){
     // The list opens underneath the photo rather than over it, so a pin near
     // the hem of a coat is never buried under the panel that just opened.
     return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${pins}${shopTag}</span>
+      <span class="bd-shot">${img}${pins}${more}${shopTag}</span>
+      ${label}
       ${bdShopList(x.id,items)}
     </div>`;
   }
-  if(x.link){
-    return `<a class="bd-tile" href="${h(x.link)}" target="_blank" rel="noopener noreferrer">${img}<span class="bd-shop">Shop</span></a>`;
+  if(n>1){
+    return `<div class="bd-tile" data-look="${h(x.id)}">
+      <span class="bd-shot">${img}${more}${x.link?`<span class="bd-shop">Shop</span>`:''}</span>
+      ${label}
+    </div>`;
   }
-  return `<div class="bd-tile">${img}</div>`;
+  if(x.link){
+    return `<a class="bd-tile" href="${h(x.link)}" target="_blank" rel="noopener noreferrer">${img}<span class="bd-shop">Shop</span>${label}</a>`;
+  }
+  return `<div class="bd-tile">${img}${label}</div>`;
 }
 
 // ── reader: the Shop tag ──
@@ -3166,16 +3554,15 @@ function renderBoardDetail(){
   if(!b){renderBoardIndex();return;}
   const looks=bdLooks(b);
   const tiles=looks.map((x,i)=>bdTileHtml(x,i,looks.length)).join('');
-  const room=BD_MAX-looks.length;
-  const drop=(isCreator&&room>0)?`<div class="bd-add">
+  const drop=isCreator?`<div class="bd-add">
       <label class="bd-drop" id="bd-drop">
         <input type="file" accept="image/*" multiple onchange="bdAddFiles(this.files);this.value='';">
         <span class="bd-drop-t">Drop or paste photos here</span>
-        <span class="bd-drop-h">Drag them off your desktop, press ${BD_PASTE_KEY} to paste, or click to browse.<br>Room for ${room} more.</span>
+        <span class="bd-drop-h">Each one starts a new piece. Open a piece to save its other photos.<br>Drag them off your desktop, press ${BD_PASTE_KEY} to paste, or click to browse.</span>
       </label>
       <button type="button" class="bd-paste-btn" onclick="bdPasteClick()">Paste from clipboard</button>
     </div>`:'';
-  const full=(isCreator&&room<=0)?`<div class="bd-full">This board is full at ${BD_MAX} looks. Remove one to add another.</div>`:'';
+  const full='';
   const acts=`<div class="bd-head-acts">
       <button class="bd-act" onclick="bdHeadOpen()">Edit header</button>
       <button class="bd-act ${b.published?'':'solid'}" onclick="bdTogglePub()">${b.published?'Unpublish':'Publish board'}</button>
@@ -3325,25 +3712,36 @@ async function bdAddFiles(files){
   const imgs=[...files].filter(f=>f.type.startsWith('image/'));
   if(!imgs.length){bdErr('Those were not image files. Drop a JPG, PNG or HEIC photo.');return;}
   const looks=bdLooks(b);
-  const room=BD_MAX-looks.length;
-  if(room<=0){bdErr(`This board is full at ${BD_MAX} looks. Remove one first.`);return;}
-  const take=imgs.slice(0,room);
   bdErr('');
-  toast(take.length===1?'Adding photo…':`Adding ${take.length} photos…`);
+  toast(imgs.length===1?'Adding photo…':`Adding ${imgs.length} photos…`);
+  // Each file dropped on the board starts its own piece: a small cover in the
+  // board row, the full-size photo in board_photos.
   const added=[];
-  for(const f of take){
+  for(const f of imgs){
     const raw=await bdReadFile(f);
-    const small=await bdShrink(raw,900,BD_TILE_CAP);
-    if(small)added.push({id:uid(),image:small,link:'',caption:''});
+    const full=await bdShrink(raw,1100,BD_PHOTO_CAP);
+    if(!full)continue;
+    const thumb=await bdShrink(full,340,BD_TILE_CAP);
+    const lookId=uid();
+    try{
+      await sbFetch('board_photos',{method:'POST',headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({id:uid(),board_id:b.id,look_id:lookId,image:full,sort_order:0})});
+    }catch(e){
+      console.error('bdAddFiles photo insert failed:',e);
+      bdErr(bdProblem(e&&e.message));
+      break;
+    }
+    delete _bdPhotoCache[lookId];
+    added.push({id:lookId,image:thumb||full,link:'',caption:'',name:'',maison:'',n:1});
   }
-  if(!added.length){bdErr('None of those photos could be read.');return;}
+  if(!added.length){
+    if(!document.getElementById('bd-err').textContent)bdErr('None of those photos could be read.');
+    return;
+  }
   const next=[...looks,...added];
   const ok=await bdSaveLooks(next);
   renderBoardDetail();
-  if(ok){
-    const skipped=imgs.length-take.length;
-    toast(skipped>0?`Added ${added.length}. ${skipped} did not fit, the board holds ${BD_MAX}.`:`Added ${added.length} look${added.length===1?'':'s'}`);
-  }
+  if(ok)toast(`Added ${added.length} piece${added.length===1?'':'s'}`);
 }
 
 // ── pasting ──
@@ -3409,13 +3807,19 @@ async function bdAddUrl(url){
   if(!b)return;
   if(!/^https?:\/\//i.test(url)){bdErr('That did not look like a web address.');return;}
   const looks=bdLooks(b);
-  if(looks.length>=BD_MAX){bdErr(`This board is full at ${BD_MAX} looks. Remove one first.`);return;}
   // A photo dragged from another site stays on that site's server, so it can
   // vanish or be blocked later. Saving the file is always steadier.
-  const next=[...looks,{id:uid(),image:url,link:'',caption:'',remote:true}];
+  const next=[...looks,{id:uid(),image:url,link:'',caption:'',name:'',maison:'',n:1,remote:true}];
   const ok=await bdSaveLooks(next);
   renderBoardDetail();
   if(ok)toast('Added. This one links to the other site, so save the file instead if it disappears.');
+}
+
+async function bdRemovePhotosOf(lookId){
+  try{
+    await sbFetch(`board_photos?look_id=eq.${encodeURIComponent(lookId)}`,{method:'DELETE',headers:{'Prefer':'return=minimal'}});
+  }catch(e){ console.error('bdRemovePhotosOf failed:',e); }
+  delete _bdPhotoCache[lookId];
 }
 
 async function bdMove(id,dir){
@@ -3431,7 +3835,12 @@ async function bdMove(id,dir){
 
 async function bdRemove(id){
   const b=_boardOpen;if(!b)return;
-  if(!confirm('Remove this look from the board?'))return;
+  const look=bdLooks(b).find(x=>x.id===id);
+  const n=bdPhotoCount(look);
+  if(!confirm(n>1
+    ? `Remove this piece and all ${n} of its photos? This cannot be undone.`
+    : 'Remove this piece from the board?'))return;
+  await bdRemovePhotosOf(id);
   const looks=bdLooks(b).filter(x=>x.id!==id);
   await bdSaveLooks(looks);
   renderBoardDetail();
@@ -3445,6 +3854,8 @@ function bdTileOpen(id){
   if(!x)return;
   _bdTileId=id;
   document.getElementById('bd-t-prev').src=x.image||'';
+  document.getElementById('bd-t-maison').value=x.maison||'';
+  document.getElementById('bd-t-name').value=x.name||'';
   document.getElementById('bd-t-link').value=x.link||'';
   document.getElementById('bd-t-cap').value=x.caption||'';
   document.getElementById('bd-tile-ov').classList.add('open');
@@ -3452,22 +3863,25 @@ function bdTileOpen(id){
 function bdTileClose(){document.getElementById('bd-tile-ov').classList.remove('open');_bdTileId=null;}
 async function bdTileSave(){
   const b=_boardOpen;if(!b||!_bdTileId)return;
+  const maison=document.getElementById('bd-t-maison').value.trim();
+  const name=document.getElementById('bd-t-name').value.trim();
   const link=document.getElementById('bd-t-link').value.trim();
   const caption=document.getElementById('bd-t-cap').value.trim();
-  const looks=bdLooks(b).map(x=>x.id===_bdTileId?{...x,link,caption}:x);
+  const looks=bdLooks(b).map(x=>x.id===_bdTileId?{...x,maison,name,link,caption}:x);
   const btn=document.getElementById('bd-t-save');
   btn.textContent='Saving…';btn.disabled=true;
   const ok=await bdSaveLooks(looks);
   btn.textContent='Save';btn.disabled=false;
-  if(ok){bdTileClose();renderBoardDetail();toast('Saved');}
-  else{bdTileClose();renderBoardDetail();}
+  bdTileClose();
+  if(_bdView)bdViewRender(); else renderBoardDetail();
+  if(ok)toast('Saved');
 }
 
 // ── tagging: pins on the photo, one per item ──
 const BD_TAG_MAX=8;
 let _bdTagLookId=null, _bdTagItems=[], _bdTagDragging=false;
 
-function bdTagOpen(lookId){
+async function bdTagOpen(lookId){
   const b=_boardOpen;if(!b)return;
   const look=bdLooks(b).find(l=>l.id===lookId);
   if(!look)return;
@@ -3476,10 +3890,18 @@ function bdTagOpen(lookId){
     id:it.id||uid(),maison:it.maison||'',name:it.name||'',link:it.link||'',
     x:Number(it.x)||50,y:Number(it.y)||50
   }));
+  // The board row holds a small thumb now, too small to place a pin on with any
+  // precision, so tag against the full-size cover from the photo set.
   document.getElementById('bd-tag-img').src=look.image||'';
   bdTagMsg('');
   bdTagRender();
   document.getElementById('bd-tag-ov').classList.add('open');
+  try{
+    const photos=await bdPhotosLoad(lookId);
+    if(photos.length&&_bdTagLookId===lookId){
+      document.getElementById('bd-tag-img').src=photos[0].image;
+    }
+  }catch(e){ /* the thumb already on screen still works */ }
 }
 function bdTagClose(){
   document.getElementById('bd-tag-ov').classList.remove('open');
@@ -3591,7 +4013,7 @@ async function bdTagSave(){
   const ok=await bdSaveLooks(looks);
   btn.textContent='Save';btn.disabled=false;
   bdTagClose();
-  renderBoardDetail();
+  if(_bdView)bdViewRender(); else renderBoardDetail();
   if(ok){
     toast(!items.length?'Tags cleared'
       :noLink?`Saved ${items.length} item${items.length===1?'':'s'}. ${noLink} of them has no link yet.`
@@ -6496,17 +6918,50 @@ async function runFetchImages(){
 </div>
 
 <!-- BOARDS: LOOK EDITOR -->
+<!-- BOARDS: PHOTO SET VIEWER -->
+<div class="bd-view-ov" id="bd-view-ov">
+  <input type="file" id="bd-view-file" accept="image/*" multiple style="display:none;" onchange="bdPhotosAdd(_bdView&&_bdView.lookId,this.files);this.value='';">
+  <button class="bd-view-x" onclick="bdViewClose()" aria-label="Close">&times;</button>
+  <div class="bd-view-box">
+    <div class="bd-view-left">
+      <div class="bd-view-stage" id="bd-view-stage"></div>
+      <div class="bd-view-nav" id="bd-view-nav">
+        <button class="bd-view-arrow" onclick="bdViewGo(-1)" aria-label="Previous photo">&larr;</button>
+        <span class="bd-view-count" id="bd-view-count"></span>
+        <button class="bd-view-arrow" onclick="bdViewGo(1)" aria-label="Next photo">&rarr;</button>
+      </div>
+      <div class="bd-view-strip" id="bd-view-strip"></div>
+    </div>
+    <div class="bd-view-right">
+      <div class="bd-view-title" id="bd-view-title"></div>
+      <div class="bd-view-msg" id="bd-view-msg" style="display:none;"></div>
+      <div class="bd-view-shop" id="bd-view-shop"></div>
+      <div class="bd-view-acts" id="bd-view-acts" style="display:none;"></div>
+      <p class="bd-view-hint" id="bd-view-hint"></p>
+    </div>
+  </div>
+  <div class="bd-view-busy" id="bd-view-busy" style="display:none;"></div>
+</div>
+
 <div class="fov" id="bd-tile-ov" onclick="bdTileClose()">
-  <div class="fp" style="max-width:420px;" onclick="event.stopPropagation()">
-    <h3 class="ftitle">This look</h3>
+  <div class="fp" style="max-width:440px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">This piece</h3>
     <div class="iprev" style="width:100%;height:190px;margin-bottom:14px;"><img id="bd-t-prev" src="" alt=""></div>
     <div class="fg">
-      <label class="fl">Affiliate link <span class="flh">(one link for the whole photo, used only when nothing is pinned)</span></label>
+      <label class="fl">Maison <span class="flh">(optional, sits above the name)</span></label>
+      <input type="text" class="fi" id="bd-t-maison" placeholder="e.g. The Row">
+    </div>
+    <div class="fg">
+      <label class="fl">Piece <span class="flh">(optional, shown on the board and in the viewer)</span></label>
+      <input type="text" class="fi" id="bd-t-name" placeholder="e.g. Enuko coat in dark brown">
+    </div>
+    <div class="fg">
+      <label class="fl">Affiliate link <span class="flh">(one link for the whole piece, used only when nothing is pinned)</span></label>
       <input type="text" class="fi" id="bd-t-link" placeholder="https://…">
     </div>
     <div class="fg">
       <label class="fl">Caption <span class="flh">(optional, read by screen readers)</span></label>
-      <input type="text" class="fi" id="bd-t-cap" placeholder="e.g. The Row Marlo in camel">
+      <input type="text" class="fi" id="bd-t-cap" placeholder="e.g. Enuko coat, shown on the runway">
     </div>
     <button class="btn-p" id="bd-t-save" onclick="bdTileSave()">Save</button>
     <button class="btn-g" onclick="bdTileClose()">Cancel</button>
