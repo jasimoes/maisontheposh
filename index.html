@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-10-20 piece-photo-sets -->
+<!-- MTP BUILD 2026-10-20b tile-arrows-stockists -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -797,9 +797,27 @@ button.bd-shop:hover{opacity:1;}
 .bd-item-go{flex-shrink:0;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:2px;transition:opacity .15s;}
 .bd-item-go:hover{opacity:.6;}
 .bd-item-no{flex-shrink:0;font-family:var(--sans);font-size:9px;color:var(--faint);letter-spacing:.02em;}
-/* The mark that says a piece has more photos behind the cover */
-.bd-more{position:absolute;left:8px;top:8px;padding:5px 10px;border:none;background:rgba(0,0,0,.72);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;cursor:pointer;opacity:.9;transition:opacity .18s,background .18s;z-index:2;}
-.bd-more:hover{opacity:1;background:var(--ink);}
+/* Arrows to flip through a piece's photos without leaving the board. They
+   stay out of the way until the photo is hovered, and never cover the clothes
+   with a number. */
+.bd-shot{cursor:zoom-in;}
+.bd-nav{position:absolute;top:50%;transform:translateY(-50%);width:30px;height:38px;padding:0;border:none;background:rgba(0,0,0,.55);color:#fff;font-family:var(--sans);font-size:13px;line-height:38px;cursor:pointer;opacity:0;transition:opacity .18s,background .18s;z-index:3;}
+.bd-nav-l{left:0;}
+.bd-nav-r{right:0;}
+.bd-tile:hover .bd-nav{opacity:.82;}
+.bd-nav:hover{opacity:1;background:var(--ink);}
+.bd-tile.bd-loading .bd-nav{opacity:.4;}
+@media(hover:none){.bd-nav{opacity:.72;}}
+.bd-store .bd-item-main{padding-left:2px;}
+.bd-store+.bd-item:not(.bd-store){border-top:1px solid var(--border);}
+/* repeatable store rows in the piece editor */
+.bd-link-row{display:grid;grid-template-columns:1fr 1.4fr 30px;gap:6px;align-items:center;margin-bottom:7px;}
+.bd-link-row .fi{margin:0;}
+.bd-l-del{height:32px;border:1px solid var(--border);background:none;color:var(--soft);font-size:15px;line-height:1;cursor:pointer;transition:all .15s;}
+.bd-l-del:hover:not(:disabled){border-color:#B03030;color:#B03030;}
+.bd-link-add{width:100%;padding:9px;border:1px dashed var(--border);background:none;color:var(--mid);font-family:var(--sans);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.bd-link-add:hover{border-color:var(--ink);color:var(--ink);}
+@media(max-width:560px){.bd-link-row{grid-template-columns:1fr 30px;}.bd-link-row .bd-l-url{grid-column:1 / -1;}}
 .bd-label{display:block;padding:9px 1px 2px;line-height:1.3;}
 .bd-label-b{display:block;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:2px;}
 .bd-label-n{display:block;font-family:var(--serif);font-size:14px;color:var(--ink);}
@@ -830,6 +848,9 @@ button.bd-shop:hover{opacity:1;}
 .bd-view-msg{background:rgba(176,48,48,.22);border-left:2px solid #B03030;color:#F2D5D1;font-size:12px;padding:9px 12px;margin-bottom:14px;line-height:1.55;}
 .bd-view-go{display:inline-block;padding:10px 20px;border:1px solid #fff;color:#fff;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;transition:all .16s;margin-bottom:16px;}
 .bd-view-go:hover{background:#fff;color:var(--ink);}
+.bd-view-where{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:rgba(255,255,255,.55);margin-bottom:10px;}
+.bd-view-stores{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:16px;}
+.bd-view-stores .bd-view-go{margin-bottom:0;}
 .bd-view-nolink{font-family:var(--sans);font-size:11px;color:rgba(255,255,255,.5);line-height:1.7;margin-bottom:14px;}
 .bd-view-list{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.16);border-top:1px solid rgba(255,255,255,.16);}
 .bd-view-list .bd-item{border-bottom-color:rgba(255,255,255,.14);}
@@ -3341,9 +3362,15 @@ function bdViewRender(){
     <span class="bd-view-n">${h(look.name||look.caption||'Untitled piece')}</span>`;
 
   const shop=document.getElementById('bd-view-shop');
+  const links=bdLinksOf(look);
   let shopHtml='';
-  if(look.link)shopHtml+=`<a class="bd-view-go" href="${h(look.link)}" target="_blank" rel="noopener noreferrer">Shop this piece &rarr;</a>`;
-  if(items.length)shopHtml+=bdShopList(look.id,items).replace('bd-shoplist','bd-shoplist bd-view-list');
+  if(links.length===1)shopHtml+=`<a class="bd-view-go" href="${h(links[0].link)}" target="_blank" rel="noopener noreferrer">Shop at ${h(links[0].store||bdHost(links[0].link))} &rarr;</a>`;
+  else if(links.length>1){
+    shopHtml+=`<p class="bd-view-where">Available at ${links.length} stores</p>`;
+    shopHtml+=`<div class="bd-view-stores">`+links.map(l=>
+      `<a class="bd-view-go" href="${h(l.link)}" target="_blank" rel="noopener noreferrer">${h(l.store||bdHost(l.link))} &rarr;</a>`).join('')+`</div>`;
+  }
+  if(items.length)shopHtml+=bdShopList(look.id,items,[]).replace('bd-shoplist','bd-shoplist bd-view-list');
   if(!shopHtml)shopHtml=`<p class="bd-view-nolink">${isCreator?'No link on this piece yet. Add one with Edit piece.':'Not shoppable right now.'}</p>`;
   shop.innerHTML=shopHtml;
 
@@ -3423,11 +3450,32 @@ function bdItemsOf(x){
   const a=x&&x.items;
   return Array.isArray(a)?a.filter(i=>i&&(i.name||i.link||i.maison)):[];
 }
+// One piece can sit at several stockists: the maison's own site, Net-a-Porter,
+// Mytheresa. Older pieces carry a single link string, so that still reads.
+function bdLinksOf(x){
+  const a=x&&x.links;
+  if(Array.isArray(a)){
+    const out=a.filter(l=>l&&l.link).map(l=>({id:l.id||('l'+Math.random().toString(36).slice(2,7)),store:l.store||'',link:l.link}));
+    if(out.length)return out;
+  }
+  return (x&&x.link)?[{id:'main',store:'',link:x.link}]:[];
+}
+// An unnamed link still has to say where it goes
+function bdHost(u){
+  try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return 'the store';}
+}
 
-// The photo stays a photo. Nothing sits on it but one Shop tag in the corner.
-// The numbers only exist once a reader asks to shop, and then they show up
-// together with the full list underneath.
-function bdShopList(lookId,items){
+// The photo stays a photo. Nothing sits on it but arrows and one Shop tag.
+// The stockists and the tagged items only appear once a reader asks to shop.
+function bdShopList(lookId,items,links){
+  const stores=(links||[]).map(l=>`
+    <li class="bd-item bd-store">
+      <span class="bd-item-main">
+        <span class="bd-item-b">Buy it at</span>
+        <span class="bd-item-t">${h(l.store||bdHost(l.link))}</span>
+      </span>
+      <a class="bd-item-go" href="${h(l.link)}" target="_blank" rel="noopener noreferrer">Shop &rarr;</a>
+    </li>`).join('');
   const rows=items.map((it,n)=>`
     <li class="bd-item" data-item="${h(it.id)}">
       <span class="bd-item-n">${n+1}</span>
@@ -3439,63 +3487,79 @@ function bdShopList(lookId,items){
         ? `<a class="bd-item-go" href="${h(it.link)}" target="_blank" rel="noopener noreferrer">Shop &rarr;</a>`
         : `<span class="bd-item-no">No link</span>`}
     </li>`).join('');
-  return `<div class="bd-shoplist"><ul class="bd-items">${rows}</ul></div>`;
+  if(!stores&&!rows)return '';
+  return `<div class="bd-shoplist"><ul class="bd-items">${stores}${rows}</ul></div>`;
+}
+
+// Flipping through a piece's photos without leaving the board. The set is
+// fetched the first time an arrow is pressed, not on page load.
+async function bdTileFlip(ev,lookId,dir){
+  ev.preventDefault();ev.stopPropagation();
+  const btn=ev.currentTarget;
+  const tile=btn.closest('.bd-tile');
+  if(!tile)return;
+  const img=tile.querySelector('.bd-shot img');
+  if(!img)return;
+  let photos=_bdPhotoCache[lookId];
+  if(!photos){
+    tile.classList.add('bd-loading');
+    try{ photos=await bdPhotosLoad(lookId); }catch(e){ photos=[]; }
+    tile.classList.remove('bd-loading');
+  }
+  if(!photos||photos.length<2)return;
+  const cur=Number(tile.dataset.idx||0);
+  const next=(cur+dir+photos.length)%photos.length;
+  tile.dataset.idx=String(next);
+  img.src=photos[next].image;
+  img.classList.remove('bd-broken');
+  tile.classList.remove('bd-broken');
 }
 
 function bdTileHtml(x,i,total){
   const img=`<img src="${h(x.image)}" alt="${h(x.name||x.caption||'Look')}" loading="lazy" onerror="this.closest('.bd-tile').classList.add('bd-broken')">`;
   const items=bdItemsOf(x);
+  const links=bdLinksOf(x);
   const n=bdPhotoCount(x);
   const pins=items.map((it,m)=>`<button class="bd-pin" style="left:${Number(it.x)||50}%;top:${Number(it.y)||50}%;" title="${h(it.name||it.maison||('Item '+(m+1)))}" onclick="bdPinFocus(event,'${h(it.id)}')">${m+1}</button>`).join('');
-  const shopTag=`<button class="bd-shop bd-shop-btn" onclick="bdShopToggle(event,this)">Shop</button>`;
-  // The mark that says this piece has more behind it, and opens the set
-  const more=`<button class="bd-more" onclick="bdViewOpen('${h(x.id)}',event)" title="See all photos of this piece">${n>1?n+' photos':'View'}</button>`;
+  const shoppable=items.length||links.length;
+  const shopTag=shoppable?`<button class="bd-shop bd-shop-btn" onclick="bdShopToggle(event,this)">Shop</button>`:'';
+  // Arrows rather than a count in the corner: the photo stays a photo
+  const arrows=n>1?`
+    <button class="bd-nav bd-nav-l" onclick="bdTileFlip(event,'${h(x.id)}',-1)" aria-label="Previous photo">&larr;</button>
+    <button class="bd-nav bd-nav-r" onclick="bdTileFlip(event,'${h(x.id)}',1)" aria-label="Next photo">&rarr;</button>`:'';
   const label=(x.maison||x.name)
     ? `<span class="bd-label">${x.maison?`<span class="bd-label-b">${h(x.maison)}</span>`:''}${x.name?`<span class="bd-label-n">${h(x.name)}</span>`:''}</span>`
     : '';
+  const openSet=`onclick="bdViewOpen('${h(x.id)}',event)" title="See this piece"`;
 
   if(isCreator){
     // In creator mode the tile is a plain block, so the buttons on it are not
     // fighting a link for the click. Reader mode below turns it back into one.
-    const openBtn=(x.link&&!items.length)?`<button class="bd-tile-act" title="Open link" onclick="event.stopPropagation();window.open('${h(x.link)}','_blank','noopener')">↗</button>`:'';
+    const openBtn=links.length?`<button class="bd-tile-act" title="Open ${h(links[0].store||bdHost(links[0].link))}" onclick="event.stopPropagation();window.open('${h(links[0].link)}','_blank','noopener')">↗</button>`:'';
     const tagBtn=`<button class="bd-tile-act${items.length?' filled':''}" title="${items.length?('Tagged: '+items.length+' items'):'Tag the items'}" onclick="bdTagOpen('${h(x.id)}')">◎</button>`;
     return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${pins}${more}
-        ${items.length?shopTag:(x.link?`<span class="bd-shop">Shop</span>`:'')}
-      </span>
+      <span class="bd-shot" ${openSet}>${img}${pins}${arrows}${shopTag}</span>
       <span class="bd-tile-acts">
         <button class="bd-tile-act" title="Move earlier" onclick="bdMove('${h(x.id)}',-1)" ${i===0?'disabled style="opacity:.4;"':''}>↑</button>
         <button class="bd-tile-act" title="Move later" onclick="bdMove('${h(x.id)}',1)" ${i===total-1?'disabled style="opacity:.4;"':''}>↓</button>
-        <button class="bd-tile-act${n>1?' filled':''}" title="Photos of this piece" onclick="bdViewOpen('${h(x.id)}',event)">▦</button>
+        <button class="bd-tile-act${n>1?' filled':''}" title="Photos of this piece" onclick="event.stopPropagation();bdViewOpen('${h(x.id)}',event)">▦</button>
         ${tagBtn}
-        <button class="bd-tile-act" title="Name, link and caption" onclick="bdTileOpen('${h(x.id)}')">✎</button>
+        <button class="bd-tile-act${links.length>1?' filled':''}" title="Name and where to buy" onclick="event.stopPropagation();bdTileOpen('${h(x.id)}')">✎</button>
         ${openBtn}
-        <button class="bd-tile-act red" title="Remove" onclick="bdRemove('${h(x.id)}')">×</button>
+        <button class="bd-tile-act red" title="Remove" onclick="event.stopPropagation();bdRemove('${h(x.id)}')">×</button>
       </span>
       ${label}
-      ${items.length?bdShopList(x.id,items):''}
+      ${bdShopList(x.id,items,links)}
     </div>`;
   }
 
-  if(items.length){
-    // The list opens underneath the photo rather than over it, so a pin near
-    // the hem of a coat is never buried under the panel that just opened.
-    return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${pins}${more}${shopTag}</span>
-      ${label}
-      ${bdShopList(x.id,items)}
-    </div>`;
-  }
-  if(n>1){
-    return `<div class="bd-tile" data-look="${h(x.id)}">
-      <span class="bd-shot">${img}${more}${x.link?`<span class="bd-shop">Shop</span>`:''}</span>
-      ${label}
-    </div>`;
-  }
-  if(x.link){
-    return `<a class="bd-tile" href="${h(x.link)}" target="_blank" rel="noopener noreferrer">${img}<span class="bd-shop">Shop</span>${label}</a>`;
-  }
-  return `<div class="bd-tile">${img}${label}</div>`;
+  // The list opens underneath the photo rather than over it, so a pin near the
+  // hem of a coat is never buried under the panel that just opened.
+  return `<div class="bd-tile" data-look="${h(x.id)}">
+    <span class="bd-shot" ${openSet}>${img}${pins}${arrows}${shopTag}</span>
+    ${label}
+    ${bdShopList(x.id,items,links)}
+  </div>`;
 }
 
 // ── reader: the Shop tag ──
@@ -3848,6 +3912,8 @@ async function bdRemove(id){
 
 // ── tile editor: the affiliate link and caption behind a photo ──
 let _bdTileId=null;
+// ── the piece editor: its name and everywhere it can be bought ──
+let _bdTileLinks=[];
 function bdTileOpen(id){
   const b=_boardOpen;if(!b)return;
   const x=bdLooks(b).find(t=>t.id===id);
@@ -3856,25 +3922,63 @@ function bdTileOpen(id){
   document.getElementById('bd-t-prev').src=x.image||'';
   document.getElementById('bd-t-maison').value=x.maison||'';
   document.getElementById('bd-t-name').value=x.name||'';
-  document.getElementById('bd-t-link').value=x.link||'';
   document.getElementById('bd-t-cap').value=x.caption||'';
+  _bdTileLinks=bdLinksOf(x).map(l=>({id:l.id==='main'?uid():l.id,store:l.store,link:l.link}));
+  if(!_bdTileLinks.length)_bdTileLinks=[{id:uid(),store:'',link:''}];
+  bdTileLinksRender();
   document.getElementById('bd-tile-ov').classList.add('open');
 }
-function bdTileClose(){document.getElementById('bd-tile-ov').classList.remove('open');_bdTileId=null;}
+// Read the fields back before every repaint, so typing is never thrown away
+function bdTileLinksSync(){
+  document.querySelectorAll('#bd-t-links .bd-link-row').forEach(row=>{
+    const l=_bdTileLinks.find(x=>x.id===row.dataset.link);
+    if(!l)return;
+    l.store=(row.querySelector('.bd-l-store').value||'').trim();
+    l.link=(row.querySelector('.bd-l-url').value||'').trim();
+  });
+}
+function bdTileLinksRender(){
+  const wrap=document.getElementById('bd-t-links');
+  wrap.innerHTML=_bdTileLinks.map((l,i)=>`
+    <div class="bd-link-row" data-link="${h(l.id)}">
+      <input type="text" class="fi bd-l-store" placeholder="Store, e.g. Net-a-Porter" value="${h(l.store)}">
+      <input type="text" class="fi bd-l-url" placeholder="Your affiliate link" value="${h(l.link)}">
+      <button type="button" class="bd-l-del" onclick="bdTileLinkRemove('${h(l.id)}')" title="Remove this store" ${_bdTileLinks.length<2?'disabled style="opacity:.35;"':''}>&times;</button>
+    </div>`).join('');
+}
+function bdTileLinkAdd(){
+  bdTileLinksSync();
+  _bdTileLinks.push({id:uid(),store:'',link:''});
+  bdTileLinksRender();
+  const rows=document.querySelectorAll('#bd-t-links .bd-link-row');
+  const last=rows[rows.length-1];
+  if(last)last.querySelector('.bd-l-store').focus();
+}
+function bdTileLinkRemove(id){
+  bdTileLinksSync();
+  _bdTileLinks=_bdTileLinks.filter(l=>l.id!==id);
+  if(!_bdTileLinks.length)_bdTileLinks=[{id:uid(),store:'',link:''}];
+  bdTileLinksRender();
+}
+function bdTileClose(){document.getElementById('bd-tile-ov').classList.remove('open');_bdTileId=null;_bdTileLinks=[];}
 async function bdTileSave(){
   const b=_boardOpen;if(!b||!_bdTileId)return;
+  bdTileLinksSync();
   const maison=document.getElementById('bd-t-maison').value.trim();
   const name=document.getElementById('bd-t-name').value.trim();
-  const link=document.getElementById('bd-t-link').value.trim();
   const caption=document.getElementById('bd-t-cap').value.trim();
-  const looks=bdLooks(b).map(x=>x.id===_bdTileId?{...x,maison,name,link,caption}:x);
+  // A row with no address is just an empty row, it does not ship
+  const links=_bdTileLinks.filter(l=>l.link).map(l=>({id:l.id,store:l.store,link:l.link}));
+  const looks=bdLooks(b).map(x=>x.id===_bdTileId
+    ? {...x,maison,name,caption,links,link:links.length?links[0].link:''}
+    : x);
   const btn=document.getElementById('bd-t-save');
   btn.textContent='Saving…';btn.disabled=true;
   const ok=await bdSaveLooks(looks);
   btn.textContent='Save';btn.disabled=false;
   bdTileClose();
   if(_bdView)bdViewRender(); else renderBoardDetail();
-  if(ok)toast('Saved');
+  if(ok)toast(links.length>1?`Saved, ${links.length} stores`:'Saved');
 }
 
 // ── tagging: pins on the photo, one per item ──
@@ -6956,8 +7060,9 @@ async function runFetchImages(){
       <input type="text" class="fi" id="bd-t-name" placeholder="e.g. Enuko coat in dark brown">
     </div>
     <div class="fg">
-      <label class="fl">Affiliate link <span class="flh">(one link for the whole piece, used only when nothing is pinned)</span></label>
-      <input type="text" class="fi" id="bd-t-link" placeholder="https://…">
+      <label class="fl">Where to buy <span class="flh">(add a row for each store that carries it)</span></label>
+      <div id="bd-t-links"></div>
+      <button type="button" class="bd-link-add" onclick="bdTileLinkAdd()">+ Add another store</button>
     </div>
     <div class="fg">
       <label class="fl">Caption <span class="flh">(optional, read by screen readers)</span></label>
