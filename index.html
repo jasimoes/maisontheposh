@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-10-20f honest-errors -->
+<!-- MTP BUILD 2026-10-20g hero-card -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3906,9 +3906,12 @@ async function bdSaveLooks(looks){
   const b=_boardOpen;
   if(!b)return false;
   const shown=bdVisible(looks);
-  const cover=shown.length?await bdShrink(shown[0].image,380,60000):'';
   // the count on the index card is what a reader will actually find
-  return bdPersist({looks,look_count:shown.length,cover});
+  const patch={looks,look_count:shown.length};
+  // a header picture she chose outranks the first piece on the board, so
+  // adding or reordering pieces must not quietly replace her card image
+  if(!b.hero)patch.cover=shown.length?await bdShrink(shown[0].image,380,60000):'';
+  return bdPersist(patch);
 }
 
 async function bdToggleHidden(id){
