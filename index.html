@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-03d sticky-filter -->
+<!-- MTP BUILD 2026-11-03e light-sales -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -4610,16 +4610,50 @@ function tlCloseImg(){
 // ══ ON SALE NOW ══
 let _posts=[];
 
+// Banners are stored inline, so fetching every one of them meant a reader
+// downloading the artwork for every sale that has already ended, which was
+// almost all of the page weight. Only the running sales load up front; the
+// rest arrive if someone actually opens past sales.
+let _spPastImagesLoaded=false;
+let _postsLoading=null;
 async function loadPosts(){
+  // Arriving on the tab fires this twice, which fetched every post twice.
+  // A second caller joins the request already in flight instead.
+  if(_postsLoading)return _postsLoading;
+  _postsLoading=_loadPostsNow();
+  try{await _postsLoading;}finally{_postsLoading=null;}
+}
+async function _loadPostsNow(){
   try{
-    const [posts,images]=await Promise.all([
-      sbFetch('posts?select=*&source=neq.substack&order=sort_order.asc,published_at.desc'),
-      sbFetch('post_images?select=*&order=sort_order.asc,created_at.asc')
-    ]);
-    console.log('[MTP] posts from Supabase:', posts);
-    console.log('[MTP] images from Supabase:', images);
-    _posts=(posts||[]).map(p=>({...p,images:(images||[]).filter(img=>img.post_id===p.id)}));
+    const posts=await sbFetch('posts?select=*&source=neq.substack&order=sort_order.asc,published_at.desc');
+    const list=posts||[];
+    const liveIds=list.filter(p=>!spIsEnded(p)).map(p=>p.id);
+    let images=[];
+    if(liveIds.length){
+      const inList=liveIds.map(id=>'"'+String(id).replace(/"/g,'')+'"').join(',');
+      images=await sbFetch('post_images?select=*&post_id=in.('+encodeURIComponent(inList)+')&order=sort_order.asc,created_at.asc')||[];
+    }
+    _spPastImagesLoaded=!list.some(p=>spIsEnded(p));
+    _posts=list.map(p=>({...p,images:images.filter(img=>img.post_id===p.id)}));
   }catch(e){console.error('loadPosts failed:',e);_posts=[];}
+}
+// Called the first time she or a reader opens past sales, and before editing
+// one, so an older post never looks as though its banner has gone missing.
+async function loadPastPostImages(){
+  if(_spPastImagesLoaded)return;
+  const pastIds=_posts.filter(p=>spIsEnded(p)).map(p=>p.id);
+  if(!pastIds.length){_spPastImagesLoaded=true;return;}
+  try{
+    // in batches, so a long archive cannot build a url the server rejects
+    const all=[];
+    for(let i=0;i<pastIds.length;i+=40){
+      const inList=pastIds.slice(i,i+40).map(id=>'"'+String(id).replace(/"/g,'')+'"').join(',');
+      const part=await sbFetch('post_images?select=*&post_id=in.('+encodeURIComponent(inList)+')&order=sort_order.asc,created_at.asc');
+      if(part&&part.length)all.push(...part);
+    }
+    _posts.forEach(p=>{if(spIsEnded(p))p.images=all.filter(img=>img.post_id===p.id);});
+    _spPastImagesLoaded=true;
+  }catch(e){console.error('loadPastPostImages failed:',e);}
 }
 
 const JOURNAL_CACHE_KEY='mtp_journal_v2';
@@ -4842,7 +4876,15 @@ async function spPersistOrder(list){
 }
 
 let _spShowPast=false;
-function spTogglePast(){_spShowPast=!_spShowPast;renderSales();}
+async function spTogglePast(){
+  _spShowPast=!_spShowPast;
+  if(_spShowPast&&!_spPastImagesLoaded){
+    const btn=document.querySelector('.sp-past-btn');
+    if(btn)btn.textContent='Loading…';
+    await loadPastPostImages();
+  }
+  renderSales(true);
+}
 
 // skipLoad: repaint from what is already in memory. Reordering must not refetch,
 // or the server's old order would land back on screen before the save finishes.
@@ -5066,7 +5108,11 @@ let _spAnchorTries=0;
 function spJumpTo(id){
   let el=document.getElementById('sp-'+id);
   // the sale may have ended since she shared it, so open the past list for it
-  if(!el&&!_spShowPast){_spShowPast=true;renderSales(true);el=document.getElementById('sp-'+id);}
+  if(!el&&!_spShowPast){
+    _spShowPast=true;renderSales(true);el=document.getElementById('sp-'+id);
+    // and fetch that archive's banners, which the first load deliberately skipped
+    if(!_spPastImagesLoaded)loadPastPostImages().then(()=>renderSales(true));
+  }
   if(!el)return false;
   _spFlashId=id;
   el.scrollIntoView({behavior:'smooth',block:'start'});
@@ -5308,8 +5354,10 @@ function openNewPostForm(){
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
-function openEditPostForm(id){
+async function openEditPostForm(id){
   const p=_posts.find(x=>x.id===id);if(!p)return;
+  // an older post's banner is not in memory yet, and its link lives on it
+  if(spIsEnded(p)&&!_spPastImagesLoaded)await loadPastPostImages();
   _editingPostId=id;
   document.getElementById('sp-form-title').textContent='Edit Post';
   document.getElementById('sp-f-title').value=p.title||'';
@@ -5793,7 +5841,11 @@ async function savePostForm(){
       // Anything she typed, or the pasted email gave us, becomes the banner in one go
       const firstLink=shopLink||_spPastedLink||'';
       if(_spPastedImage||firstLink){
-        const img={id:uid(),post_id:newPost.id,image:_spPastedImage||'',caption:'',price:'',link:firstLink,sort_order:0};
+        // a banner lifted out of an email arrives at full size, and one of them
+        // was 647KB on its own. Same squeeze an uploaded file already gets.
+        let banner=_spPastedImage||'';
+        if(banner.startsWith('data:image'))banner=await compressImage(banner,700);
+        const img={id:uid(),post_id:newPost.id,image:banner,caption:'',price:'',link:firstLink,sort_order:0};
         try{await savePostImage(img);newPost.images=[img];}
         catch(err){console.error('banner save failed:',err);}
       }
