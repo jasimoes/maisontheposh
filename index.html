@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-10-20g hero-card -->
+<!-- MTP BUILD 2026-11-03a pick-and-code -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,6 +50,9 @@
   --bg:#F5F5F5;--white:#FFFFFF;--ink:#000000;--mid:#555555;
   --soft:#888888;--faint:#BBBBBB;--border:#E0E0E0;--surf:#F9F9F9;
   --serif:'Cormorant Garamond',Georgia,serif;--sans:'Jost',sans-serif;
+  /* The one color on the site. It marks the things she personally stands
+     behind, so it has to read as approval without competing with the sale. */
+  --go:#2F6B4F;
 }
 html{font-size:16px;}
 /* Cormorant defaults to old style figures, where 1 drops below the line and 0
@@ -525,13 +528,15 @@ body.creator .sp-creator-acts{display:flex;}
 a.sp-pick-name:hover{text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px;}
 /* The pick has to earn a click on its own, so it gets a real button sitting
    directly under the item, not a faint label floated off to the right. */
-.sp-pick-btn{display:inline-block;margin-top:12px;padding:10px 22px;border:1px solid var(--ink);background:none;color:var(--ink);font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:background .18s,color .18s;}
-.sp-pick-btn:hover{background:var(--ink);color:white;}
+/* Her pick is an endorsement, not an ad, so it reads as a line of type with a
+   green dot rather than a block that takes the whole screen. */
+.sp-pick-btn{display:inline-flex;align-items:center;gap:9px;margin-top:11px;padding:4px 0;border:none;background:none;color:var(--go);font-family:var(--sans);font-size:12px;font-weight:400;letter-spacing:.02em;text-transform:none;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1px;text-decoration-color:rgba(47,107,79,.3);transition:text-decoration-color .18s;}
+.sp-pick-btn::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--go);flex:0 0 auto;}
+.sp-pick-btn:hover{text-decoration-color:var(--go);}
 @media(max-width:700px){
   .sp-picks{margin-top:24px;}
   .sp-pick-row{padding:16px 0 18px;}
   .sp-pick-name{font-size:18px;}
-  .sp-pick-btn{display:block;text-align:center;}
 }
 /* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
@@ -4892,13 +4897,14 @@ function renderPostEntry(p){
   const imagesHtml=(p.images||[]).map(img=>renderPostImage(img,p.id)).join('');
   const addImgBtn=isCreator?`<button class="sp-add-img" onclick="openAddImageForm('${h(p.id)}')">＋ Add Image</button>`:'';
   const ended=spIsEnded(p);
-  const code=spPromoCode(p);
+  const code=spPromoCodes(p);
+  const shopLink=spShopLink(p);
   return `<div class="sp${ended?' is-ended':''}" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
     ${dragHandle}
     <div class="sp-meta">${date}${spStatus(p)}</div>
-    <div class="sp-title">${spCodeHtml(p.title,code)}</div>
-    ${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code)+'</div>':''}
-    ${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code)+'</div>':''}
+    <div class="sp-title">${spCodeHtml(p.title,code,shopLink)}</div>
+    ${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code,shopLink)+'</div>':''}
+    ${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code,shopLink)+'</div>':''}
     ${creatorActs}
     <div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>
     ${addImgBtn}
@@ -4913,29 +4919,63 @@ function renderPostEntry(p){
 // is pulled out of her words and set in the sans, with lining figures, and
 // tapping it copies it.
 const CODE_TOKEN='[A-Z0-9][A-Z0-9_-]{2,23}';
-function spPromoCodeIn(text){
+// Words that follow "code" in ordinary writing and are not codes
+const CODE_STOP=/^(CODE|CODES|ONLY|ABOVE|BELOW|HERE|NONE|REQUIRED|NEEDED|APPLIED|APPLY|AUTOMATICALLY|AT|IN|ON|FOR|THE|AND)$/;
+function spAcceptCode(tok){
+  if(!tok||!/[A-Za-z]/.test(tok))return '';          // not a bare number
+  if(/[0-9]/.test(tok))return tok;                   // CURATED10, FIRST10
+  // A word in full capitals after "code" is a code: ALLONSALE, SCSAVE
+  if(tok.length>=4&&tok===tok.toUpperCase()&&!CODE_STOP.test(tok))return tok;
+  return '';
+}
+function spPromoCodesIn(text){
   const s=String(text||'');
   // Only where she actually says "code", so a season like SS26 is left alone
-  const m=s.match(new RegExp('\\bcodes?\\b\\s*(?:is|:|=)?\\s*("|“)?('+CODE_TOKEN+')','i'));
-  if(!m)return '';
-  const tok=m[2];
-  // Needs a digit and a letter to be a code rather than an ordinary word
-  if(!/[0-9]/.test(tok)||!/[A-Za-z]/.test(tok))return '';
-  return tok;
+  const rx=new RegExp('\\bcodes?\\b\\s*(?:is|are|:|=)?\\s*("|“)?('+CODE_TOKEN+')','gi');
+  const out=[];let m;
+  while((m=rx.exec(s))!==null){const t=spAcceptCode(m[2]);if(t)out.push(t);}
+  return out;
 }
-function spPromoCode(p){
-  return spPromoCodeIn(p&&p.title)||spPromoCodeIn(p&&p.subtitle)||spPromoCodeIn(p&&p.body)||'';
+function spPromoCodeIn(text){return spPromoCodesIn(text)[0]||'';}
+// A sale can carry more than one: one code for the site, another for a sub-brand
+function spPromoCodes(p){
+  const all=[].concat(spPromoCodesIn(p&&p.title),spPromoCodesIn(p&&p.subtitle),spPromoCodesIn(p&&p.body));
+  return all.filter((c,i)=>all.indexOf(c)===i);
 }
-function spCodeHtml(text,code){
+function spPromoCode(p){return spPromoCodes(p)[0]||'';}
+// The post's own shop link. It lives on the banner image, which is why she used
+// to have to open Add Image to set it. The first real link wins.
+function spShopLink(p){
+  const imgs=(p&&p.images)||[];
+  for(const i of imgs){const l=(i&&i.link||'').trim();if(l&&l!=='#')return l;}
+  return '';
+}
+// The code and the link ride on data attributes rather than inside the onclick
+// string, so an apostrophe in a url cannot break the handler.
+function spCodeHtml(text,codes,link){
   const safe=h(text);
-  if(!code)return safe;
-  const esc=code.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const list=(Array.isArray(codes)?codes:[codes]).filter(Boolean);
+  if(!list.length)return safe;
+  const esc=list.map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
   const rx=new RegExp('(^|[^A-Za-z0-9])('+esc+')(?![A-Za-z0-9])','g');
+  const tip=link?'Tap to copy this code and open the sale':'Tap to copy this code';
   return safe.replace(rx,(m,pre,tok)=>
-    pre+`<button type="button" class="sp-code" onclick="spCopyCode(event,this,'${h(code)}')" title="Tap to copy this code">${h(tok)}</button>`);
+    pre+`<button type="button" class="sp-code" data-code="${h(tok)}" data-link="${h(link||'')}" onclick="spCopyCode(event,this)" title="${tip}">${h(tok)}</button>`);
 }
 function spCopyCode(ev,btn,code){
   if(ev){ev.preventDefault();ev.stopPropagation();}
+  code=code||(btn&&btn.dataset?btn.dataset.code:'')||'';
+  const link=(btn&&btn.dataset?btn.dataset.link:'')||'';
+  // The code is only useful at the checkout it belongs to, so the tap takes her
+  // reader there as well. Opened inside the tap itself, before the clipboard
+  // promise settles, or the browser treats it as a pop-up and blocks it. On a
+  // phone the retailer's own app takes over the link if it is installed.
+  if(link){
+    try{
+      const w=window.open(link,'_blank','noopener');
+      if(!w)location.href=link;
+    }catch(e){location.href=link;}
+  }
   const flash=()=>{
     btn.classList.add('ok');
     btn.textContent='Copied';
@@ -5006,7 +5046,7 @@ function renderPicks(p){
       ? `<a class="sp-pick-name" href="${h(link)}" target="_blank" rel="noopener noreferrer">${h(label)}</a>`
       : `<span class="sp-pick-name">${h(label)}</span>`;
     const btn=link
-      ? `<a class="sp-pick-btn" href="${h(link)}" target="_blank" rel="noopener noreferrer">Shop This Item &rarr;</a>`
+      ? `<a class="sp-pick-btn" href="${h(link)}" target="_blank" rel="noopener noreferrer">Shop this item &rarr;</a>`
       : '';
     return `<div class="sp-pick-row">
       <span class="sp-pick-main">
@@ -5079,6 +5119,7 @@ function openNewPostForm(){
   document.getElementById('sp-form-title').textContent='New Post';
   document.getElementById('sp-f-title').value='';
   document.getElementById('sp-f-subtitle').value='';
+  document.getElementById('sp-f-shoplink').value='';
   document.getElementById('sp-f-body').value='';
   spInitEndsField(null);
   spResetPasteBox();
@@ -5092,6 +5133,7 @@ function openEditPostForm(id){
   document.getElementById('sp-form-title').textContent='Edit Post';
   document.getElementById('sp-f-title').value=p.title||'';
   document.getElementById('sp-f-subtitle').value=p.subtitle||'';
+  document.getElementById('sp-f-shoplink').value=spShopLink(p);
   document.getElementById('sp-f-body').value=p.body||'';
   spInitEndsField(p.expires_at);
   spResetPasteBox(true);
@@ -5411,6 +5453,8 @@ function spParsePasted(text,html){
   }
   _spPastedImage=d.image||null;
   _spPastedLink=d.link||null;
+  // so the link the email gave us is visible and editable, not hidden in a variable
+  set('sp-f-shoplink',d.link||'');
 
   // Say plainly what was and was not found
   const chip=(label,ok)=>`<span class="sp-chip${ok?'':' miss'}">${ok?label:'no '+label}</span>`;
@@ -5491,6 +5535,7 @@ async function savePostForm(){
   const rawEnds=document.getElementById('sp-f-expires').value;
   const expires_at=rawEnds?new Date(rawEnds+'T23:59:59').toISOString():null;
   const picks=spPickValues();
+  const shopLink=document.getElementById('sp-f-shoplink').value.trim();
   const btn=document.querySelector('#sp-ov .btn-p');
   btn.textContent='Saving…';btn.disabled=true;
   try{
@@ -5498,14 +5543,27 @@ async function savePostForm(){
       const p=_posts.find(x=>x.id===_editingPostId);
       if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;}
       await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks});
+      // The shop link lives on the banner. Put it there, making a banner-less
+      // row for it if this post has no image yet, so she never has to open
+      // Add Image just to set a link.
+      if(p&&shopLink!==spShopLink(p)){
+        const imgs=p.images||(p.images=[]);
+        const target=imgs.find(i=>(i.link||'').trim())||imgs[0];
+        if(target){target.link=shopLink;await savePostImage(target);}
+        else if(shopLink){
+          const img={id:uid(),post_id:p.id,image:'',caption:'',price:'',link:shopLink,sort_order:0};
+          await savePostImage(img);imgs.push(img);
+        }
+      }
     } else {
       const newPost={id:uid(),title,subtitle,body,expires_at,picks,published_at:new Date().toISOString(),images:[]};
       await savePost(newPost);
-      // Anything the pasted email gave us becomes the post's banner in one go
-      if(_spPastedImage||_spPastedLink){
-        const img={id:uid(),post_id:newPost.id,image:_spPastedImage||'',caption:'',price:'',link:_spPastedLink||'',sort_order:0};
+      // Anything she typed, or the pasted email gave us, becomes the banner in one go
+      const firstLink=shopLink||_spPastedLink||'';
+      if(_spPastedImage||firstLink){
+        const img={id:uid(),post_id:newPost.id,image:_spPastedImage||'',caption:'',price:'',link:firstLink,sort_order:0};
         try{await savePostImage(img);newPost.images=[img];}
-        catch(err){console.error('pasted image save failed:',err);}
+        catch(err){console.error('banner save failed:',err);}
       }
       _posts.unshift(newPost);
       _spPastedImage=null;_spPastedLink=null;
@@ -7306,6 +7364,7 @@ async function runFetchImages(){
     </div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional, e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
+    <div class="fg"><label class="fl">Shop link <span class="flh">(this is the Shop Now button, and where a tapped code sends them)</span></label><input type="url" class="fi" id="sp-f-shoplink" placeholder="https://…"></div>
     <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale: what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
     <div class="fg">
       <label class="fl">Sale ends <span class="flh">(leave empty if it has no end date)</span></label>
