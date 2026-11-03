@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-03c holiday -->
+<!-- MTP BUILD 2026-11-03d sticky-filter -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -493,7 +493,10 @@ body.creator .sp-drag-handle{display:flex;}
 .sales-empty{padding:80px 40px;text-align:center;}
 .sales-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
 .sales-empty p{font-size:13px;color:var(--soft);}
-.sp{border-bottom:1px solid var(--border);padding:36px 0;}
+/* so a sale opened from a shared link lands below the header and the filter
+   row rather than underneath them */
+.sp{border-bottom:1px solid var(--border);padding:36px 0;scroll-margin-top:calc(var(--header-h,122px) + 54px);}
+.sales-feed{scroll-margin-top:var(--header-h,122px);}
 .sp:first-child{padding-top:32px;}
 .sp-meta{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
 .sp-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.25;margin-bottom:8px;}
@@ -518,7 +521,9 @@ body.creator .sp-drag-handle{display:flex;}
 .sp-disc{display:inline-block;margin-left:12px;padding:2px 7px;background:var(--ink);color:#fff;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
 @media(max-width:600px){.sp-disc{margin-left:8px;}}
 /* Scanning 24 sales. Same row of chips as the board. */
-.sp-filters{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 0 26px;}
+/* It stays under the site header while the feed scrolls, so a reader 14 sales
+   down can still switch filters without going back to the top. */
+.sp-filters{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 0 26px;position:sticky;top:var(--header-h,122px);z-index:120;background:var(--white);}
 .sp-filters::-webkit-scrollbar{display:none;}
 .sp-filter{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 13px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
 .sp-filter:hover{color:var(--ink);}
@@ -863,7 +868,7 @@ button.bd-shop:hover{opacity:1;}
 .bd-hidden-tag{position:absolute;left:8px;top:8px;padding:5px 10px;background:rgba(0,0,0,.78);color:#fff;font-family:var(--sans);font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;line-height:1;z-index:3;}
 .bd-hidden-note{font-family:var(--sans)!important;font-size:11px!important;color:var(--soft)!important;letter-spacing:.02em;margin-top:10px;}
 /* category filter, in the same language as the sub-navigation elsewhere */
-.bd-cats{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin-bottom:22px;padding-bottom:0;}
+.bd-cats{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin-bottom:22px;padding-bottom:0;position:sticky;top:var(--header-h,122px);z-index:120;background:var(--white);}
 .bd-cats::-webkit-scrollbar{display:none;}
 .bd-cat{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 13px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
 .bd-cat:hover{color:var(--mid);}
