@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-03a pick-and-code -->
+<!-- MTP BUILD 2026-11-03c holiday -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -499,9 +499,43 @@ body.creator .sp-drag-handle{display:flex;}
 .sp-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.25;margin-bottom:8px;}
 .sp-subtitle{font-family:var(--serif);font-size:16px;color:var(--mid);line-height:1.65;margin-bottom:14px;font-style:italic;}
 /* The code itself, wherever it appears in her words */
-.sp-code{display:inline-block;padding:1px 7px 2px;margin:0 1px;vertical-align:baseline;border:none;border-bottom:1px solid var(--faint);background:var(--surf);color:var(--ink);font-family:var(--sans);font-size:.82em;font-weight:400;font-style:normal;letter-spacing:.1em;line-height:1.3;cursor:pointer;transition:background .15s,color .15s,border-color .15s;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;}
+.sp-code{display:inline-flex;align-items:center;gap:5px;padding:1px 7px 2px;margin:0 1px;vertical-align:baseline;border:none;border-bottom:1px solid var(--faint);background:var(--surf);color:var(--ink);font-family:var(--sans);font-size:.82em;font-weight:400;font-style:normal;letter-spacing:.1em;line-height:1.3;cursor:pointer;transition:background .15s,color .15s,border-color .15s;font-variant-numeric:lining-nums tabular-nums;font-feature-settings:"lnum" 1,"tnum" 1;}
 .sp-code:hover{background:var(--ink);color:#fff;border-bottom-color:var(--ink);}
-.sp-code.ok{background:var(--ink);color:#fff;border-bottom-color:var(--ink);letter-spacing:.08em;}
+/* the little pair of squares that says this one copies */
+.sp-code-ico{width:.82em;height:.82em;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;opacity:.55;}
+.sp-code:hover .sp-code-ico{opacity:.9;}
+.sp-code .i-ok{display:none;}
+.sp-code.ok{background:rgba(47,107,79,.1);color:var(--go);border-bottom-color:var(--go);}
+.sp-code.ok .i-copy{display:none;}
+.sp-code.ok .i-ok{display:inline-block;opacity:1;stroke-width:1.7;}
+.sp-code.ok:hover{background:var(--go);color:#fff;border-bottom-color:var(--go);}
+/* said in words under the write-up, since a tooltip never shows on a phone */
+.sp-code-hint{display:flex;align-items:center;gap:7px;margin:-12px 0 20px;font-family:var(--sans);font-size:10px;font-weight:300;letter-spacing:.11em;text-transform:uppercase;color:var(--soft);}
+.sp-code-hint::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--faint);flex:0 0 auto;}
+.sp-code-hint.done{color:var(--go);}
+.sp-code-hint.done::before{background:var(--go);}
+/* How deep the sale is, next to the date, so 24 of them can be read at a glance */
+.sp-disc{display:inline-block;margin-left:12px;padding:2px 7px;background:var(--ink);color:#fff;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
+@media(max-width:600px){.sp-disc{margin-left:8px;}}
+/* Scanning 24 sales. Same row of chips as the board. */
+.sp-filters{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 0 26px;}
+.sp-filters::-webkit-scrollbar{display:none;}
+.sp-filter{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 13px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
+.sp-filter:hover{color:var(--ink);}
+.sp-filter.on{color:var(--ink);border-bottom-color:var(--ink);}
+.sp-filter-n{color:var(--faint);margin-left:4px;font-variant-numeric:lining-nums tabular-nums;}
+.sp-filter.on .sp-filter-n{color:var(--soft);}
+/* The post someone arrived at from a story */
+.sp-flash{animation:spFlash 2.4s ease-out 1;}
+@keyframes spFlash{0%,18%{background:rgba(47,107,79,.09);box-shadow:0 0 0 10px rgba(47,107,79,.09);}100%{background:transparent;box-shadow:0 0 0 10px transparent;}}
+/* Last time she confirmed the sale and its code are still live */
+.sp-checked{display:inline-flex;align-items:center;gap:6px;margin-left:12px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--go);white-space:nowrap;}
+.sp-checked::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--go);flex:0 0 auto;}
+@media(max-width:600px){.sp-checked{margin-left:0;display:flex;margin-top:6px;}}
+/* Quick add: one sale at a time, four fields, stays open for the next */
+.sp-quick-row{display:flex;gap:8px;align-items:stretch;flex-wrap:wrap;}
+.sp-quick-row .fi{flex:1;min-width:120px;}
+.sp-quick-count{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--go);margin-top:10px;min-height:14px;}
 .sp-body{font-size:14px;color:var(--ink);line-height:1.8;margin-bottom:22px;white-space:pre-wrap;}
 .sp-creator-acts{display:none;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
 /* Big enough to hit with a thumb */
@@ -4813,7 +4847,7 @@ async function renderSales(skipLoad){
     feed.innerHTML=`<div style="display:flex;align-items:center;justify-content:center;padding:80px 20px;"><div style="width:20px;height:20px;border:1.5px solid #E0E0E0;border-top-color:#888;border-radius:50%;animation:sp .65s linear infinite;"></div></div>`;
     await loadPosts();
   }
-  const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button>`:'';
+  const addBtn=isCreator?`<button class="btn-new-sale" onclick="openNewPostForm()">+ New Post</button><button class="btn-new-sale" onclick="spQuickOpen()" style="margin-left:8px;">⚡ Quick Add</button>`:'';
   const hdr=`<div class="sales-hdr"><div class="sales-hdr-left"><h2>On Sale Now</h2><p>Sales, deals &amp; picks, updated as they happen.</p><p class="sales-disclaimer">${h(AFF_DISCLOSURE)}</p></div>${addBtn}</div>`;
   if(!_posts.length){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`+subscribeBlock();
@@ -4823,9 +4857,16 @@ async function renderSales(skipLoad){
   const ended=_posts.filter(spIsEnded)
     .sort((a,b)=>new Date(b.expires_at||0)-new Date(a.expires_at||0));
 
-  let inner=live.map(renderPostEntry).join('');
-  if(!live.length){
-    inner=`<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`;
+  const bar=spFilterBar(live);
+  if(!bar)_spFilter='';                       // the row is gone, so is the filter
+  const picked=SP_FILTERS.find(f=>f.k===_spFilter);
+  const shownLive=picked?live.filter(picked.test):live;
+
+  let inner=bar+shownLive.map(renderPostEntry).join('');
+  if(!shownLive.length){
+    inner=bar+(picked
+      ? `<div class="sales-empty"><h3>Nothing in ${h(picked.label.toLowerCase())}</h3><p>Tap All to see every sale running.</p></div>`
+      : `<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`);
   }
   if(ended.length){
     inner+=`<div class="sp-past-bar">
@@ -4836,7 +4877,13 @@ async function renderSales(skipLoad){
     if(_spShowPast)inner+=ended.map(renderPostEntry).join('');
   }
   feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
-  if(isCreator)initPostDrag();
+  // dragging to reorder a filtered list would write the wrong order
+  if(isCreator&&!_spFilter)initPostDrag();
+  if(!_spAnchorDone&&_spAnchorId&&_spAnchorTries<4){
+    _spAnchorTries++;
+    const sid=_spAnchorId;
+    setTimeout(()=>{if(!_spAnchorDone&&spJumpTo(sid))_spAnchorDone=true;},180);
+  }
 }
 
 let _postDragSrcId=null;
@@ -4892,6 +4939,8 @@ function renderPostEntry(p){
     <button class="sp-act-btn sp-move" onclick="spMovePost('${h(p.id)}',-1)" title="Move up" aria-label="Move up">↑</button>
     <button class="sp-act-btn sp-move" onclick="spMovePost('${h(p.id)}',1)" title="Move down" aria-label="Move down">↓</button>
     <button class="sp-act-btn" onclick="openEditPostForm('${h(p.id)}')">✎ Edit</button>
+    <button class="sp-act-btn" onclick="spCopyPermalink(event,this,'${h(p.id)}')" title="Copy a link straight to this sale">⧉ Link</button>
+    <button class="sp-act-btn" onclick="spMarkChecked('${h(p.id)}')" title="Say you have just confirmed this sale is still live">✓ Checked</button>
     <button class="sp-act-btn red" onclick="confirmDeletePost('${h(p.id)}')">✕ Delete</button>
   </div>`:'';
   const imagesHtml=(p.images||[]).map(img=>renderPostImage(img,p.id)).join('');
@@ -4899,12 +4948,14 @@ function renderPostEntry(p){
   const ended=spIsEnded(p);
   const code=spPromoCodes(p);
   const shopLink=spShopLink(p);
-  return `<div class="sp${ended?' is-ended':''}" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
+  const disc=spDiscountOf(p);
+  return `<div class="sp${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
     ${dragHandle}
-    <div class="sp-meta">${date}${spStatus(p)}</div>
+    <div class="sp-meta">${date}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}${spCheckedLine(p)}</div>
     <div class="sp-title">${spCodeHtml(p.title,code,shopLink)}</div>
     ${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code,shopLink)+'</div>':''}
     ${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code,shopLink)+'</div>':''}
+    ${spCodeHint(code,shopLink)}
     ${creatorActs}
     <div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>
     ${addImgBtn}
@@ -4943,6 +4994,109 @@ function spPromoCodes(p){
   return all.filter((c,i)=>all.indexOf(c)===i);
 }
 function spPromoCode(p){return spPromoCodes(p)[0]||'';}
+// ── how deep the sale is ──
+// Her own words already carry it, so nothing new has to be stored. The title
+// is the headline number; the body is only consulted if the title has none,
+// because the body often mentions a second, smaller offer.
+function spDiscountOf(p){
+  const scan=t=>{const s=String(t||'');const m=s.match(/(\d{1,2})\s*%/);
+    return (m&&+m[1]>=5&&+m[1]<=95)?{n:+m[1],s}:null;};
+  const hit=scan(p&&p.title)||scan(p&&p.subtitle)||scan(p&&p.body);
+  if(hit){
+    const up=new RegExp('up\\s*to[^%]{0,14}'+hit.n+'\\s*%','i').test(hit.s);
+    return {pct:hit.n,label:(up?'Up to ':'')+hit.n+'% off'};
+  }
+  const m=String((p&&p.title)||'').concat(' ',String((p&&p.subtitle)||'')).match(/\$(\d{2,4})\s*off/i);
+  return m?{pct:0,label:'$'+m[1]+' off'}:null;
+}
+// ── the scan row ──
+// Only appears once there are enough sales for scrolling to be a problem.
+const SP_FILTER_MIN=6;
+let _spFilter='';
+const SP_FILTERS=[
+  {k:'today',label:'Ending today',test:p=>spDaysLeft(p.expires_at)===0},
+  {k:'soon', label:'3 days or less',test:p=>{const d=spDaysLeft(p.expires_at);return d!==null&&d>=0&&d<=3;}},
+  {k:'d30',  label:'30% and over',test:p=>{const d=spDiscountOf(p);return !!d&&d.pct>=30;}},
+  {k:'d50',  label:'50% and over',test:p=>{const d=spDiscountOf(p);return !!d&&d.pct>=50;}},
+  {k:'code', label:'With a code',test:p=>spPromoCodes(p).length>0}
+];
+function spFilterBar(live){
+  if(live.length<SP_FILTER_MIN)return '';
+  const chips=[{k:'',label:'All',n:live.length}].concat(
+    SP_FILTERS.map(f=>({k:f.k,label:f.label,n:live.filter(f.test).length})))
+    // a chip that holds everything, or nothing, is not worth a tap
+    .filter(c=>c.k===''||(c.n>0&&c.n<live.length));
+  if(chips.length<2)return '';
+  return `<div class="sp-filters">${chips.map(c=>
+    `<button type="button" class="sp-filter${c.k===_spFilter?' on':''}" onclick="spSetFilter('${c.k}')">${h(c.label)}<span class="sp-filter-n">${c.n}</span></button>`
+  ).join('')}</div>`;
+}
+function spSetFilter(k){
+  _spFilter=(k===_spFilter)?'':k;
+  renderSales(true);
+  const f=document.getElementById('sales-feed-list');
+  if(f)f.scrollIntoView({behavior:'smooth',block:'start'});
+}
+// ── one link per sale ──
+// So a story can send someone to this sale rather than to the top of the page.
+function spPermalink(id){
+  return location.origin+location.pathname+'?tab=sales&sale='+encodeURIComponent(id);
+}
+function spCopyPermalink(ev,btn,id){
+  if(ev){ev.preventDefault();ev.stopPropagation();}
+  const url=spPermalink(id);
+  const was=btn.textContent;
+  const done=()=>{btn.textContent='✓ Copied';setTimeout(()=>{btn.textContent=was;},1700);};
+  if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done,()=>toast(url));
+  else toast(url);
+}
+let _spAnchorDone=false;
+// Read once, as the script parses, because navigating tabs rewrites the URL
+// and the sale id would be gone by the time the feed renders.
+let _spAnchorId=(function(){try{return new URLSearchParams(location.search).get('sale')||'';}catch(e){return '';}})();
+// The highlight is re-applied by the renderer while this is set, so another
+// render in the same moment cannot quietly wipe it.
+let _spFlashId='';
+let _spAnchorTries=0;
+function spJumpTo(id){
+  let el=document.getElementById('sp-'+id);
+  // the sale may have ended since she shared it, so open the past list for it
+  if(!el&&!_spShowPast){_spShowPast=true;renderSales(true);el=document.getElementById('sp-'+id);}
+  if(!el)return false;
+  _spFlashId=id;
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+  el.classList.add('sp-flash');
+  setTimeout(()=>{
+    _spFlashId='';
+    const e=document.getElementById('sp-'+id);
+    if(e)e.classList.remove('sp-flash');
+  },3000);
+  return true;
+}
+// ── checked today ──
+// Codes die by the hour on a sale weekend. This is her saying she just looked.
+function spCheckedLine(p){
+  const t=p&&p.checked_at?new Date(p.checked_at):null;
+  if(!t||isNaN(t))return '';
+  const days=Math.floor((spStartOfDay(new Date())-spStartOfDay(t))/86400000);
+  if(days<0||days>3)return '';
+  const when=days===0?'Checked today':days===1?'Checked yesterday':'Checked '+days+' days ago';
+  return `<span class="sp-checked">${when}</span>`;
+}
+function spStartOfDay(d){const x=new Date(d);x.setHours(0,0,0,0);return x;}
+async function spMarkChecked(id){
+  const p=_posts.find(x=>x.id===id);if(!p)return;
+  const now=new Date().toISOString();
+  try{
+    await sbFetch(`posts?id=eq.${encodeURIComponent(id)}`,{method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({checked_at:now})});
+    p.checked_at=now;renderSales(true);toast('Marked as checked');
+  }catch(e){
+    const t=String(e&&e.message||e);
+    if(/checked_at/.test(t)||/42703/.test(t))toast('Run posts-checked-column.sql first, the column is missing');
+    else toast('Could not save that');
+    console.error(e);
+  }
+}
 // The post's own shop link. It lives on the banner image, which is why she used
 // to have to open Add Image to set it. The first real link wins.
 function spShopLink(p){
@@ -4959,8 +5113,20 @@ function spCodeHtml(text,codes,link){
   const esc=list.map(c=>c.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|');
   const rx=new RegExp('(^|[^A-Za-z0-9])('+esc+')(?![A-Za-z0-9])','g');
   const tip=link?'Tap to copy this code and open the sale':'Tap to copy this code';
+  // The two small squares say "this copies" before the tap. The check replaces
+  // them after it, and stays, because the shop opens in a new tab and a flash
+  // of confirmation would be gone before the reader looked back.
+  const ico='<svg class="sp-code-ico i-copy" viewBox="0 0 12 12" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2"/><path d="M8.6 1.6H1.6v7"/></svg>'
+    +'<svg class="sp-code-ico i-ok" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.8 6.4 4.6 9.2 10.2 3"/></svg>';
   return safe.replace(rx,(m,pre,tok)=>
-    pre+`<button type="button" class="sp-code" data-code="${h(tok)}" data-link="${h(link||'')}" onclick="spCopyCode(event,this)" title="${tip}">${h(tok)}</button>`);
+    pre+`<button type="button" class="sp-code" data-code="${h(tok)}" data-link="${h(link||'')}" onclick="spCopyCode(event,this)" title="${tip}"><span class="sp-code-t">${h(tok)}</span>${ico}</button>`);
+}
+// Said once under the write-up, because a tooltip never shows on a phone
+function spCodeHint(codes,link){
+  const n=(codes||[]).length;
+  if(!n)return '';
+  const what=n>1?'a code':'the code';
+  return `<div class="sp-code-hint">Tap ${what} to copy it${link?', and the sale opens in a new tab':''}</div>`;
 }
 function spCopyCode(ev,btn,code){
   if(ev){ev.preventDefault();ev.stopPropagation();}
@@ -4972,14 +5138,24 @@ function spCopyCode(ev,btn,code){
   // phone the retailer's own app takes over the link if it is installed.
   if(link){
     try{
-      const w=window.open(link,'_blank','noopener');
-      if(!w)location.href=link;
+      // No 'noopener' in the features string: that makes window.open return
+      // null by spec, which would send the fallback below and take her page
+      // with it. Cut the opener on the new window instead.
+      const w=window.open(link,'_blank');
+      if(w){try{w.opener=null;}catch(e){}}
+      else location.href=link;   // only when the browser actually blocked it
     }catch(e){location.href=link;}
   }
+  // The code itself stays on screen, because it is part of her sentence. What
+  // changes is the mark beside it, and it does not time out: the reader is on
+  // the retailer by then and has to come back to see it.
   const flash=()=>{
     btn.classList.add('ok');
-    btn.textContent='Copied';
-    setTimeout(()=>{btn.textContent=code;btn.classList.remove('ok');},1500);
+    btn.setAttribute('title',code+' copied, paste it at the checkout');
+    const row=btn.closest('.sp');
+    const hint=row?row.querySelector('.sp-code-hint'):null;
+    if(hint){hint.classList.add('done');hint.textContent=code+' copied, paste it at the checkout';}
+    toast(code+' copied');
   };
   const manual=()=>{
     const ta=document.createElement('textarea');
@@ -5142,6 +5318,57 @@ function openEditPostForm(id){
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
 function closeSPForm(){document.getElementById('sp-ov').classList.remove('open');}
+
+// ══ QUICK ADD ══
+// On a sale weekend she is posting twenty of these from a phone. Title, link,
+// code, end date, save, and the form is ready for the next one.
+let _sqAdded=0;
+function spQuickOpen(){
+  _sqAdded=0;
+  ['sq-title','sq-link','sq-code'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sq-ends').value='3';
+  document.getElementById('sq-count').textContent='';
+  document.getElementById('sp-quick-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('sq-title').focus(),80);
+}
+function spQuickClose(){
+  document.getElementById('sp-quick-ov').classList.remove('open');
+  if(_sqAdded)renderSales(true);
+}
+function spQuickEndsISO(v){
+  if(v==='')return null;
+  const d=new Date();
+  if(v==='sunday'){const away=(7-d.getDay())%7;d.setDate(d.getDate()+(away===0?7:away));}
+  else d.setDate(d.getDate()+parseInt(v,10));
+  d.setHours(23,59,59,0);
+  return d.toISOString();
+}
+async function spQuickSave(){
+  const title=document.getElementById('sq-title').value.trim();
+  if(!title){toast('Title required');document.getElementById('sq-title').focus();return;}
+  const link=document.getElementById('sq-link').value.trim();
+  const codeRaw=document.getElementById('sq-code').value.trim();
+  const code=codeRaw.toUpperCase();
+  const expires_at=spQuickEndsISO(document.getElementById('sq-ends').value);
+  // Written as a sentence so the tap-to-copy chip finds it the normal way
+  const body=code?`Use code ${code} at checkout.`:'';
+  const btn=document.getElementById('sq-save');
+  btn.textContent='Adding…';btn.disabled=true;
+  try{
+    const post={id:uid(),title,subtitle:'',body,expires_at,picks:[],published_at:new Date().toISOString(),images:[]};
+    await savePost(post);
+    if(link){
+      const img={id:uid(),post_id:post.id,image:'',caption:'',price:'',link,sort_order:0};
+      await savePostImage(img);post.images=[img];
+    }
+    _posts.unshift(post);
+    _sqAdded++;
+    document.getElementById('sq-count').textContent=_sqAdded+(_sqAdded===1?' sale added':' sales added');
+    ['sq-title','sq-link','sq-code'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('sq-title').focus();
+  }catch(e){toast('⚠ Could not save that one');console.error(e);}
+  btn.textContent='Add and keep going';btn.disabled=false;
+}
 
 // ══ MY PICKS ══
 // A short list of items, each one a name, the shop it is at, and her link.
@@ -7391,6 +7618,32 @@ async function runFetchImages(){
     </div>
     <button class="btn-p" onclick="savePostForm()">Save Post</button>
     <button class="btn-g" onclick="closeSPForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- ON SALE NOW: QUICK ADD. Four fields, stays open for the next one. -->
+<div class="fov" id="sp-quick-ov">
+  <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
+    <h3 class="ftitle">Quick Add</h3>
+    <p class="flh" style="margin:-6px 0 16px;display:block;">For a run of sales in one sitting. It saves and clears itself so you can keep going. Use New Post when you want a banner, a write-up or picks.</p>
+    <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sq-title" placeholder="e.g. Sezane 30% off everything" onkeydown="if(event.key==='Enter')spQuickSave()"></div>
+    <div class="fg"><label class="fl">Shop link</label><input type="url" class="fi" id="sq-link" placeholder="https://…" onkeydown="if(event.key==='Enter')spQuickSave()"></div>
+    <div class="sp-quick-row">
+      <div class="fg" style="flex:1;min-width:150px;"><label class="fl">Code <span class="flh">(optional)</span></label><input type="text" class="fi" id="sq-code" placeholder="BLACKFRIDAY" onkeydown="if(event.key==='Enter')spQuickSave()"></div>
+      <div class="fg" style="flex:1;min-width:150px;"><label class="fl">Ends</label>
+        <select class="fi" id="sq-ends">
+          <option value="">No end date</option>
+          <option value="0">Today</option>
+          <option value="1">Tomorrow</option>
+          <option value="3" selected>In 3 days</option>
+          <option value="7">In a week</option>
+          <option value="sunday">Sunday</option>
+        </select>
+      </div>
+    </div>
+    <div class="sp-quick-count" id="sq-count"></div>
+    <button class="btn-p" id="sq-save" onclick="spQuickSave()">Add and keep going</button>
+    <button class="btn-g" onclick="spQuickClose()">Done</button>
   </div>
 </div>
 
