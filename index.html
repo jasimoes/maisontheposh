@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-03e light-sales -->
+<!-- MTP BUILD 2026-11-03f ios-sticky -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -59,6 +59,15 @@ html{font-size:16px;}
    shrinks to the height of an o. Elegant in a paragraph, unreadable in a
    discount code or a percentage. Lining figures everywhere. */
 body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1;}
+/* overflow-x:hidden above turns the body into a scrolling box of its own, and
+   Safari on iPhone then pins anything sticky to that box rather than to the
+   screen, so the filter row scrolled away on her phone while behaving on a
+   desktop. clip keeps the same no-sideways-scrolling behaviour without making
+   a scroll container. The hidden above stays as the fallback for old browsers. */
+@supports (overflow-x:clip){
+  html{overflow-x:clip;}
+  body{overflow-x:clip;}
+}
 
 /* ══ CREATOR MODE BANNER ══ */
 .creator-bar{background:var(--ink);color:white;padding:9px 40px;display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.06em;position:sticky;top:0;z-index:210;}
