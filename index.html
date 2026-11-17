@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17e cover-picker -->
+<!-- MTP BUILD 2026-11-17g search -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -60,6 +60,10 @@
   --shell:1280px;   /* how wide the page is allowed to run */
   --gutter:24px;    /* the air on either side of it */
   --measure:70ch;   /* as wide as a line of text may get, whatever the shell does */
+  /* The strip at the very top. It has to be a real shade, not a suggestion of
+     one: the page itself is already #F5F5F5, so anything lighter disappears. */
+  --band:#EAE7E2;
+  --band-ink:#3A3732;
 }
 html{font-size:16px;}
 /* Cormorant defaults to old style figures, where 1 drops below the line and 0
@@ -109,14 +113,26 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:3
 /* The three places to find her, set at the size of the filter rows below and
    on a grey band, so the top of the page reads as a masthead rather than
    three pieces of small print. */
-.hdr-top-links{display:flex;align-items:center;justify-content:space-between;padding:11px 40px 10px;border-bottom:none;background:var(--bg);}
+.hdr-top-links{display:flex;align-items:center;justify-content:space-between;padding:12px 40px 11px;border-bottom:1px solid rgba(0,0,0,.07);background:var(--band);}
 .hdr-top-links-center{display:flex;gap:38px;align-items:center;margin:0 auto;}
-.hdr-link{font-family:var(--serif);font-size:19px;font-weight:300;letter-spacing:.03em;text-transform:uppercase;color:var(--mid);text-decoration:none;transition:color .18s;display:flex;align-items:center;gap:9px;}
+.hdr-link{font-family:var(--serif);font-size:20px;font-weight:300;letter-spacing:.05em;text-transform:uppercase;color:var(--band-ink);text-decoration:none;transition:color .18s;display:flex;align-items:center;gap:9px;}
 .hdr-link:hover{color:var(--ink);}
 .hdr-link svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round;}
 .hdr-top-actions{display:flex;gap:10px;align-items:center;}
 
-/* Row 2: MTP logo centered with generous space */
+/* Row 2: the utility line. About sits hard left and the two things a reader
+   reaches for sit hard right, the way the reference page sets it. */
+.hdr-util{display:flex;align-items:center;justify-content:space-between;padding:12px 40px 2px;}
+.hdr-u-right{display:flex;align-items:center;gap:26px;}
+.hdr-u{font-family:var(--sans);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--mid);background:none;border:none;padding:4px 0;cursor:pointer;transition:color .18s;}
+.hdr-u:hover{color:var(--ink);}
+@media(max-width:700px){
+  .hdr-util{padding:10px 18px 0;}
+  .hdr-u-right{gap:18px;}
+  .hdr-u{font-size:9px;letter-spacing:.16em;}
+}
+
+/* Row 3: MTP logo centered with generous space */
 .hdr-logo-row{display:flex;justify-content:center;align-items:center;padding:20px 40px 16px;cursor:pointer;}
 .hdr-logo-lockup{display:flex;flex-direction:column;align-items:center;gap:0;text-decoration:none;}
 .hdr-logo-mtp{font-family:'Cormorant Garamond',Georgia,serif;font-size:32px;font-weight:200;color:var(--ink);letter-spacing:.22em;line-height:1;}
@@ -141,6 +157,42 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:3
 .t2{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 14px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
 .t2:hover{color:var(--mid);}
 .t2.on{color:var(--ink);border-bottom-color:var(--ink);}
+
+/* ══ SEARCH ══
+   One field over a dimmed page. Results come back grouped by where they live,
+   so a search for Toteme shows the writing, the live sale and the edit as
+   three separate things rather than one undifferentiated list. */
+.sq{position:fixed;inset:0;z-index:600;display:none;background:var(--bg);overflow-y:auto;}
+.sq.open{display:block;}
+.sq-top{position:sticky;top:0;background:var(--band);border-bottom:1px solid rgba(0,0,0,.08);padding:0 var(--gutter);}
+.sq-bar{max-width:var(--shell);margin:0 auto;display:flex;align-items:center;gap:18px;padding:18px 0;}
+.sq-in{flex:1;min-width:0;font-family:var(--serif);font-size:30px;font-weight:300;color:var(--ink);background:none;border:none;outline:none;padding:4px 0;}
+.sq-in::placeholder{color:var(--faint);}
+/* Chrome puts a blue clear cross in a search field. There is a Close here. */
+.sq-in::-webkit-search-cancel-button,.sq-in::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none;}
+.sq-close{background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);padding:8px 0;flex:0 0 auto;}
+.sq-close:hover{color:var(--ink);}
+.sq-body{max-width:var(--shell);margin:0 auto;padding:30px var(--gutter) 90px;}
+.sq-note{font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);}
+.sq-sec{margin-bottom:38px;}
+.sq-h{font-family:var(--serif);font-size:19px;font-weight:300;letter-spacing:.03em;text-transform:uppercase;color:var(--ink);padding-bottom:9px;border-bottom:1px solid var(--border);margin-bottom:4px;}
+.sq-h span{font-family:var(--sans);font-size:9px;letter-spacing:.1em;color:var(--faint);margin-left:7px;}
+.sq-r{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:13px 4px;cursor:pointer;transition:background .14s;}
+.sq-r:hover{background:rgba(0,0,0,.025);}
+.sq-r-img{width:54px;height:54px;flex:0 0 auto;object-fit:cover;background:var(--white);display:block;}
+.sq-r-txt{min-width:0;flex:1;}
+.sq-r-t{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);line-height:1.3;}
+.sq-r-s{font-family:var(--sans);font-size:11.5px;color:var(--soft);line-height:1.5;margin-top:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
+.sq-r-k{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);flex:0 0 auto;}
+.sq-empty{padding:60px 0;text-align:center;}
+.sq-empty p{font-family:var(--serif);font-size:19px;color:var(--mid);font-style:italic;}
+@media(max-width:700px){
+  .sq-in{font-size:21px;}
+  .sq-bar{padding:14px 0;gap:12px;}
+  .sq-body{padding:22px var(--gutter) 70px;}
+  .sq-r-k{display:none;}
+  .sq-h{font-size:16px;}
+}
 
 /* ══ ITEM PREVIEW POPUP ══ */
 .ip-pop{position:fixed;inset:0;background:rgba(28,27,25,.5);z-index:450;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);}
@@ -1318,9 +1370,9 @@ body.bd-viewing .fov{z-index:700;}
 .toast.show{transform:translateX(-50%) translateY(0);}
 
 @media(max-width:700px){
-  .hdr-top-links{padding:9px 18px 8px;}
+  .hdr-top-links{padding:10px 18px 9px;}
   .hdr-top-links-center{gap:20px;}
-  .hdr-link{font-size:14px;gap:6px;}
+  .hdr-link{font-size:15px;gap:6px;letter-spacing:.04em;}
   .hdr-link svg{width:13px;height:13px;}
   .hdr-logo-row{padding:14px 18px 12px;}
   .hdr-logo-mtp{font-size:24px;}
@@ -1443,7 +1495,15 @@ body.bd-viewing .fov{z-index:700;}
     </div>
     <div style="flex:1;"></div>
   </div>
-  <!-- Row 2: MTP Logo centered -->
+  <!-- Row 2: About on the left, the two things a reader reaches for on the right -->
+  <div class="hdr-util">
+    <button class="hdr-u" onclick="goAbout()">About</button>
+    <div class="hdr-u-right">
+      <button class="hdr-u" onclick="searchOpen()">Search</button>
+      <button class="hdr-u" onclick="goSubscribe()">Subscribe</button>
+    </div>
+  </div>
+  <!-- Row 3: MTP Logo centered -->
   <div class="hdr-logo-row" onclick="handleLogoTap(event)">
     <div class="hdr-logo-lockup">
       <span class="hdr-logo-mtp">MTP</span>
@@ -1458,7 +1518,6 @@ body.bd-viewing .fov{z-index:700;}
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
     <button class="t1"    data-t1="boards"      onclick="setT1('boards',this)">Boards</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
-    <button class="t1"    data-t1="about"       onclick="setT1('about',this)">About</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
 </header>
@@ -2176,7 +2235,8 @@ function setT1(val,btn){
   activeT1=val;activeCat='all';
   _boardOpen=null;
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
-  btn.classList.add('on');
+  // About is reached from the row above the logo, which has no .t1 of its own
+  if(btn)btn.classList.add('on');
   document.getElementById('nav2').classList.toggle('hide',!['foryou'].includes(val));
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
   closeDetail(true);
@@ -5061,6 +5121,188 @@ async function renderJournal(){
   }catch(e){
     feed.innerHTML='<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>';
   }
+}
+
+// ══ SEARCH ══
+// Everything the site holds, in one field. The index is built the first time
+// she or a reader opens it and then kept for the session, so the second search
+// costs nothing. Five small queries, none of which the page waits on at load.
+let _sqIdx=null, _sqBuilding=null, _sqTimer=null, _sqLast='';
+
+function goAbout(){
+  searchClose();
+  setT1('about',null);
+}
+function goSubscribe(){
+  searchClose();
+  const go=()=>{
+    const el=document.querySelector('.sub-block');
+    if(!el)return false;
+    const off=(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h'))||122)+10;
+    window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-off,behavior:'smooth'});
+    return true;
+  };
+  // the block lives at the bottom of whatever tab is open, so if this tab has
+  // not painted one yet, wait a beat for it rather than doing nothing
+  if(!go())setTimeout(go,400);
+}
+
+function searchOpen(){
+  const ov=document.getElementById('sq');
+  ov.classList.add('open');
+  document.body.style.overflow='hidden';
+  const inp=document.getElementById('sq-in');
+  setTimeout(()=>inp.focus(),60);
+  if(!_sqIdx){
+    document.getElementById('sq-body').innerHTML='<p class="sq-note">Gathering everything…</p>';
+    sqBuild().then(()=>{if(document.getElementById('sq').classList.contains('open'))searchType(inp.value);});
+  }else{
+    searchType(inp.value);
+  }
+}
+function searchClose(){
+  const ov=document.getElementById('sq');
+  if(!ov||!ov.classList.contains('open'))return;
+  ov.classList.remove('open');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape')searchClose();
+  // the shortcut every search field has, without stealing it from a text box
+  if((e.key==='/'||((e.metaKey||e.ctrlKey)&&e.key==='k'))&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||''))){
+    e.preventDefault();searchOpen();
+  }
+});
+
+function sqBuild(){
+  if(_sqBuilding)return _sqBuilding;
+  _sqBuilding=(async()=>{
+    const idx=[];
+    const grab=async(path)=>{try{return await sbFetch(path)||[];}catch(e){return [];}};
+    const [posts,cols,boards,lists,items]=await Promise.all([
+      grab('posts?select=id,slug,title,subtitle,excerpt,body,source,image,published_at,expires_at'),
+      grab('wc_carousels?select=id,title,group,tab,blurb,blurb_auto,cover,cover_auto,pin_count'),
+      grab('boards?select=id,title,intro,cover,published,look_count'),
+      grab('lists?select=id,name,note,t1,cat'),
+      grab('items?select=id,list_id,name,brand,note,image')
+    ]);
+    posts.forEach(p=>{
+      const isPost=(p.source||'')==='substack';
+      idx.push({
+        kind:isPost?'post':'sale',
+        label:isPost?'Posts':'On Sale Now',
+        title:p.title||'',
+        sub:p.subtitle||p.excerpt||String(p.body||'').slice(0,160),
+        hay:[p.title,p.subtitle,p.excerpt,p.body].join(' '),
+        img:p.image||'',
+        go:isPost
+          ? {out:SUBSTACK_URL+'/p/'+(p.slug||'')}
+          : {tab:'sales',sale:p.id}
+      });
+    });
+    cols.forEach(c=>{
+      idx.push({
+        kind:'edit',
+        label:c.tab==='stockist'?'Stockist':'The Edits',
+        title:c.title||'',
+        sub:c.blurb||c.blurb_auto||((c.pin_count||0)+' pieces'),
+        hay:[c.title,c.blurb,c.blurb_auto,c.group].join(' '),
+        img:c.cover||c.cover_auto||'',
+        go:{tab:c.tab,c:c.id}
+      });
+    });
+    boards.filter(b=>b.published).forEach(b=>{
+      idx.push({kind:'board',label:'Inspiration Boards',title:b.title||'',
+        sub:b.intro||((b.look_count||0)+' looks'),
+        hay:[b.title,b.intro].join(' '),img:b.cover||'',go:{tab:'boards',board:b.id}});
+    });
+    const listName={};
+    lists.forEach(l=>{
+      listName[l.id]=l.name||'';
+      idx.push({kind:'list',label:'The List',title:l.name||'',sub:l.note||'',
+        hay:[l.name,l.note,l.cat].join(' '),img:'',go:{tab:'latest',list:l.id}});
+    });
+    items.forEach(it=>{
+      const nm=[it.brand,it.name].filter(Boolean).join(' ');
+      if(!nm.trim())return;
+      idx.push({kind:'piece',label:'Pieces',title:it.name||nm,
+        sub:[it.brand,listName[it.list_id]].filter(Boolean).join(' · '),
+        hay:[it.name,it.brand,it.note].join(' '),img:it.image||'',
+        go:{tab:'latest',list:it.list_id}});
+    });
+    _sqIdx=idx;
+    return idx;
+  })();
+  _sqBuilding.catch(()=>{_sqIdx=[];});
+  return _sqBuilding;
+}
+
+function sqNorm(v){
+  return String(v||'').toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,'')   // Sezane finds Sézane
+    .replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
+}
+function sqScore(row,words){
+  const t=sqNorm(row.title), hay=sqNorm(row.hay);
+  let total=0;
+  for(const w of words){
+    if(t.startsWith(w))total+=12;
+    else if(t.includes(w))total+=7;
+    else if(hay.includes(w))total+=2;
+    else return 0;                 // every word has to land somewhere
+  }
+  return total;
+}
+const SQ_ORDER=['Posts','On Sale Now','The Edits','Stockist','Inspiration Boards','Pieces','The List'];
+
+function searchType(q){
+  clearTimeout(_sqTimer);
+  _sqTimer=setTimeout(()=>sqRender(q),140);
+}
+function sqRender(q){
+  const body=document.getElementById('sq-body');
+  if(!body)return;
+  const words=sqNorm(q).split(' ').filter(w=>w.length>1);
+  _sqLast=q;
+  if(!words.length){
+    body.innerHTML='<p class="sq-note">'+(_sqIdx?_sqIdx.length+' things to look through':'Gathering everything…')+'</p>';
+    return;
+  }
+  if(!_sqIdx){body.innerHTML='<p class="sq-note">Gathering everything…</p>';return;}
+  const hits=[];
+  _sqIdx.forEach(r=>{const sc=sqScore(r,words);if(sc)hits.push({r,sc});});
+  if(!hits.length){
+    body.innerHTML='<div class="sq-empty"><p>Nothing here for "'+h(q)+'".</p></div>';
+    return;
+  }
+  hits.sort((a,b)=>b.sc-a.sc);
+  const groups={};
+  hits.forEach(({r})=>{(groups[r.label]=groups[r.label]||[]).push(r);});
+  const order=SQ_ORDER.filter(k=>groups[k]).concat(Object.keys(groups).filter(k=>SQ_ORDER.indexOf(k)<0));
+  body.innerHTML=order.map(k=>{
+    const rows=groups[k];
+    return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+rows.length+'</span></h3>'
+      +rows.slice(0,8).map(r=>
+        '<button class="sq-r" onclick=\'sqGo('+JSON.stringify(r.go).replace(/'/g,'&#39;')+')\'>'
+        +(r.img?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.remove();">':'')
+        +'<span class="sq-r-txt"><span class="sq-r-t">'+h(r.title)+'</span>'
+        +(r.sub?'<span class="sq-r-s">'+h(r.sub)+'</span>':'')+'</span>'
+        +'<span class="sq-r-k">'+h(k)+'</span></button>').join('')
+      +(rows.length>8?'<p class="sq-note" style="padding-top:11px;">and '+(rows.length-8)+' more</p>':'')
+      +'</section>';
+  }).join('');
+}
+
+// Everything a result can be is a link into the site, so send the reader there
+// the same way a shared link would.
+function sqGo(go){
+  searchClose();
+  if(go.out){window.open(go.out,'_blank','noopener');return;}
+  const btn=document.querySelector('[data-t1="'+go.tab+'"]');
+  if(go.c){_wcFilter='all';_wcDetail=go.c;}
+  if(go.sale){_spAnchorId=go.sale;_spAnchorDone=false;_spAnchorTries=0;}
+  setT1(go.tab,btn);
+  if(go.board&&typeof bdOpen==='function')setTimeout(()=>bdOpen(go.board),260);
 }
 
 // ══ SALE EXPIRY ══
@@ -8057,6 +8299,17 @@ async function runFetchImages(){
     <button class="btn-p" onclick="tlSaveForm()">Save</button>
     <button class="btn-g" onclick="tlCloseFom()">Cancel</button>
   </div>
+</div>
+
+<!-- SEARCH -->
+<div class="sq" id="sq" onclick="if(event.target===this)searchClose()">
+  <div class="sq-top">
+    <div class="sq-bar">
+      <input class="sq-in" id="sq-in" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search" oninput="searchType(this.value)" onkeydown="if(event.key==='Escape')searchClose()">
+      <button class="sq-close" onclick="searchClose()">Close</button>
+    </div>
+  </div>
+  <div class="sq-body" id="sq-body"></div>
 </div>
 
 <!-- WEEKLY CURATION: ADD / EDIT COLLECTION -->
