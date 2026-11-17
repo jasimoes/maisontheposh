@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17g search -->
+<!-- MTP BUILD 2026-11-17i tab-scroll -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,6 +180,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:3
 .sq-r{display:flex;align-items:center;gap:16px;width:100%;text-align:left;background:none;border:none;border-bottom:1px solid var(--border);padding:13px 4px;cursor:pointer;transition:background .14s;}
 .sq-r:hover{background:rgba(0,0,0,.025);}
 .sq-r-img{width:54px;height:54px;flex:0 0 auto;object-fit:cover;background:var(--white);display:block;}
+/* A piece with no photograph keeps its place in the row rather than sliding
+   the writing left and making the column look broken */
+.sq-r-none{background:var(--white);border:1px solid var(--border);}
 .sq-r-txt{min-width:0;flex:1;}
 .sq-r-t{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);line-height:1.3;}
 .sq-r-s{font-family:var(--sans);font-size:11.5px;color:var(--soft);line-height:1.5;margin-top:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
@@ -2243,6 +2246,10 @@ function setT1(val,btn){
   if(!wcIsTab(val)){_wcFilter='all';}
   applyTabMeta(val);
   render();
+  // A new tab starts at its top. Without this, coming back from the subscribe
+  // block at the foot of one tab left her looking at the foot of the next one,
+  // which looks exactly the same and reads as the click having done nothing.
+  window.scrollTo(0,0);
   history.pushState({tab:val},'',`/?tab=${tabToSlug(val)}`);
 }
 function setCat(val,btn){activeCat=val;document.querySelectorAll('.t2').forEach(b=>b.classList.remove('on'));btn.classList.add('on');render();}
@@ -5191,8 +5198,8 @@ function sqBuild(){
       idx.push({
         kind:isPost?'post':'sale',
         label:isPost?'Posts':'On Sale Now',
-        title:p.title||'',
-        sub:p.subtitle||p.excerpt||String(p.body||'').slice(0,160),
+        title:sqClean(p.title),
+        sub:sqClean(p.subtitle)||sqClean(p.excerpt)||String(p.body||'').slice(0,160),
         hay:[p.title,p.subtitle,p.excerpt,p.body].join(' '),
         img:p.image||'',
         go:isPost
@@ -5204,8 +5211,8 @@ function sqBuild(){
       idx.push({
         kind:'edit',
         label:c.tab==='stockist'?'Stockist':'The Edits',
-        title:c.title||'',
-        sub:c.blurb||c.blurb_auto||((c.pin_count||0)+' pieces'),
+        title:sqClean(c.title),
+        sub:sqClean(c.blurb)||sqClean(c.blurb_auto)||((c.pin_count||0)+' pieces'),
         hay:[c.title,c.blurb,c.blurb_auto,c.group].join(' '),
         img:c.cover||c.cover_auto||'',
         go:{tab:c.tab,c:c.id}
@@ -5218,17 +5225,29 @@ function sqBuild(){
     });
     const listName={};
     lists.forEach(l=>{
-      listName[l.id]=l.name||'';
-      idx.push({kind:'list',label:'The List',title:l.name||'',sub:l.note||'',
+      listName[l.id]=sqClean(l.name);
+      idx.push({kind:'list',label:'The List',title:sqClean(l.name),sub:sqClean(l.note),
         hay:[l.name,l.note,l.cat].join(' '),img:'',go:{tab:'latest',list:l.id}});
     });
+    // Whichever maisons are actually in the data, longest first, so The Row
+    // does not match before a longer name that starts the same way
+    const maisons=[...new Set(items.map(it=>sqClean(it.brand)).filter(Boolean))]
+      .sort((a,b)=>b.length-a.length);
+    const seen={};
     items.forEach(it=>{
-      const nm=[it.brand,it.name].filter(Boolean).join(' ');
-      if(!nm.trim())return;
-      idx.push({kind:'piece',label:'Pieces',title:it.name||nm,
-        sub:[it.brand,listName[it.list_id]].filter(Boolean).join(' · '),
-        hay:[it.name,it.brand,it.note].join(' '),img:it.image||'',
-        go:{tab:'latest',list:it.list_id}});
+      const got=sqPiece(it,maisons);
+      if(!got)return;
+      // the same piece is pinned to several lists, and one copy carries the
+      // photograph while the others do not. Keep the one that does.
+      const key=sqNorm(got.title)+'|'+sqNorm(got.brand);
+      const prev=seen[key];
+      if(prev){ if(!prev.img&&got.img)prev.img=got.img; return; }
+      const row={kind:'piece',label:'Pieces',title:got.title,
+        sub:[got.brand,listName[it.list_id]].filter(Boolean).join(' \u00b7 '),
+        hay:[it.name,it.brand,it.note].join(' '),img:got.img,
+        go:{tab:'latest',list:it.list_id}};
+      seen[key]=row;
+      idx.push(row);
     });
     _sqIdx=idx;
     return idx;
@@ -5237,6 +5256,32 @@ function sqBuild(){
   return _sqBuilding;
 }
 
+// Some rows carry a placeholder where the real value should be: a brand of "-",
+// an image of "none". They are not data, so they are not treated as any.
+const SQ_EMPTY=/^(-+|none|n\/a|na|null|undefined|tbd|\.)$/i;
+function sqClean(v){
+  const t=String(v==null?'':v).trim();
+  return SQ_EMPTY.test(t)?'':t;
+}
+// A piece as it should read, out of a row where the brand, the name and the
+// fabric composition were all typed into one field.
+function sqPiece(it,maisons){
+  let title=sqClean(it.name);
+  let brand=sqClean(it.brand);
+  if(!title)return null;
+  title=title.replace(/[\.,;\s]*\b(material|fabric|composition)\s*:.*$/i,'');
+  if(!brand){
+    const m=(maisons||[]).find(b=>new RegExp('^'+b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(title));
+    if(m)brand=m;
+  }
+  if(brand){
+    title=title.replace(new RegExp('^'+brand.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[-:,\u2013]?\\s*','i'),'');
+  }
+  title=title.replace(/^[\s\-:,\u2013]+/,'').replace(/[\s\-:,\u2013\.]+$/,'').trim();
+  if(!title)title=sqClean(it.name);
+  const img=sqClean(it.image);
+  return {title,brand,img:/^https?:|^data:/.test(img)?img:''};
+}
 function sqNorm(v){
   return String(v||'').toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g,'')   // Sezane finds Sézane
@@ -5284,7 +5329,9 @@ function sqRender(q){
     return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+rows.length+'</span></h3>'
       +rows.slice(0,8).map(r=>
         '<button class="sq-r" onclick=\'sqGo('+JSON.stringify(r.go).replace(/'/g,'&#39;')+')\'>'
-        +(r.img?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.remove();">':'')
+        +(r.img
+            ?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'sq-r-img sq-r-none\'}));">'
+            :'<span class="sq-r-img sq-r-none"></span>')
         +'<span class="sq-r-txt"><span class="sq-r-t">'+h(r.title)+'</span>'
         +(r.sub?'<span class="sq-r-s">'+h(r.sub)+'</span>':'')+'</span>'
         +'<span class="sq-r-k">'+h(k)+'</span></button>').join('')
