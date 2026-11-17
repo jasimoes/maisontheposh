@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-03f ios-sticky -->
+<!-- MTP BUILD 2026-11-17 substack-auto-sync -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1205,6 +1205,7 @@ body.bd-viewing .fov{z-index:700;}
     <div class="creator-dot"></div>
     <span>Creator Mode, only you see this</span>
     <span id="img-counter" style="opacity:.5;font-size:10px;margin-left:6px;"></span>
+    <span id="sync-status" style="font-size:10px;margin-left:6px;"></span>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
     <button class="btn-toggle-mode" onclick="openImporter()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">↑ Import ShopMy</button>
@@ -1919,6 +1920,7 @@ function submitPW(){
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='');
     render();
+    checkSyncHealth();
     toast('Creator mode on');
   } else {
     document.getElementById('pw-err').textContent='Incorrect password. Try again';
@@ -1935,6 +1937,39 @@ document.addEventListener('keydown',e=>{
   if(_keyBuf==='mtp'&&!isCreator)openPW();
 });
 
+// ══ SYNC HEALTH ══
+// The Substack sync runs on a schedule in Supabase and writes one row per run.
+// This reads the newest successful run and says so in the creator bar. Quiet
+// when it is working, loud when it has not worked for a day, so a sync that
+// stops is visible the next time she opens the site rather than weeks later.
+async function checkSyncHealth(){
+  const el=document.getElementById('sync-status');
+  if(!el)return;
+  let last=null;
+  try{
+    const rows=await sbFetch('sync_log?select=ran_at&action=eq.sync-posts&ok=is.true&order=ran_at.desc&limit=1');
+    if(rows&&rows.length)last=new Date(rows[0].ran_at);
+  }catch(e){
+    el.textContent='';
+    return;
+  }
+  if(!last||isNaN(last)){
+    el.style.cssText='font-size:10px;margin-left:6px;color:#FFC27A;';
+    el.textContent='Substack sync has not run yet';
+    return;
+  }
+  const mins=Math.round((Date.now()-last.getTime())/60000);
+  if(mins>1440){
+    const days=Math.floor(mins/1440);
+    el.style.cssText='font-size:10px;margin-left:6px;color:#FFC27A;';
+    el.textContent='Substack sync last worked '+days+(days===1?' day':' days')+' ago';
+  } else {
+    const txt=mins<60?(mins<2?'just now':mins+' min ago'):Math.floor(mins/60)+'h ago';
+    el.style.cssText='font-size:10px;margin-left:6px;opacity:.5;';
+    el.textContent='Synced '+txt;
+  }
+}
+
 // Init — restore creator session if available
 document.addEventListener('DOMContentLoaded',()=>{
   if(sessionStorage.getItem('mtp_creator')==='1'){
@@ -1943,6 +1978,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     document.getElementById('creator-bar').classList.remove('hide');
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='');
+    checkSyncHealth();
   } else {
     document.body.classList.remove('creator');
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='none');
@@ -4700,7 +4736,8 @@ function _buildJournalShell(feed){
 }
 
 async function _fetchAllSubstackPosts(){
-  // Browser-side CORS proxies are dead/unreliable — sync server-side, then read back.
+  // Cold start only: the table is empty, so ask the server to fill it once
+  // rather than leave the page blank until the next scheduled run.
   await _syncSubstackToSupabase();
   try{
     const rows=await sbFetch('posts?select=*&source=eq.substack&order=published_at.desc');
@@ -4757,7 +4794,6 @@ async function renderJournal(){
         _setCachedPosts(mapped);
       }
     }).catch(()=>{});
-    _syncSubstackToSupabase().catch(()=>{});
     return;
   }
   // Step 1: Load from Supabase instantly
@@ -4772,18 +4808,8 @@ async function renderJournal(){
       }));
       const wrap=_buildJournalShell(feed);
       _renderJournalCards(mapped,wrap);
-      // Sync from Substack in background
-      _syncSubstackToSupabase().then(()=>{
-        // Reload from Supabase after sync if still on journal
-        if(activeT1==='journal'){
-          sbFetch('posts?select=*&source=eq.substack&order=published_at.desc').then(fresh=>{
-            if(Array.isArray(fresh)&&fresh.length){
-              const w=document.querySelector('.journal-feed');
-              if(w){w.innerHTML='';_renderJournalCards(fresh.map(p=>({title:p.title,slug:p.slug,subtitle:p.excerpt||p.subtitle||'',cover_image:p.image||'',post_date:p.published_at})),w);}
-            }
-          }).catch(()=>{});
-        }
-      }).catch(()=>{});
+      // No sync from the browser. Supabase pulls the feed on its own schedule,
+      // so the table a reader lands on is already current.
       return;
     }
   }catch(e){console.warn('Supabase journal load failed:',e);}
@@ -4795,7 +4821,6 @@ async function renderJournal(){
     const posts=await _fetchAllSubstackPosts();
     if(!posts||!posts.length){feed.innerHTML='<div class="sales-empty"><h3>Could not load posts</h3><p>Visit <a href="https://maisontheposh.substack.com" target="_blank">maisontheposh.substack.com</a> directly.</p></div>';return;}
     _setCachedPosts(posts);
-    _syncSubstackToSupabase().catch(()=>{});
     const wrap=_buildJournalShell(feed);
     _renderJournalCards(posts,wrap);
   }catch(e){
