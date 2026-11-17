@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17 substack-auto-sync -->
+<!-- MTP BUILD 2026-11-17c edits-cover-wall -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,12 +53,19 @@
   /* The one color on the site. It marks the things she personally stands
      behind, so it has to read as approval without competing with the sale. */
   --go:#2F6B4F;
+  /* ── Page shell ──
+     The reading pages used to sit in a 680px column inside a 1280px window,
+     so half the screen was empty margin and every photograph was postage
+     stamp sized. These three hold the wide layout in one place. */
+  --shell:1280px;   /* how wide the page is allowed to run */
+  --gutter:24px;    /* the air on either side of it */
+  --measure:70ch;   /* as wide as a line of text may get, whatever the shell does */
 }
 html{font-size:16px;}
 /* Cormorant defaults to old style figures, where 1 drops below the line and 0
    shrinks to the height of an o. Elegant in a paragraph, unreadable in a
    discount code or a percentage. Lining figures everywhere. */
-body{background:var(--white);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1;}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:300;-webkit-font-smoothing:antialiased;overflow-x:hidden;font-variant-numeric:lining-nums;font-feature-settings:"lnum" 1;}
 /* overflow-x:hidden above turns the body into a scrolling box of its own, and
    Safari on iPhone then pins anything sticky to that box rather than to the
    screen, so the filter row scrolled away on her phone while behaving on a
@@ -284,6 +291,66 @@ body.creator .wc-bar{display:flex;}
 .wc-bar-btn.ghost:hover{background:none;border-color:var(--mid);color:var(--mid);}
 @media(max-width:700px){.wc-carousel-wrap{padding:20px 16px 16px;}.wc-bar{padding:12px 16px;}}
 
+/* ══ THE EDITS AND STOCKIST: THE COVER WALL ══
+   Twenty seven accordion rows, each one hiding its contents until opened and
+   each open one carrying a scrollbar of its own inside the page scroll, could
+   not be scanned. It becomes a wall of covers you read at a glance, and one
+   edit at a time when you pick one. */
+.ed-wrap{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
+.ed-hd{padding:34px 0 22px;}
+.ed-hd h2{font-family:var(--serif);font-size:34px;font-weight:300;letter-spacing:.01em;margin-bottom:6px;}
+.ed-hd p{font-size:13px;color:var(--mid);line-height:1.6;max-width:var(--measure);}
+.ed-wrap .aff-note{border-bottom:none;padding:13px 22px;margin-bottom:30px;}
+.ed-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:44px 24px;}
+.ed-card{cursor:pointer;position:relative;min-width:0;}
+.ed-top{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px;}
+.ed-grp,.ed-date{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ed-cover{aspect-ratio:4/5;overflow:hidden;background:var(--white);}
+.ed-cover img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s;}
+.ed-card:hover .ed-cover img{opacity:.84;}
+.ed-title{font-family:var(--serif);font-size:20px;font-weight:400;line-height:1.3;color:var(--ink);margin:15px 0 0;text-wrap:balance;}
+.ed-blurb{font-size:12.5px;color:var(--mid);line-height:1.65;margin:7px 0 0;}
+.ed-n{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint);margin-top:9px;}
+/* Creator controls sit on the cover, so a row of cards never falls out of line */
+.ed-acts{position:absolute;top:31px;right:7px;display:none;gap:5px;z-index:4;}
+body.creator .ed-acts{display:flex;}
+.ed-act{width:26px;height:26px;border:1px solid var(--border);background:var(--white);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--mid);font-family:var(--sans);line-height:1;padding:0;transition:all .15s;}
+.ed-act:hover:not(:disabled){border-color:var(--ink);color:var(--ink);}
+.ed-act.danger:hover{border-color:#B03030;color:#B03030;}
+.ed-act:disabled{opacity:.3;cursor:default;}
+.ed-card.wc-dragging{opacity:.4;}
+.ed-card.wc-drag-over .ed-cover{outline:2px solid var(--ink);outline-offset:3px;}
+/* The one edit she picked, on its own */
+.ed-detail{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
+.ed-back{display:inline-flex;align-items:center;gap:9px;margin:26px 0 20px;padding:0;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .15s;}
+.ed-back::before{content:'\2190';}
+.ed-back:hover{color:var(--ink);}
+.ed-sheet{background:var(--white);padding:42px 44px 34px;}
+.ed-dmeta{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-bottom:12px;}
+.ed-dtitle{font-family:var(--serif);font-size:32px;font-weight:300;line-height:1.2;color:var(--ink);margin:0;text-wrap:balance;}
+.ed-dblurb{font-size:14px;color:var(--mid);line-height:1.8;margin:13px 0 0;max-width:var(--measure);}
+.ed-frame{display:block;width:100%;border:none;margin-top:26px;background:var(--surf);}
+.ed-foot{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:14px;}
+.ed-out{font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);text-decoration:none;border-bottom:1px solid var(--border);padding-bottom:2px;transition:all .15s;}
+.ed-out:hover{color:var(--ink);border-bottom-color:var(--ink);}
+/* The filter row, set the way the rest of the page now reads */
+.nav2.nav2-ed{justify-content:space-between;gap:8px;padding:0 var(--gutter);}
+.nav2-ed .t2{font-family:var(--serif);font-size:19px;font-weight:300;letter-spacing:.03em;text-transform:uppercase;color:var(--soft);padding:15px 4px;border-bottom-width:1px;}
+.nav2-ed .t2.on{color:var(--ink);}
+.nav2-ed .t2-n{font-family:var(--sans);font-size:9px;letter-spacing:.1em;margin-left:5px;}
+@media(max-width:1000px){.ed-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 20px;}}
+@media(max-width:700px){
+  .ed-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:26px 12px;}
+  .ed-title{font-size:16px;margin-top:11px;}
+  .ed-blurb{display:none;}
+  .ed-date{display:none;}
+  .ed-sheet{padding:26px 18px 24px;}
+  .ed-dtitle{font-size:24px;}
+  .ed-dblurb{font-size:13px;}
+  .nav2.nav2-ed{justify-content:flex-start;}
+  .nav2-ed .t2{font-size:15px;padding:13px 11px;}
+}
+
 /* ══ STRIP VIEW (Collections / Weekly) ══ */
 .wl{border-bottom:1px solid var(--border);position:relative;transition:background .15s;}
 .wl.clickable{cursor:pointer;}
@@ -368,26 +435,55 @@ body.creator .tl-add-row{display:flex;}
 .note-badge{position:absolute;top:7px;right:7px;width:18px;height:18px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:8px;color:var(--ink);}
 
 /* ══ ON SALE NOW ══ */
-.sales-hdr{padding:28px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
+.sales-hdr{max-width:var(--shell);margin:0 auto;padding:34px var(--gutter) 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
 /* ══ JOURNAL / POSTS ══ */
-.journal-wrap{max-width:680px;margin:0 auto;padding:0 40px 100px;}
-.journal-hdr{padding:28px 0 20px;border-bottom:1px solid var(--border);margin-bottom:32px;}
-.journal-hdr h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
-.journal-hdr p{font-size:13px;color:var(--mid);line-height:1.6;}
+.journal-wrap{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
+.journal-hdr{padding:34px 0 22px;margin-bottom:28px;}
+.journal-hdr h2{font-family:var(--serif);font-size:34px;font-weight:300;letter-spacing:.01em;margin-bottom:6px;}
+.journal-hdr p{font-size:13px;color:var(--mid);line-height:1.6;max-width:var(--measure);}
 .journal-hdr a{color:var(--ink);}
-.journal-feed{display:flex;flex-direction:column;gap:0;}
-.journal-card{display:flex;flex-direction:column;border-bottom:1px solid var(--border);padding:28px 0;cursor:pointer;transition:opacity .15s;}
-.journal-card:hover{opacity:.75;}
-.journal-img{width:100%;aspect-ratio:16/7;overflow:hidden;margin-bottom:18px;background:var(--surf);}
+.journal-feed{display:flex;flex-direction:column;gap:24px;}
+/* The card is the white surface. The photograph runs flush to its top and
+   side edges, the way a plate sits on a page, and the writing underneath is
+   the only thing that gets a margin. */
+.journal-card{display:flex;flex-direction:column;background:var(--white);padding:0 0 40px;cursor:pointer;transition:opacity .15s;}
+.journal-card:hover{opacity:.82;}
+.journal-img{width:100%;aspect-ratio:21/9;max-height:470px;overflow:hidden;margin-bottom:30px;background:var(--surf);}
 .journal-img img{width:100%;height:100%;object-fit:cover;display:block;}
-.journal-body{}
-.journal-date{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:8px;}
-.journal-title{font-family:var(--serif);font-size:22px;font-weight:400;line-height:1.3;margin-bottom:10px;color:var(--ink);}
-.journal-excerpt{font-size:13px;color:var(--mid);line-height:1.7;margin-bottom:14px;}
-.journal-read{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:1px;transition:opacity .15s;}
+/* Title hard left, the summary set against it on the right, with a wide
+   empty gutter between. The space is the point. */
+.journal-body{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:72px;align-items:start;padding:0 44px;}
+/* A post with no cover photograph would otherwise start hard against the
+   top edge of its own card */
+.journal-card > .journal-body:first-child{padding-top:34px;}
+.journal-date{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-bottom:12px;}
+.journal-title{font-family:var(--serif);font-size:32px;font-weight:300;line-height:1.22;color:var(--ink);text-wrap:balance;}
+.journal-excerpt{font-size:14px;color:var(--mid);line-height:1.8;margin-bottom:20px;}
+.journal-read{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);text-decoration:none;border-bottom:1px solid var(--ink);padding-bottom:1px;transition:opacity .15s;align-self:start;}
 .journal-read:hover{opacity:.6;}
-@media(max-width:600px){.journal-wrap{padding:0 18px 80px;}.journal-hdr{padding:20px 0 16px;}}
-.sales-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
+/* Drops the summary so its first line sits with the first line of the title
+   rather than with the date above it */
+@media(min-width:901px){.jc-r{padding-top:26px;}}
+@media(max-width:900px){
+  .journal-body{grid-template-columns:1fr;column-gap:0;row-gap:14px;padding:0 24px;}
+  .journal-title{font-size:26px;}
+  .journal-img{aspect-ratio:16/8;margin-bottom:22px;}
+}
+@media(max-width:700px){
+  .sales-hdr-left h2,.bd-hdr-left h2,.widgets-hd h2,.journal-hdr h2{font-size:27px;}
+}
+@media(max-width:600px){
+  /* less air at the edges on a phone, so the photographs keep the width */
+  :root{--gutter:14px;}
+  .journal-wrap{padding:0 var(--gutter) 80px;}
+  .journal-hdr{padding:22px 0 16px;margin-bottom:18px;}
+  .journal-hdr h2{font-size:27px;}
+  .journal-feed{gap:14px;}
+  .journal-card{padding-bottom:28px;}
+  .journal-body{padding:0 20px;}
+  .journal-title{font-size:23px;}
+}
+.sales-hdr-left h2{font-family:var(--serif);font-size:34px;font-weight:300;letter-spacing:.01em;margin-bottom:6px;}
 .sales-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .sales-disclaimer{font-size:11px!important;color:var(--soft)!important;margin-top:6px;font-style:italic;}
 /* ── Sale status: countdown + ended state ── */
@@ -406,8 +502,23 @@ body.creator .tl-add-row{display:flex;}
 .sp-past-btn{background:none;border:1px solid var(--border);color:var(--soft);font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;padding:7px 15px;cursor:pointer;transition:all .16s;white-space:nowrap;}
 .sp-past-btn:hover{border-color:var(--mid);color:var(--mid);}
 /* About & Partnerships */
-.ab-wrap{max-width:680px;margin:0 auto;padding:44px 40px 20px;}
+/* The page is wide, the writing is not. The whole thing sits on one white
+   sheet with generous margins, and the section labels step out to the left
+   so the eye has a column to run down. */
+.ab-wrap{max-width:1040px;margin:0 auto;background:var(--white);padding:52px 60px 56px;}
 .ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:22px;}
+.ab-top{max-width:none;}
+.ab-top .ab-lead,.ab-body p{max-width:var(--measure);}
+.ab-sec{display:grid;grid-template-columns:190px minmax(0,1fr);column-gap:56px;align-items:start;}
+.ab-sec > .ab-h{grid-column:1;margin-bottom:0;}
+.ab-sec > :not(.ab-h){grid-column:2;}
+.ab-sec > :not(.ab-h) ~ :not(.ab-h){margin-top:0;}
+@media(max-width:860px){
+  .ab-sheet{padding:34px 26px 38px;}
+  .ab-sec{grid-template-columns:1fr;column-gap:0;}
+  .ab-sec > .ab-h{grid-column:1;margin-bottom:18px;}
+  .ab-sec > :not(.ab-h){grid-column:1;}
+}
 /* Portrait tucked top right with the copy running around it, so there is no
    dead column under the opening line. Stacks above the text on a phone. */
 .ab-top{margin-bottom:26px;}
@@ -498,15 +609,21 @@ body.creator .sp-drag-handle{display:flex;}
 .sp.sp-drag-over{border-top:2px solid var(--ink);}
 .btn-new-sale{padding:8px 18px;background:var(--ink);color:white;border:none;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;cursor:pointer;transition:opacity .18s;white-space:nowrap;flex-shrink:0;margin-top:4px;}
 .btn-new-sale:hover{opacity:.8;}
-.sales-feed{max-width:680px;margin:0 auto;padding:0 40px 100px;}
-.sales-empty{padding:80px 40px;text-align:center;}
+/* Two sales side by side rather than one narrow column down the middle.
+   Columns rather than a grid, so a one line sale does not leave a hole the
+   height of the longest one beside it. The filter row and the past sales
+   divider stay outside the columns and run the full width. */
+.sales-feed{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
+.sp-cols{column-count:2;column-gap:24px;}
+.sp-cols > .sp{break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%;margin-bottom:24px;}
+@media(max-width:860px){.sp-cols{column-count:1;}.sp-cols > .sp{margin-bottom:14px;}}
+.sales-empty{padding:80px 40px;text-align:center;background:var(--white);}
 .sales-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
 .sales-empty p{font-size:13px;color:var(--soft);}
 /* so a sale opened from a shared link lands below the header and the filter
    row rather than underneath them */
-.sp{border-bottom:1px solid var(--border);padding:36px 0;scroll-margin-top:calc(var(--header-h,122px) + 54px);}
+.sp{background:var(--white);padding:32px 34px 34px;scroll-margin-top:calc(var(--header-h,122px) + 54px);}
 .sales-feed{scroll-margin-top:var(--header-h,122px);}
-.sp:first-child{padding-top:32px;}
 .sp-meta{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);margin-bottom:10px;}
 .sp-title{font-family:var(--serif);font-size:26px;font-weight:400;color:var(--ink);line-height:1.25;margin-bottom:8px;}
 .sp-subtitle{font-family:var(--serif);font-size:16px;color:var(--mid);line-height:1.65;margin-bottom:14px;font-style:italic;}
@@ -634,8 +751,8 @@ body.creator .sp-img-acts{display:flex;}
 body.creator .sp-add-img{display:flex;}
 @media(max-width:700px){
   .sales-hdr{padding:20px 18px 16px;flex-direction:column;gap:10px;}
-  .sales-feed{padding:0 18px 80px;}
-  .sp{padding:28px 0;}
+  .sales-feed{padding:0 var(--gutter) 80px;}
+  .sp{padding:26px 20px 28px;}
   .sp-title{font-size:21px;}
   .sp-img-item{flex-direction:column;gap:12px;}
   .sp-img-wrap,.sp-img-ph{width:100%;}
@@ -659,7 +776,7 @@ body.creator .sp-add-img{display:flex;}
 .wg-danger-btn.hot:hover:not(:disabled){background:#A33030;border-color:#A33030;color:#fff;}
 .wg-danger-btn:disabled{opacity:.4;cursor:default;}
 @media(max-width:700px){.wg-head-row{flex-direction:column;gap:14px;}.wg-build-btn{width:100%;}}
-.widgets-hd h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
+.widgets-hd h2{font-family:var(--serif);font-size:34px;font-weight:300;letter-spacing:.01em;margin-bottom:6px;}
 .widgets-hd p{font-size:13px;color:var(--mid);line-height:1.6;max-width:520px;margin-bottom:20px;}
 .widget-row{border:1px solid var(--border);margin-bottom:-1px;display:flex;align-items:center;}
 .w-thumbs{display:flex;gap:2px;padding:10px 12px;flex-shrink:0;}
@@ -772,7 +889,7 @@ body.creator .detail-add-btn.creator-only-btn{display:flex;}
    The looks sit in a masonry column flow rather than a fixed grid, so nothing
    is cropped and the board reflows itself every time a photo is added. */
 .bd-hdr{padding:28px 40px 20px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:16px;}
-.bd-hdr-left h2{font-family:var(--serif);font-size:22px;font-weight:400;margin-bottom:4px;}
+.bd-hdr-left h2{font-family:var(--serif);font-size:34px;font-weight:300;letter-spacing:.01em;margin-bottom:6px;}
 .bd-hdr-left p{font-size:13px;color:var(--mid);line-height:1.6;}
 .bd-hdr-aff{font-size:10px;color:var(--faint);margin-top:6px;}
 .bd-wrap{padding:26px 40px 80px;}
@@ -2129,7 +2246,15 @@ function wcList(t){t=t||wcTab();return _wcData[t]||wcCacheLoad(t);}
 
 async function wcFetchCloud(t){
   const rows=await sbFetch(`wc_carousels?select=*&tab=eq.${encodeURIComponent(t)}&order=sort_order.asc,created_at.asc`);
-  const arr=(rows||[]).map(r=>({id:r.id,title:r.title,src:r.src,group:r.group||''}));
+  // cover and blurb each come in two parts: what the server found on ShopMy,
+  // and whatever she has overridden by hand. The override always wins.
+  const arr=(rows||[]).map(r=>({
+    id:r.id,title:r.title,src:r.src,group:r.group||'',
+    cover:r.cover||r.cover_auto||'',
+    blurb:r.blurb||r.blurb_auto||'',
+    coverOwn:r.cover||'', blurbOwn:r.blurb||'',
+    pins:r.pin_count||0, created:r.created_at||''
+  }));
   _wcData[t]=arr;wcCacheSave(t,arr);return arr;
 }
 
@@ -2168,11 +2293,8 @@ function wcGroupLabel(key){
   if(WC_SEED_LABEL[key])return WC_SEED_LABEL[key];
   return String(key||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
 }
-const WC_OPEN_BY_DEFAULT=2;   // how many sit open when the page loads
 const WC_FILTER_MIN=8;        // only show filters once a tab is long enough
 let _wcFilter='all';
-let _wcOpen=null;             // Set of open collection ids, null until first render
-let _wcOpenInit=false;        // have the defaults been applied to real data yet
 let _wcAnchorId=null;         // a collection linked directly from outside
 
 // Groups in use, seeded ones first in their original order, then hers A to Z
@@ -2202,10 +2324,11 @@ function wcRenderFilters(list){
   const nav=document.getElementById('nav2');
   if(!nav)return;
   const groups=wcGroupsPresent(list);
-  if(list.length<WC_FILTER_MIN||groups.length<3){nav.classList.add('hide');nav.innerHTML='';return;}
+  if(list.length<WC_FILTER_MIN||groups.length<3){nav.classList.add('hide');nav.classList.remove('nav2-ed');nav.innerHTML='';return;}
   nav.innerHTML=groups.map(g=>
     `<button class="t2${_wcFilter===g.key?' on':''}" onclick="wcSetFilter('${g.key}')">${h(g.label)} <span class="t2-n">${wcCount(list,g.key)}</span></button>`
   ).join('');
+  nav.classList.add('nav2-ed');
   nav.classList.remove('hide');
 }
 function wcSetFilter(key){
@@ -2223,55 +2346,8 @@ function wcSetFilter(key){
 // The product row scrolls inside ShopMy's own frame, so nothing here can read
 // where it got to or step it back one. Reloading the frame is the one lever we
 // do have, and it returns the row to the first piece.
-function wcRewind(btn){
-  const f=btn.closest('.wc-body').querySelector('iframe');
-  if(!f)return;
-  const src=f.getAttribute('src')||f.dataset.src;
-  if(!src)return;
-  btn.disabled=true;btn.textContent='Going back…';
-  f.setAttribute('src','about:blank');
-  setTimeout(()=>{
-    f.setAttribute('src',src);
-    btn.disabled=false;btn.textContent='Back to start';
-  },60);
-}
-function wcToggle(id,btn){
-  const item=btn.closest('.wc-item');
-  if(!item)return;
-  const before=item.getBoundingClientRect().top;
-  const open=item.classList.toggle('wc-open');
-  if(open){
-    const f=item.querySelector('iframe');
-    if(f&&!f.src&&f.dataset.src)f.src=f.dataset.src;   // load only when opened
-    _wcOpen.add(id);
-  }else{
-    _wcOpen.delete(id);
-  }
-  btn.setAttribute('aria-expanded',open?'true':'false');
-  const after=item.getBoundingClientRect().top;
-  if(Math.abs(after-before)>1)window.scrollBy(0,after-before);
-}
-
-function wcExpandAll(openIt){
-  const list=wcVisible(wcList(wcTab()));
-  if(openIt)list.forEach(c=>_wcOpen.add(c.id)); else _wcOpen.clear();
-  renderWeekly();
-}
-
-// Open a specific collection and bring it into view, used by ?c=<id> links
-function wcGoTo(id,smooth){
-  const el=document.querySelector(`.wc-item[data-wc-id="${CSS.escape(id)}"]`);
-  if(!el)return false;
-  if(!el.classList.contains('wc-open')){
-    const btn=el.querySelector('.wc-head-btn');
-    if(btn)wcToggle(id,btn);
-  }
-  const off=(parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h'))||122)+52;
-  window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-off,behavior:smooth?'smooth':'auto'});
-  el.classList.add('wc-flash');
-  setTimeout(()=>el.classList.remove('wc-flash'),1400);
-  return true;
-}
+// The accordion this page used to be, and the open/close bookkeeping it needed,
+// are gone. One edit opens on its own page now, so there is nothing to expand.
 function wcCopyLink(id){
   const url=`https://maisontheposh.com/?tab=${tabToSlug(wcTab())}&c=${encodeURIComponent(id)}`;
   navigator.clipboard.writeText(url).then(()=>toast('Link to this edit copied')).catch(()=>{
@@ -2279,26 +2355,110 @@ function wcCopyLink(id){
   });
 }
 
+// ── The cover wall ──
+// _wcDetail holds the id of the edit being read, or null for the wall itself.
+let _wcDetail=null;
+
+function wcOpen(id){
+  _wcDetail=id;
+  try{history.replaceState(null,'','?tab='+tabToSlug(wcTab())+'&c='+encodeURIComponent(id));}catch(e){}
+  renderWeekly();
+  window.scrollTo(0,0);
+}
+function wcBack(){
+  _wcDetail=null;
+  try{history.replaceState(null,'','?tab='+tabToSlug(wcTab()));}catch(e){}
+  renderWeekly();
+  window.scrollTo(0,0);
+}
+// The collection id lives inside the embed url she pasted
+function wcCollectionId(src){
+  const m=String(src||'').match(/collections\/(?:embed\/|public\/)?(\d+)/);
+  return m?m[1]:'';
+}
+// The carousel embed scrolls sideways inside its own little box. The full
+// collection embed is a plain grid that scrolls with the page, which is the
+// whole point of opening one edit at a time.
+function wcEmbedSrc(c){
+  const id=wcCollectionId(c.src);
+  return id
+    ? 'https://shopmy.us/collections/public/'+id+'?noHeader=true&hideAppPromotion=true'
+    : c.src;
+}
+// The frame has no scrollbar of its own until it has to, so it needs telling
+// how tall to stand. Three across on a desktop, two on a phone, about 344px a
+// row. Past the ceiling it scrolls inside, because nothing good happens to a
+// page that is eighty thousand pixels long.
+function wcFrameHeight(pins){
+  const cols=window.innerWidth<700?2:3;
+  const rows=Math.ceil(Math.max(Number(pins)||0,1)/cols);
+  return Math.min(Math.max(rows*344+30,480),9000);
+}
+
+function wcCardHtml(c,i,total){
+  const d=c.created?new Date(c.created):null;
+  const date=d&&!isNaN(d)?d.toLocaleDateString('en-US',{month:'long',year:'numeric'}):'';
+  const grp=c.group?wcGroupLabel(c.group):'';
+  const n=Number(c.pins)||0;
+  return `<article class="ed-card" data-wc-i="${i}" data-wc-id="${h(c.id)}" draggable="${isCreator}" onclick="wcOpen('${h(c.id)}')">
+      <div class="ed-top"><span class="ed-grp">${h(grp)}</span><span class="ed-date">${h(date)}</span></div>
+      <div class="ed-cover">${c.cover?`<img src="${h(c.cover)}" alt="" loading="lazy" onerror="this.remove();">`:''}</div>
+      <h3 class="ed-title">${h(c.title)}</h3>
+      ${c.blurb?`<p class="ed-blurb">${h(c.blurb)}</p>`:''}
+      ${n?`<p class="ed-n">${n} ${n===1?'piece':'pieces'}</p>`:''}
+      <div class="ed-acts">
+        <button class="ed-act" onclick="event.stopPropagation();wcCopyLink('${h(c.id)}')" title="Copy a link straight to this edit">↗</button>
+        <button class="ed-act" onclick="event.stopPropagation();wcMove(${i},-1)" ${i===0?'disabled':''} title="Move up">▲</button>
+        <button class="ed-act" onclick="event.stopPropagation();wcMove(${i},1)" ${i===total-1?'disabled':''} title="Move down">▼</button>
+        <button class="ed-act" onclick="event.stopPropagation();wcOpenEdit(${i})" title="Edit name, cover, description or group">✎</button>
+        <button class="ed-act danger" onclick="event.stopPropagation();wcDelete(${i})" title="Remove">✕</button>
+      </div>
+    </article>`;
+}
+
+function wcDetailHtml(c,i,total){
+  const d=c.created?new Date(c.created):null;
+  const date=d&&!isNaN(d)?d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
+  const n=Number(c.pins)||0;
+  const meta=[c.group?wcGroupLabel(c.group):'',n?n+(n===1?' piece':' pieces'):'',date].filter(Boolean).join(' · ');
+  const id=wcCollectionId(c.src);
+  return `<div class="ed-detail">
+      <button class="ed-back" onclick="wcBack()">Back to ${h(WC_TAB_LABELS[wcTab()]||'the edits')}</button>
+      <div class="ed-sheet">
+        ${meta?`<div class="ed-dmeta">${h(meta)}</div>`:''}
+        <h2 class="ed-dtitle">${h(c.title)}</h2>
+        ${c.blurb?`<p class="ed-dblurb">${h(c.blurb)}</p>`:''}
+        <iframe class="ed-frame" title="${h(c.title)}" src="${h(wcEmbedSrc(c))}" style="height:${wcFrameHeight(c.pins)}px;" loading="lazy"></iframe>
+        <div class="ed-foot">
+          ${id?`<a class="ed-out" href="https://shopmy.us/collections/public/${h(id)}" target="_blank" rel="noopener">Open this edit on ShopMy</a>`:'<span></span>'}
+          ${isCreator?`<button class="wc-bar-btn ghost" onclick="wcOpenEdit(${i})">✎ Edit this one</button>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
 function renderWeekly(){
   const feed=document.getElementById('feed');
   const tab=wcTab();
   const all=wcList(tab);
-  // Decide what starts open, but only once there is real data. On a first visit
-  // the cache is empty, so doing this earlier would leave everything collapsed.
-  if(_wcOpen===null)_wcOpen=new Set();
-  if(!_wcOpenInit&&all.length){
-    _wcOpenInit=true;
-    all.slice(0,WC_OPEN_BY_DEFAULT).forEach(c=>_wcOpen.add(c.id));
-    if(_wcAnchorId)_wcOpen.add(_wcAnchorId);
-  }
+  const nav=document.getElementById('nav2');
+
+  // A ?c=<id> link lands straight on that edit, once the data is actually there
+  if(_wcAnchorId&&all.some(c=>c.id===_wcAnchorId)){_wcDetail=_wcAnchorId;_wcAnchorId=null;}
+  if(_wcDetail&&!all.some(c=>c.id===_wcDetail))_wcDetail=null;
   if(_wcFilter!=='all'&&all.length&&!all.some(c=>(c.group||'')===_wcFilter))_wcFilter='all';
-  const carousels=wcVisible(all);
 
   if(!all.length&&!isCreator){
-    document.getElementById('nav2').classList.add('hide');
+    if(nav)nav.classList.add('hide');
     feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`+subscribeBlock();
+  }else if(_wcDetail){
+    // One edit, nothing else on the page, no filter row competing with it
+    if(nav){nav.classList.add('hide');nav.classList.remove('nav2-ed');}
+    const c=all.find(x=>x.id===_wcDetail);
+    feed.innerHTML=wcDetailHtml(c,all.indexOf(c),all.length)+subscribeBlock();
   }else{
     wcRenderFilters(all);
+    const shown=wcVisible(all);
     const bar=isCreator?`
       <div class="wc-bar">
         <div class="wc-bar-note"><b>${all.length} collection${all.length===1?'':'s'}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
@@ -2307,46 +2467,16 @@ function renderWeekly(){
           <button class="wc-bar-btn ghost" onclick="wcRefresh()">Refresh</button>
         </div>
       </div>`:'';
-    const tools=all.length>=WC_FILTER_MIN?`
-      <div class="wc-tools">
-        <span class="wc-tools-count">${carousels.length} ${carousels.length===1?'edit':'edits'}${_wcFilter!=='all'?' in '+h(wcGroupLabel(_wcFilter)):''}</span>
-        <div class="wc-tools-acts">
-          <button class="wc-tool-btn" onclick="wcExpandAll(true)">Open all</button>
-          <button class="wc-tool-btn" onclick="wcExpandAll(false)">Close all</button>
-        </div>
-      </div>`:'';
-    const items=carousels.map((c,vi)=>{
-      const i=all.indexOf(c);
-      const open=_wcOpen.has(c.id);
-      return `
-      <div class="wc-item${open?' wc-open':''}" data-wc-i="${i}" data-wc-id="${h(c.id)}" draggable="${isCreator}">
-        <div class="wc-carousel-wrap">
-          <div class="wc-carousel-header">
-            <button class="wc-head-btn" onclick="wcToggle('${h(c.id)}',this)" aria-expanded="${open?'true':'false'}">
-              <span class="wc-chev" aria-hidden="true"></span>
-              <span class="wc-carousel-label">${h(c.title)}</span>
-              ${c.group&&_wcFilter==='all'?`<span class="wc-grp">${h(wcGroupLabel(c.group))}</span>`:''}
-            </button>
-            <div class="wc-carousel-acts">
-              <button class="wc-link-btn" onclick="event.stopPropagation();wcCopyLink('${h(c.id)}')" title="Copy a link straight to this edit">↗</button>
-              <button class="wc-move-btn" onclick="event.stopPropagation();wcMove(${i},-1)" ${i===0?'disabled':''} title="Move up">▲</button>
-              <button class="wc-move-btn" onclick="event.stopPropagation();wcMove(${i},1)" ${i===all.length-1?'disabled':''} title="Move down">▼</button>
-              <button class="wc-edit-btn" onclick="event.stopPropagation();wcOpenEdit(${i})" title="Edit name, link or group">✎</button>
-              <button class="wc-del-btn" onclick="event.stopPropagation();wcDelete(${i})" title="Remove">✕</button>
-            </div>
-          </div>
-          <div class="wc-body">
-            <iframe loading="lazy" title="${h(c.title)}" ${open?`src="${h(c.src)}"`:''} data-src="${h(c.src)}" style="width:100%;min-height:340px;border:none;"></iframe>
-            <button class="wc-rewind" onclick="wcRewind(this)" title="Jump back to the first piece in this edit">Back to start</button>
-          </div>
-        </div>
-      </div>`;}).join('');
-    const empty=(!carousels.length&&all.length)?`<div class="wc-empty">Nothing in ${h(wcGroupLabel(_wcFilter)||'this group')} yet.</div>`:'';
-    const addRow=isCreator?`<div class="wc-add-row" onclick="wcOpenAdd()">＋ Add Carousel</div>`:'';
-    feed.innerHTML=`<div class="wc-feed">${bar}${affNote()}${tools}${items}${empty}${addRow}</div>`+subscribeBlock();
+    const head=`<div class="ed-hd">
+        <h2>${h(WC_TAB_LABELS[tab]||'The Edits')}</h2>
+        <p>${h((TAB_META[tab]&&TAB_META[tab].d)||'')}</p>
+      </div>`;
+    const cards=shown.map(c=>wcCardHtml(c,all.indexOf(c),all.length)).join('');
+    const grid=cards?`<div class="ed-grid">${cards}</div>`:'';
+    const empty=(!shown.length&&all.length)?`<div class="wc-empty">Nothing in ${h(wcGroupLabel(_wcFilter)||'this group')} yet.</div>`:'';
+    const addRow=isCreator?`<div class="wc-add-row" style="margin-top:34px;" onclick="wcOpenAdd()">＋ Add collection</div>`:'';
+    feed.innerHTML=`<div class="ed-wrap">${bar}${head}${affNote()}${grid}${empty}${addRow}</div>`+subscribeBlock();
     if(isCreator)wcInitDrag();
-    // Honour a ?c=<id> deep link once the data is actually there
-    if(_wcAnchorId){const done=wcGoTo(_wcAnchorId,false);if(done)_wcAnchorId=null;}
   }
   // First paint came from cache; pull the real list once per tab, then repaint
   if(!_wcLoaded[tab]&&!_wcFetching[tab]){
@@ -2372,7 +2502,7 @@ async function wcMove(i,dir){
   [arr[i],arr[j]]=[arr[j],arr[i]];
   _wcData[tab]=arr;renderWeekly();
   // keep the moved row in view so the page does not jump under her
-  const el=document.querySelector(`.wc-item[data-wc-i="${j}"]`);
+  const el=document.querySelector(`.ed-card[data-wc-i="${j}"]`);
   if(el)el.scrollIntoView({block:'nearest',behavior:'smooth'});
   try{await wcPersist(tab,arr);toast(dir<0?'Moved up':'Moved down');}
   catch(e){console.error('wcMove failed:',e);_wcData[tab]=prev;renderWeekly();toast('⚠ Could not save the new order');}
@@ -2387,7 +2517,12 @@ function wcRefresh(){
 
 // Write the whole lineup back, with sort_order matching the on-page order
 async function wcPersist(tab,arr){
-  const rows=arr.map((c,i)=>({id:c.id,title:c.title,src:c.src,group:c.group||'',tab:tab,sort_order:i}));
+  // cover_auto, blurb_auto and pin_count belong to the server job and are never
+  // sent from here, so a reorder cannot wipe what the nightly sync found.
+  const rows=arr.map((c,i)=>({
+    id:c.id,title:c.title,src:c.src,group:c.group||'',tab:tab,sort_order:i,
+    cover:c.coverOwn||null, blurb:c.blurbOwn||null
+  }));
   if(rows.length){
     await sbFetch('wc_carousels',{
       method:'POST',
@@ -2395,7 +2530,7 @@ async function wcPersist(tab,arr){
       body:JSON.stringify(rows)
     });
   }
-  _wcData[tab]=arr.map(c=>({id:c.id,title:c.title,src:c.src,group:c.group||''}));
+  _wcData[tab]=arr.slice();
   wcCacheSave(tab,_wcData[tab]);
 }
 
@@ -2441,6 +2576,10 @@ function wcOpenEdit(i){
   document.getElementById('wc-form-title').textContent='Edit Collection';
   document.getElementById('wc-f-title').value=c.title||'';
   document.getElementById('wc-f-src').value=c.src||'';
+  const cv=document.getElementById('wc-f-cover');if(cv)cv.value=c.coverOwn||'';
+  const bl=document.getElementById('wc-f-blurb');if(bl)bl.value=c.blurbOwn||'';
+  const pv=document.getElementById('wc-f-coverprev');
+  if(pv){pv.src=c.cover||'';pv.style.display=c.cover?'block':'none';}
   wcFillGroupSelect(c.group||'');
   document.getElementById('wc-save-btn').textContent='Save';
   document.getElementById('wc-ov').classList.add('open');
@@ -2481,6 +2620,9 @@ async function wcSaveForm(){
   const title=document.getElementById('wc-f-title').value.trim();
   const src=wcCleanSrc(document.getElementById('wc-f-src').value);
   const group=wcChosenGroup();
+  // Blank means fall back to whatever the nightly ShopMy sync found
+  const coverOwn=(document.getElementById('wc-f-cover')||{}).value||'';
+  const blurbOwn=(document.getElementById('wc-f-blurb')||{}).value||'';
   if(document.getElementById('wc-f-group').value==='__new'&&!group){toast('Give the new group a name');return;}
   if(!title){toast('Give the collection a name');return;}
   if(!src){toast('Paste the ShopMy embed code or collection link');return;}
@@ -2492,12 +2634,18 @@ async function wcSaveForm(){
     if(_wcEditIdx===null){
       if(arr.some(c=>c.src===src)){toast(`That collection is already on ${WC_TAB_LABELS[tab]}`);return;}
       const nid=uid();
-      arr.unshift({id:nid,title,src,group});
-      _wcOpen.add(nid);
+      arr.unshift({id:nid,title,src,group,
+        coverOwn:coverOwn.trim(),blurbOwn:blurbOwn.trim(),
+        cover:coverOwn.trim(),blurb:blurbOwn.trim(),pins:0,created:new Date().toISOString()});
       await wcPersist(tab,arr);
-      wcCloseForm();renderWeekly();toast('Added to the top and saved');
+      wcCloseForm();renderWeekly();
+      toast(coverOwn.trim()?'Added and saved':'Added. Its cover arrives with tonight sync');
     }else{
-      arr[_wcEditIdx]={...arr[_wcEditIdx],title,src,group};
+      const was=arr[_wcEditIdx];
+      arr[_wcEditIdx]={...was,title,src,group,
+        coverOwn:coverOwn.trim(),blurbOwn:blurbOwn.trim(),
+        cover:coverOwn.trim()||(was.coverOwn?'':was.cover),
+        blurb:blurbOwn.trim()||(was.blurbOwn?'':was.blurb)};
       await wcPersist(tab,arr);
       wcCloseForm();renderWeekly();toast('Saved');
     }
@@ -2513,10 +2661,10 @@ let _wcDragSrc=null;
 function wcInitDrag(){
   const feed=document.getElementById('feed');
   if(!feed)return;
-  feed.querySelectorAll('.wc-item').forEach(el=>{
+  feed.querySelectorAll('.ed-card').forEach(el=>{
     el.addEventListener('dragstart',e=>{_wcDragSrc=parseInt(el.dataset.wcI);el.classList.add('wc-dragging');e.dataTransfer.effectAllowed='move';});
-    el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));});
-    el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.wc-item').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
+    el.addEventListener('dragend',()=>{el.classList.remove('wc-dragging');feed.querySelectorAll('.ed-card').forEach(x=>x.classList.remove('wc-drag-over'));});
+    el.addEventListener('dragover',e=>{e.preventDefault();feed.querySelectorAll('.ed-card').forEach(x=>x.classList.remove('wc-drag-over'));if(parseInt(el.dataset.wcI)!==_wcDragSrc)el.classList.add('wc-drag-over');});
     el.addEventListener('dragleave',()=>el.classList.remove('wc-drag-over'));
     el.addEventListener('drop',async e=>{
       e.preventDefault();el.classList.remove('wc-drag-over');
@@ -4716,14 +4864,16 @@ function _renderJournalCards(posts,wrap){
     const title=(p.title||'').replace(/&/g,'&amp;').replace(/</g,'&lt;');
     const link='https://maisontheposh.substack.com/p/'+p.slug;
     const img=p.cover_image||'';
-    const excerpt=(p.subtitle||'').slice(0,180);
+    const excerpt=(p.subtitle||'').slice(0,240);
     const date=p.post_date?new Date(p.post_date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
     const el=document.createElement('article');
     el.className='journal-card';
     el.addEventListener('click',()=>window.open(link,'_blank'));
     if(img){const d=document.createElement('div');d.className='journal-img';const i=new Image();i.src=img;i.alt='';i.loading='lazy';i.onerror=()=>d.style.display='none';d.appendChild(i);el.appendChild(d);}
     const body=document.createElement('div');body.className='journal-body';
-    body.innerHTML='<p class="journal-date">'+date+'</p><h2 class="journal-title">'+title+'</h2>'+(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=180?'…':'')+'</p>':'')+'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener">Read on Substack →</a>';
+    body.innerHTML='<div class="jc-l"><p class="journal-date">'+date+'</p><h2 class="journal-title">'+title+'</h2></div>'
+      +'<div class="jc-r">'+(excerpt?'<p class="journal-excerpt">'+excerpt+(excerpt.length>=240?'…':'')+'</p>':'')
+      +'<a class="journal-read" href="'+link+'" target="_blank" rel="noopener">Read on Substack →</a></div>';
     body.querySelector('.journal-read').addEventListener('click',e=>e.stopPropagation());
     el.appendChild(body);
     wrap.appendChild(el);
@@ -4943,7 +5093,7 @@ async function renderSales(skipLoad){
   const picked=SP_FILTERS.find(f=>f.k===_spFilter);
   const shownLive=picked?live.filter(picked.test):live;
 
-  let inner=bar+shownLive.map(renderPostEntry).join('');
+  let inner=bar+`<div class="sp-cols">${shownLive.map(renderPostEntry).join('')}</div>`;
   if(!shownLive.length){
     inner=bar+(picked
       ? `<div class="sales-empty"><h3>Nothing in ${h(picked.label.toLowerCase())}</h3><p>Tap All to see every sale running.</p></div>`
@@ -4955,7 +5105,7 @@ async function renderSales(skipLoad){
       <button class="sp-past-btn" onclick="spTogglePast()">${_spShowPast?'Hide':'Show'} past sales (${ended.length})</button>
       <div class="sp-past-line"></div>
     </div>`;
-    if(_spShowPast)inner+=ended.map(renderPostEntry).join('');
+    if(_spShowPast)inner+=`<div class="sp-cols">${ended.map(renderPostEntry).join('')}</div>`;
   }
   feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
   // dragging to reorder a filtered list would write the wrong order
@@ -7840,6 +7990,15 @@ async function runFetchImages(){
       <label class="fl">Group <span class="flh">(optional, drives the filters across the top)</span></label>
       <select class="fi" id="wc-f-group" onchange="wcGroupSelectChanged(this)"></select>
       <input type="text" class="fi" id="wc-f-group-new" placeholder="Name the new group, e.g. Jewellery" style="display:none;margin-top:8px;">
+    </div>
+    <div class="fg">
+      <label class="fl">Description <span class="flh">(optional, one line under the title on the card. Blank uses the description from ShopMy)</span></label>
+      <input type="text" class="fi" id="wc-f-blurb" maxlength="300" placeholder="e.g. Every Row piece worth knowing about, kept current.">
+    </div>
+    <div class="fg">
+      <label class="fl">Cover image <span class="flh">(optional. Blank uses the cover from ShopMy, or the first piece in the edit)</span></label>
+      <input type="text" class="fi" id="wc-f-cover" placeholder="Paste an image link" oninput="var p=document.getElementById('wc-f-coverprev');p.src=this.value.trim();p.style.display=this.value.trim()?'block':'none';">
+      <img id="wc-f-coverprev" src="" alt="" style="display:none;width:92px;margin-top:9px;background:var(--bg);" onerror="this.style.display='none';">
     </div>
     <button class="btn-p" id="wc-save-btn" onclick="wcSaveForm()">Add</button>
     <button class="btn-g" onclick="wcCloseForm()">Cancel</button>
