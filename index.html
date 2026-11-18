@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18al search-stays -->
+<!-- MTP BUILD 2026-11-18am search-clear -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -170,6 +170,11 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:3
 .sq-in::placeholder{color:var(--faint);}
 /* Chrome puts a blue clear cross in a search field. There is a Close here. */
 .sq-in::-webkit-search-cancel-button,.sq-in::-webkit-search-decoration{-webkit-appearance:none;appearance:none;display:none;}
+/* Clearing by selecting 30px type and deleting it is nobody's idea of easy.
+   The button only exists while there is something to clear. */
+.sq-clear{display:none;flex:0 0 auto;width:30px;height:30px;padding:0;border:1px solid var(--border);background:var(--white);border-radius:50%;cursor:pointer;font-family:var(--sans);font-size:11px;line-height:1;color:var(--soft);transition:all .15s;}
+.sq-clear.on{display:flex;align-items:center;justify-content:center;}
+.sq-clear:hover{color:var(--ink);border-color:var(--ink);}
 .sq-close{background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);padding:8px 0;flex:0 0 auto;}
 .sq-close:hover{color:var(--ink);}
 .sq-body{max-width:var(--shell);margin:0 auto;padding:30px var(--gutter) 90px;}
@@ -5367,6 +5372,7 @@ function searchOpen(){
   }
   const inp=document.getElementById('sq-in');
   setTimeout(()=>inp.focus(),60);
+  sqClearShow();
   searchType(inp.value);
 }
 // how: 'pop' when Back brought us here, so history is already where it should
@@ -5458,6 +5464,19 @@ function searchType(q){
   },220);
 }
 
+// The clear button appears only when there is something in the box
+function sqClearShow(){
+  const b=document.getElementById('sq-clear'), inp=document.getElementById('sq-in');
+  if(b&&inp)b.classList.toggle('on', inp.value.trim().length>0);
+}
+function sqClear(){
+  const inp=document.getElementById('sq-in');
+  if(!inp)return;
+  inp.value='';
+  sqClearShow();
+  searchType('');
+  inp.focus();
+}
 function sqPaint(rows,q){
   const body=document.getElementById('sq-body');
   if(!body)return;
@@ -8729,7 +8748,8 @@ async function runFetchImages(){
 <div class="sq" id="sq" onclick="if(event.target===this)searchClose()">
   <div class="sq-top">
     <div class="sq-bar">
-      <input class="sq-in" id="sq-in" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search" oninput="searchType(this.value)" onkeydown="if(event.key==='Escape')searchClose()">
+      <input class="sq-in" id="sq-in" type="search" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search" oninput="searchType(this.value);sqClearShow()" onkeydown="if(event.key==='Escape')searchClose()">
+      <button class="sq-clear" id="sq-clear" type="button" title="Clear" aria-label="Clear the search" onclick="sqClear()">&#10005;</button>
       <button class="sq-close" onclick="searchClose()">Close</button>
     </div>
   </div>
