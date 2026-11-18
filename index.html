@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17n back-everywhere -->
+<!-- MTP BUILD 2026-11-17p sales-grid -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -690,9 +690,12 @@ body.creator .sp-drag-handle{display:flex;}
    height of the longest one beside it. The filter row and the past sales
    divider stay outside the columns and run the full width. */
 .sales-feed{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
-.sp-cols{column-count:2;column-gap:24px;}
-.sp-cols > .sp{break-inside:avoid;page-break-inside:avoid;display:inline-block;width:100%;margin-bottom:24px;}
-@media(max-width:860px){.sp-cols{column-count:1;}.sp-cols > .sp{margin-bottom:14px;}}
+/* A grid rather than columns: with the pictures all one shape the cards are
+   close enough in height that rows line up, and a row that does not fill
+   ends in white inside its own card rather than in a ragged grey step. */
+.sp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;}
+.sp-cols > .sp{min-width:0;}
+@media(max-width:860px){.sp-cols{grid-template-columns:1fr;gap:14px;}}
 .sales-empty{padding:80px 40px;text-align:center;background:var(--white);}
 .sales-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
 .sales-empty p{font-size:13px;color:var(--soft);}
@@ -809,6 +812,18 @@ a.sp-pick-name:hover{text-decoration:underline;text-underline-offset:3px;text-de
 .sp-img-item{display:flex;gap:20px;align-items:flex-start;}
 .sp-img-wrap{flex:0 0 180px;}
 .sp-img-wrap img{width:100%;display:block;object-fit:cover;}
+/* Every sale picture used to come out whatever shape the retailer sent it in:
+   a wide "60% off" banner 90px tall, a product shot 240px. That is what made
+   two columns of cards refuse to line up. On a card wide enough for it the
+   picture now runs the full width in a fixed window, with the caption and the
+   button under it rather than in a half empty column alongside. */
+@media(min-width:701px){
+  .sp-img-item{display:block;}
+  .sp-img-wrap{flex:none;width:100%;}
+  .sp-img-wrap img{aspect-ratio:3/2;}
+  .sp-img-body{padding-top:14px;}
+  .sp-img-cta{align-self:flex-start;}
+}
 .sp-img-ph{width:180px;height:240px;display:flex;align-items:center;justify-content:center;border:1.5px dashed var(--border);background:var(--bg);position:relative;cursor:pointer;}
 .sp-img-ph input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .sp-img-ph-txt{font-size:10px;color:var(--soft);text-align:center;line-height:1.6;pointer-events:none;}
