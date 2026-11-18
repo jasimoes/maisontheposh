@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18w about-intro -->
+<!-- MTP BUILD 2026-11-18x faq-collapse -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -631,14 +631,22 @@ body.creator .tl-add-row{display:flex;}
 .ab-note{font-size:12px;color:var(--soft);line-height:1.7;margin-top:18px;}
 /* The questions people actually ask, set so the question carries and the
    answer reads underneath it rather than beside it */
-.ab-faq{display:flex;flex-direction:column;}
-.ab-q{padding:22px 0;border-bottom:1px solid var(--rule-soft,#EFEDE7);}
-.ab-q:first-child{padding-top:0;}
-.ab-q:last-child{border-bottom:none;padding-bottom:0;}
-.ab-q-t{font-family:var(--sans);font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);margin:0 0 12px;line-height:1.5;}
-.ab-q-a{font-family:var(--serif);font-size:17px;font-weight:300;line-height:1.65;color:var(--mid);margin:0 0 10px;max-width:var(--measure);}
+.ab-faq{display:flex;flex-direction:column;border-top:1px solid var(--rule-soft,#DEDAD3);}
+.ab-q{border-bottom:1px solid var(--rule-soft,#DEDAD3);}
+/* The question is the control. Click anywhere on the row and the answer drops. */
+.ab-q>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:17px 2px;font-family:var(--serif);font-size:15px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--ink);line-height:1.45;transition:color .15s;}
+.ab-q>summary::-webkit-details-marker{display:none;}
+.ab-q>summary::marker{content:'';}
+.ab-q>summary:hover{color:var(--soft);}
+.ab-q>summary::after{content:'↓';font-family:var(--sans);font-size:13px;line-height:1;color:var(--soft);flex:none;}
+.ab-q[open]>summary::after{content:'↑';}
+.ab-q-body{padding:0 0 24px;}
+.ab-q-a{font-family:var(--sans);font-size:13.5px;line-height:1.85;color:var(--mid);margin:0 0 14px;max-width:var(--measure);}
 .ab-q-a:last-child{margin-bottom:0;}
-@media(max-width:700px){.ab-q-a{font-size:15px;}.ab-q-t{font-size:10px;}}
+@media(max-width:700px){
+  .ab-q>summary{font-size:13px;letter-spacing:.08em;padding:15px 2px;}
+  .ab-q-a{font-size:13px;}
+}
 .ab-signoff{font-family:var(--serif);font-size:19px;color:var(--ink);margin-top:30px;font-style:italic;}
 .ab-slot{border:1px dashed var(--faint);background:var(--surf);padding:16px 18px;font-size:11.5px;color:var(--soft);line-height:1.7;}
 body:not(.creator) .ab-slot{display:none;}
@@ -3284,10 +3292,10 @@ function renderAbout(){
     ${faq.length?`<div class="ab-sec">
       <div class="ab-h">Questions</div>
       <div class="ab-faq">${faq.map(q=>`
-        <div class="ab-q">
-          <h3 class="ab-q-t">${h(q.q)}</h3>
-          ${q.a.map(line=>`<p class="ab-q-a">${h(line)}</p>`).join('')}
-        </div>`).join('')}</div>
+        <details class="ab-q">
+          <summary>${h(q.q)}</summary>
+          <div class="ab-q-body">${q.a.map(line=>`<p class="ab-q-a">${h(line)}</p>`).join('')}</div>
+        </details>`).join('')}</div>
     </div>`:''}
 
     ${cover.length?`<div class="ab-sec">
