@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ae hero-half -->
+<!-- MTP BUILD 2026-11-18ag hero-pos-warn -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -380,6 +380,20 @@ body.creator .ed-acts{display:flex;}
 .ed-act:disabled{opacity:.3;cursor:default;}
 .ed-card.wc-dragging{opacity:.4;}
 .ed-card.wc-drag-over .ed-cover{outline:2px solid var(--ink);outline-offset:3px;}
+/* GIFT GUIDES. Fewer, larger cards than the edits, because there are 5 or 6
+   of them, not 34, and each one has to carry a description a reader will read.
+   Portrait covers, the shape the reference page uses for its guides. */
+.ed-grid.gift-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:56px 30px;}
+.gift-grid .ed-cover{aspect-ratio:4/5;}
+.gift-grid .ed-title{font-size:24px;margin-top:18px;}
+.gift-grid .ed-blurb{font-size:13.5px;line-height:1.75;margin-top:10px;}
+@media(max-width:1000px){.ed-grid.gift-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:40px 22px;}}
+@media(max-width:700px){
+  .ed-grid.gift-grid{grid-template-columns:1fr;gap:34px;}
+  .gift-grid .ed-title{font-size:21px;}
+  /* The description is the point of a guide card, so it stays on a phone */
+  .gift-grid .ed-blurb{display:block;font-size:13px;}
+}
 /* The one edit she picked, on its own */
 .ed-detail{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
 .ed-back{display:inline-flex;align-items:center;gap:9px;margin:26px 0 20px;padding:0;background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);transition:color .15s;}
@@ -1588,7 +1602,7 @@ body.bd-viewing .fov{z-index:700;}
     <button class="t1 on" data-t1="journal"     onclick="setT1('journal',this)">Posts</button>
     <button class="t1"    data-t1="weekly"      onclick="setT1('weekly',this)">The Edits</button>
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
-    <button class="t1"    data-t1="boards"      onclick="setT1('boards',this)">Boards</button>
+    <button class="t1"    data-t1="gifts"       onclick="setT1('gifts',this)">Gift Guides</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
@@ -2297,6 +2311,9 @@ function goHome(){
 // ══ NAV ══
 // The tab is called The Edits but its key, and its rows in wc_carousels, stay
 // 'weekly'. These two keep the shared URL readable without touching either.
+// Boards is hidden, not deleted. Flip this to true and the tab, its search
+// results and its cards all come back exactly as they were.
+const SHOW_BOARDS=false;
 const TAB_SLUG={weekly:'edits'};
 // latest is kept so links shared back when this tab was The List still land somewhere
 const SLUG_TAB={edits:'weekly',latest:'boards'};
@@ -2376,6 +2393,7 @@ const TAB_META={
   stockist:{t:'Stockist | MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
   latest:{t:'The List | MaisonThePosh',d:'The things I actually love and keep going back to.'},
   boards:{t:'Inspiration Boards | MaisonThePosh',d:'Looks I am building around, gathered one board at a time.'},
+  gifts:{t:'Gift Guides | MaisonThePosh',d:'Considered gifts, gathered into one list at a time.'},
   sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
   about:{t:'About & Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
   widgets:{t:'MaisonThePosh',d:''}
@@ -2392,7 +2410,7 @@ function applyTabMeta(tab){
 const AFF_DISCLOSURE="The products featured here may contain affiliate links.";
 function affNote(){return `<div class="aff-note">${h(AFF_DISCLOSURE)}</div>`;}
 
-const WC_TAB_LABELS={weekly:'The Edits',stockist:'Stockist'};
+const WC_TAB_LABELS={weekly:'The Edits',stockist:'Stockist',gifts:'Gift Guides'};
 function wcIsTab(t){return Object.prototype.hasOwnProperty.call(WC_TAB_LABELS,t);}
 function wcTab(){return wcIsTab(activeT1)?activeT1:'weekly';}
 // Keep the original cache key for weekly so returning readers still paint instantly
@@ -2563,11 +2581,23 @@ function wcFrameHeight(pins){
 // The date sat on the right of the eyebrow at first, the way the reference
 // page sets it, but hers records when a collection was added to the site, and
 // 27 of them land in three months. The piece count earns that slot instead.
+// (11.18.2026), the compact form the eyebrow slot has room for
+function wcShortDate(v){
+  const d=v?new Date(v):null;
+  if(!d||isNaN(d))return '';
+  const p=n=>String(n).padStart(2,'0');
+  return `(${p(d.getMonth()+1)}.${p(d.getDate())}.${d.getFullYear()})`;
+}
+function wcNoun(p){return wcTab()==='gifts'?(p?'guides':'guide'):(p?'collections':'collection');}
 function wcCardHtml(c,i,total){
-  const grp=c.group?wcGroupLabel(c.group):'';
+  const gift=wcTab()==='gifts';
   const n=Number(c.pins)||0;
+  // A guide carries its date, the way the reference page sets it. An edit
+  // carries its piece count, because 27 edits inside 3 months all read alike.
+  const grp=gift?(c.group?wcGroupLabel(c.group):'Gift Guides'):(c.group?wcGroupLabel(c.group):'');
+  const right=gift?wcShortDate(c.created):(n?n+(n===1?' piece':' pieces'):'');
   return `<article class="ed-card" data-wc-i="${i}" data-wc-id="${h(c.id)}" draggable="${isCreator}" onclick="wcOpen('${h(c.id)}')">
-      <div class="ed-top"><span class="ed-grp">${h(grp)}</span><span class="ed-n">${n?n+(n===1?' piece':' pieces'):''}</span></div>
+      <div class="ed-top"><span class="ed-grp">${h(grp)}</span><span class="ed-n">${h(right)}</span></div>
       <div class="ed-cover">${c.cover?`<img src="${h(c.cover)}" alt="" loading="lazy" onerror="this.remove();">`:''}</div>
       <h3 class="ed-title">${h(c.title)}</h3>
       ${c.blurb?`<p class="ed-blurb">${h(c.blurb)}</p>`:''}
@@ -2615,7 +2645,7 @@ function renderWeekly(){
 
   if(!all.length&&!isCreator){
     if(nav)nav.classList.add('hide');
-    feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No collections yet.':'Loading…'}</div>`+subscribeBlock();
+    feed.innerHTML=`${affNote()}<div class="wc-empty">${_wcLoaded[tab]?'No '+wcNoun(true)+' yet.':'Loading…'}</div>`+subscribeBlock();
   }else if(_wcDetail){
     // One edit, nothing else on the page, no filter row competing with it
     if(nav){nav.classList.add('hide');nav.classList.remove('nav2-ed');}
@@ -2626,9 +2656,9 @@ function renderWeekly(){
     const shown=wcVisible(all);
     const bar=isCreator?`
       <div class="wc-bar">
-        <div class="wc-bar-note"><b>${all.length} collection${all.length===1?'':'s'}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
+        <div class="wc-bar-note"><b>${all.length} ${wcNoun(all.length!==1)}.</b> Every change saves to the cloud and goes live for readers straight away.</div>
         <div class="wc-bar-acts">
-          <button class="wc-bar-btn" onclick="wcOpenAdd()">＋ Add collection</button>
+          <button class="wc-bar-btn" onclick="wcOpenAdd()">＋ Add ${wcNoun()}</button>
           <button class="wc-bar-btn ghost" onclick="wcRefresh()">Refresh</button>
         </div>
       </div>`:'';
@@ -2637,9 +2667,9 @@ function renderWeekly(){
         <p>${h((TAB_META[tab]&&TAB_META[tab].d)||'')}</p>
       </div>`;
     const cards=shown.map(c=>wcCardHtml(c,all.indexOf(c),all.length)).join('');
-    const grid=cards?`<div class="ed-grid">${cards}</div>`:'';
+    const grid=cards?`<div class="ed-grid${tab==='gifts'?' gift-grid':''}">${cards}</div>`:'';
     const empty=(!shown.length&&all.length)?`<div class="wc-empty">Nothing in ${h(wcGroupLabel(_wcFilter)||'this group')} yet.</div>`:'';
-    const addRow=isCreator?`<div class="wc-add-row" style="margin-top:34px;" onclick="wcOpenAdd()">＋ Add collection</div>`:'';
+    const addRow=isCreator?`<div class="wc-add-row" style="margin-top:34px;" onclick="wcOpenAdd()">＋ Add ${wcNoun()}</div>`:'';
     feed.innerHTML=`<div class="ed-wrap">${bar}${head}${affNote()}${grid}${empty}${addRow}</div>`+subscribeBlock();
     if(isCreator)wcInitDrag();
   }
@@ -3380,6 +3410,9 @@ function abHeroPreview(){
   img.src=v;
   if(row)row.style.display=v?'block':'none';
   abPosMove((document.getElementById('ab-e-heropos')||{value:'50'}).value||'50');
+  // Say so plainly rather than letting a moved slider quietly fail to save
+  const warn=document.getElementById('ab-e-poswarn');
+  if(warn)warn.style.display=(v&&_about&&!('hero_pos' in _about))?'block':'none';
 }
 // Which slice of a tall photo the wide band shows. 0 is the top edge, 100 the
 // bottom. The preview box is the same shape as the band, so this is literal.
@@ -5389,7 +5422,9 @@ function sqBuild(){
         go:{tab:c.tab,c:c.id}
       });
     });
-    boards.filter(b=>b.published).forEach(b=>{
+    // Boards came out of the navigation when Gift Guides replaced it, so they
+    // no longer appear in search. The data and the ?tab=boards link still work.
+    if(SHOW_BOARDS)boards.filter(b=>b.published).forEach(b=>{
       idx.push({kind:'board',label:'Inspiration Boards',title:b.title||'',
         sub:b.intro||((b.look_count||0)+' looks'),
         hay:[b.title,b.intro].join(' '),img:b.cover||'',go:{tab:'boards',board:b.id}});
@@ -7987,7 +8022,7 @@ function restoreFromURL(){
   const lookId=params.get('look');
   const boardId=params.get('board');
   // Set active tab
-  const validTabs=['latest','boards','weekly','stockist','collections','journal','sales','about','widgets'];
+  const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets'];
   const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
   applyTabMeta(t);
@@ -8083,7 +8118,7 @@ window.addEventListener('popstate',function(e){
     document.getElementById('feed').style.display='block';
     currentListId=null;
     _boardOpen=null;
-    const validTabs=['latest','boards','weekly','stockist','collections','journal','sales','about','widgets'];
+    const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets'];
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
@@ -8712,6 +8747,7 @@ async function runFetchImages(){
         <div class="ab-crop"><img id="ab-e-heroprev" src="" alt=""></div>
         <input type="range" class="ab-crop-r" id="ab-e-posr" min="0" max="100" value="50" oninput="abPosMove(this.value)">
         <div class="ab-crop-h"><span>Top of the photo</span><span>Bottom of the photo</span></div>
+        <div id="ab-e-poswarn" style="display:none;font-family:var(--sans);font-size:11px;line-height:1.6;color:#8A6D3B;background:#FBF6EA;border:1px solid #EADCBF;padding:9px 11px;margin-top:10px;">The slider moves the preview, but it cannot save yet. Add the <code>hero_pos</code> column to <code>site_about</code> in Supabase and it will stick.</div>
       </div>
       <button type="button" class="btn-g" onclick="abHeroClear()" style="margin-top:10px;font-size:10px;letter-spacing:.12em;">Remove it</button>
     </div>
