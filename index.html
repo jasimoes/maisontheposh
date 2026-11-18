@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17k search-destinations -->
+<!-- MTP BUILD 2026-11-17n back-everywhere -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2454,13 +2454,16 @@ let _wcDetail=null;
 
 function wcOpen(id){
   _wcDetail=id;
-  try{history.replaceState(null,'','?tab='+tabToSlug(wcTab())+'&c='+encodeURIComponent(id));}catch(e){}
+  // push, not replace: Back out of an edit should land on the wall of covers,
+  // the same way Back out of search lands on the page behind it
+  try{history.pushState({tab:wcTab(),c:id},'','?tab='+tabToSlug(wcTab())+'&c='+encodeURIComponent(id));}catch(e){}
   renderWeekly();
   window.scrollTo(0,0);
 }
 function wcBack(){
+  if(_wcDetail&&history.state&&history.state.c){history.back();return;}
   _wcDetail=null;
-  try{history.replaceState(null,'','?tab='+tabToSlug(wcTab()));}catch(e){}
+  try{history.replaceState({tab:wcTab()},'','?tab='+tabToSlug(wcTab()));}catch(e){}
   renderWeekly();
   window.scrollTo(0,0);
 }
@@ -3728,6 +3731,7 @@ async function bdViewOpen(lookId,ev){
   if(!look)return;
   _bdView={lookId,idx:0};
   document.getElementById('bd-view-ov').classList.add('open');
+  ovPush('piece');
   document.body.classList.add('bd-viewing');
   document.body.style.overflow='hidden';
   bdViewMsg('');bdViewBusy('Loading photos…');
@@ -3743,7 +3747,9 @@ async function bdViewOpen(lookId,ev){
   bdViewRender();
   bdWireViewKeys();
 }
-function bdViewClose(){
+function bdViewClose(how){
+  if(!document.getElementById('bd-view-ov').classList.contains('open'))return;
+  if(ovStepBack(how))return;
   _bdView=null;
   document.getElementById('bd-view-ov').classList.remove('open');
   document.body.classList.remove('bd-viewing');
@@ -4207,10 +4213,13 @@ async function bdOpenFromUrl(id){
 }
 
 function bdBack(push){
+  // Leaving a board used to PUSH the index on top of it, so the next Back
+  // walked straight back into the board she had just left. Step back instead.
+  if(push!==false&&history.state&&history.state.board){history.back();return;}
   _boardOpen=null;_bdCat='';
   renderBoardIndex();
   window.scrollTo({top:0});
-  if(push!==false)history.pushState({tab:'boards'},'','/?tab=boards');
+  if(push!==false)history.replaceState({tab:'boards'},'','/?tab=boards');
 }
 
 async function bdNew(){
@@ -5137,11 +5146,11 @@ async function renderJournal(){
 let _sqIdx=null, _sqBuilding=null, _sqTimer=null, _sqLast='';
 
 function goAbout(){
-  searchClose();
+  searchClose('nav');
   setT1('about',null);
 }
 function goSubscribe(){
-  searchClose();
+  searchClose('nav');
   const go=()=>{
     const el=document.querySelector('.sub-block');
     if(!el)return false;
@@ -5154,10 +5163,18 @@ function goSubscribe(){
   if(!go())setTimeout(go,400);
 }
 
+// Opening search adds a history entry, so Back closes it instead of leaving
+// the site. On a phone that is the only way out people reach for.
+let _sqPushed=false;
 function searchOpen(){
   const ov=document.getElementById('sq');
+  if(ov.classList.contains('open'))return;
   ov.classList.add('open');
   document.body.style.overflow='hidden';
+  if(!_sqPushed){
+    _sqPushed=true;
+    try{history.pushState({mtpSearch:1,tab:activeT1},'',location.href);}catch(e){_sqPushed=false;}
+  }
   const inp=document.getElementById('sq-in');
   setTimeout(()=>inp.focus(),60);
   if(!_sqIdx){
@@ -5167,14 +5184,23 @@ function searchOpen(){
     searchType(inp.value);
   }
 }
-function searchClose(){
+// how: 'pop' when Back brought us here, so history is already where it should
+// be; 'nav' when a result is about to navigate, so the entry is replaced
+// rather than popped and the destination does not race the Back; otherwise
+// she closed it herself and Back is what does the closing.
+function searchClose(how){
   const ov=document.getElementById('sq');
   if(!ov||!ov.classList.contains('open'))return;
+  if(how!=='pop'&&how!=='nav'&&_sqPushed){_sqPushed=false;history.back();return;}
   ov.classList.remove('open');
   document.body.style.overflow='';
+  if(how==='nav'&&_sqPushed){
+    try{history.replaceState({tab:activeT1},'',location.href);}catch(e){}
+  }
+  _sqPushed=false;
 }
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')searchClose();
+  if(e.key==='Escape')searchClose();   // which steps back through history
   // the shortcut every search field has, without stealing it from a text box
   if((e.key==='/'||((e.metaKey||e.ctrlKey)&&e.key==='k'))&&!/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName||''))){
     e.preventDefault();searchOpen();
@@ -5399,7 +5425,7 @@ function sqRender(q){
 // Everything a result can be is a link into the site, so send the reader there
 // the same way a shared link would.
 function sqGo(go){
-  searchClose();
+  searchClose('nav');
   if(go.out){window.open(go.out,'_blank','noopener');return;}
   const btn=document.querySelector('[data-t1="'+go.tab+'"]');
   if(go.c){_wcFilter='all';_wcDetail=go.c;}
@@ -7444,7 +7470,15 @@ function openLookPanel(id){
   document.getElementById('panel').classList.add('open');
   document.body.style.overflow='hidden';
 }
-function closePanel(){document.getElementById('backdrop').classList.remove('open');document.getElementById('panel').classList.remove('open');document.body.style.overflow='';}
+function closePanel(how){
+  const el=document.getElementById('panel');
+  if(!el.classList.contains('open'))return;
+  // this one pushed its entry in openLookPanel rather than through ovPush
+  if(how!=='pop'&&history.state&&history.state.look){history.back();return;}
+  document.getElementById('backdrop').classList.remove('open');
+  el.classList.remove('open');
+  document.body.style.overflow='';
+}
 
 function openPanelOpts(btn){
   try{
@@ -7533,6 +7567,23 @@ async function autoFetchImage(item){
   }
 }
 
+// ══ BACK CLOSES WHAT IS ON TOP ══
+// Every overlay a reader can open adds a history entry, so the back button and
+// the phone's back gesture take away the thing in front of them rather than
+// the whole page. The close buttons all still work: they step back through
+// that same entry, so neither way leaves a stale one behind.
+let _ovDepth=0;
+function ovPush(name){
+  try{history.pushState({mtpOverlay:name,tab:activeT1},'',location.href);_ovDepth++;}catch(e){}
+}
+// Returns true when Back is doing the closing, so the caller should stop and
+// let popstate finish the job.
+function ovStepBack(how){
+  if(how==='pop'){if(_ovDepth>0)_ovDepth--;return false;}
+  if(_ovDepth>0){history.back();return true;}
+  return false;
+}
+
 function openItemPop(itemId){
   // Find item across all lists and unassigned
   let item=null;
@@ -7590,12 +7641,17 @@ function openItemPop(itemId){
 
   document.getElementById('ip-pop').classList.add('open');
   document.body.style.overflow='hidden';
+  ovPush('item');
 }
-function closeItemPop(){
-  document.getElementById('ip-pop').classList.remove('open');
+function closeItemPop(how){
+  const el=document.getElementById('ip-pop');
+  if(!el.classList.contains('open'))return;
+  if(ovStepBack(how))return;
+  el.classList.remove('open');
   document.body.style.overflow='';
 }
 function openOptsPop(){
+  ovPush('opts');
   const links=window._ipAllLinks||[];
   const img=window._ipItemImg||'';
   const rows=links.slice(1).map((l,i)=>{
@@ -7610,8 +7666,11 @@ function openOptsPop(){
   document.getElementById('ip-opts-table').innerHTML=rows;
   document.getElementById('ip-opts-pop').classList.add('open');
 }
-function closeOptsPop(){
-  document.getElementById('ip-opts-pop').classList.remove('open');
+function closeOptsPop(how){
+  const el=document.getElementById('ip-opts-pop');
+  if(!el.classList.contains('open'))return;
+  if(ovStepBack(how))return;
+  el.classList.remove('open');
 }
 
 // ══ FORCE PRODUCT LINKS TO ALWAYS OPEN IN NEW TAB ══
@@ -7683,17 +7742,26 @@ function restoreFromURL(){
 }
 
 window.addEventListener('popstate',function(e){
-  // Close any open popups first
-  closeItemPop();closeOptsPop();
-  if(document.getElementById('wb-pop').classList.contains('open'))closeWB();
-  // Close look panel if open
-  if(document.getElementById('panel').classList.contains('open')){closePanel();return;}
+  // Back takes away the thing on top, one layer per press, and goes no
+  // further. Innermost first: the options list sits over the item preview,
+  // which sits over the board.
+  const open_=id=>{const el=document.getElementById(id);return el&&el.classList.contains('open');};
+  if(open_('sq')){searchClose('pop');return;}
+  if(open_('ip-opts-pop')){closeOptsPop('pop');return;}
+  if(open_('bd-view-ov')){bdViewClose('pop');return;}
+  if(open_('ip-pop')){closeItemPop('pop');return;}
+  if(open_('wb-pop')){closeWB();return;}
+  if(open_('panel')){closePanel('pop');return;}
   const state=e.state||{};
   const params=new URLSearchParams(location.search);
   const lookId=state.look||params.get('look');
   const listId=state.list||params.get('list');
   const boardId=state.board||params.get('board');
   const tab=slugToTab(state.tab||params.get('tab')||'latest');
+
+  // Which edit, if any, this entry was looking at. Without this, Back out of
+  // an edit left the edit on screen because nothing cleared it.
+  if(wcIsTab(tab))_wcDetail=state.c||params.get('c')||null;
 
   if(lookId&&(D.looks||[]).find(x=>x.id===lookId)){
     openLookPanel(lookId);return;
