@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ag hero-pos-warn -->
+<!-- MTP BUILD 2026-11-18ah sales-3up -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -750,8 +750,17 @@ body.creator .sp-drag-handle{display:flex;}
 /* A grid rather than columns: with the pictures all one shape the cards are
    close enough in height that rows line up, and a row that does not fill
    ends in white inside its own card rather than in a ragged grey step. */
-.sp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;}
+/* 3 across on a full desktop. At 2 the cards ran about 620px wide, which made
+   a one line sale look like a billboard. 2 again on a narrow laptop, 1 on a phone. */
+.sp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
 .sp-cols > .sp{min-width:0;}
+/* At 3 up a card is about 400px, so the generous padding and the 26px title
+   that suited a 620px card have to come in a little. */
+@media(min-width:1181px){
+  .sp-cols > .sp{padding:26px 26px 28px;}
+  .sp-cols .sp-title{font-size:22px;}
+}
+@media(max-width:1180px){.sp-cols{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;}}
 @media(max-width:860px){.sp-cols{grid-template-columns:1fr;gap:14px;}}
 .sales-empty{padding:80px 40px;text-align:center;background:var(--white);}
 .sales-empty h3{font-family:var(--serif);font-size:20px;font-weight:400;margin-bottom:8px;color:var(--mid);}
