@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ak server-search -->
+<!-- MTP BUILD 2026-11-18al search-stays -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -186,6 +186,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-weight:3
 .sq-r-txt{min-width:0;flex:1;}
 .sq-r-t{font-family:var(--serif);font-size:17px;font-weight:400;color:var(--ink);line-height:1.3;}
 .sq-r-s{font-family:var(--sans);font-size:11.5px;color:var(--soft);line-height:1.5;margin-top:3px;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
+/* A result opened in another tab stays marked, so working down a list of
+   pieces does not mean losing track of which ones have been looked at. */
+.sq-r.sq-seen .sq-r-t{color:var(--soft);}
+.sq-r.sq-seen .sq-r-img{opacity:.55;}
 .sq-r-k{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);flex:0 0 auto;}
 .sq-empty{padding:60px 0;text-align:center;}
 .sq-empty p{font-family:var(--serif);font-size:19px;color:var(--mid);font-style:italic;}
@@ -5469,7 +5473,7 @@ function sqPaint(rows,q){
     const list=groups[k];
     return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+list.length+'</span></h3>'
       +list.map(r=>
-        '<button class="sq-r" onclick=\''+'sqGo('+JSON.stringify(r.go||{}).replace(/'/g,'&#39;')+')\'>'
+        '<button class="sq-r" onclick=\''+'sqGo('+JSON.stringify(r.go||{}).replace(/'/g,'&#39;')+',this)\'>'
         +(r.img
             ?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'sq-r-img sq-r-none\'}));">'
             :'<span class="sq-r-img sq-r-none"></span>')
@@ -5482,9 +5486,17 @@ function sqPaint(rows,q){
 
 // Everything a result can be is a link into the site, so send the reader there
 // the same way a shared link would.
-function sqGo(go){
+function sqGo(go,btnEl){
+  // A piece opens in a new tab, so this one stays exactly as it was. Closing it
+  // meant coming back to nothing and typing the search again, when what a reader
+  // is usually doing is working down a list of results one at a time.
+  if(go.out){
+    if(btnEl)btnEl.classList.add('sq-seen');
+    window.open(go.out,'_blank','noopener');
+    return;
+  }
+  // Anything inside the site replaces what is on screen, so the overlay goes.
   searchClose('nav');
-  if(go.out){window.open(go.out,'_blank','noopener');return;}
   const btn=document.querySelector('[data-t1="'+go.tab+'"]');
   if(go.c){_wcFilter='all';_wcDetail=go.c;}
   if(go.sale){_spAnchorId=go.sale;_spAnchorDone=false;_spAnchorTries=0;}
