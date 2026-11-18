@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18aj cadence-bold -->
+<!-- MTP BUILD 2026-11-18ak server-search -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5329,7 +5329,7 @@ async function renderJournal(){
 // Everything the site holds, in one field. The index is built the first time
 // she or a reader opens it and then kept for the session, so the second search
 // costs nothing. Five small queries, none of which the page waits on at load.
-let _sqIdx=null, _sqBuilding=null, _sqTimer=null, _sqLast='';
+let _sqTimer=null, _sqLast='';
 
 function goAbout(){
   searchClose('nav');
@@ -5363,12 +5363,7 @@ function searchOpen(){
   }
   const inp=document.getElementById('sq-in');
   setTimeout(()=>inp.focus(),60);
-  if(!_sqIdx){
-    document.getElementById('sq-body').innerHTML='<p class="sq-note">Gathering everything…</p>';
-    sqBuild().then(()=>{if(document.getElementById('sq').classList.contains('open'))searchType(inp.value);});
-  }else{
-    searchType(inp.value);
-  }
+  searchType(inp.value);
 }
 // how: 'pop' when Back brought us here, so history is already where it should
 // be; 'nav' when a result is about to navigate, so the entry is replaced
@@ -5393,219 +5388,94 @@ document.addEventListener('keydown',e=>{
   }
 });
 
-function sqBuild(){
-  if(_sqBuilding)return _sqBuilding;
-  _sqBuilding=(async()=>{
-    const idx=[];
-    const grab=async(path)=>{try{return await sbFetch(path)||[];}catch(e){return [];}};
-    const [posts,cols,boards,lists,items,pins]=await Promise.all([
-      grab('posts?select=id,slug,title,subtitle,excerpt,body,source,image,published_at,expires_at'),
-      grab('wc_carousels?select=id,title,group,tab,blurb,blurb_auto,cover,cover_auto,pin_count'),
-      grab('boards?select=id,title,intro,cover,published,look_count'),
-      grab('lists?select=id,name,note,t1,cat'),
-      grab('items?select=id,list_id,name,brand,note,image,link'),
-      sqPins()
-    ]);
-    posts.forEach(p=>{
-      const isPost=(p.source||'')==='substack';
-      idx.push({
-        kind:isPost?'post':'sale',
-        label:isPost?'Posts':'On Sale Now',
-        title:sqClean(p.title),
-        sub:sqClean(p.subtitle)||sqClean(p.excerpt)||String(p.body||'').slice(0,160),
-        hay:[p.title,p.subtitle,p.excerpt,p.body].join(' '),
-        img:p.image||'',
-        go:isPost
-          ? {out:SUBSTACK_URL+'/p/'+(p.slug||'')}
-          : {tab:'sales',sale:p.id}
-      });
-    });
-    cols.forEach(c=>{
-      idx.push({
-        kind:'edit',
-        label:c.tab==='stockist'?'Stockist':'The Edits',
-        title:sqClean(c.title),
-        sub:sqClean(c.blurb)||sqClean(c.blurb_auto)||((c.pin_count||0)+' pieces'),
-        hay:[c.title,c.blurb,c.blurb_auto,c.group].join(' '),
-        img:c.cover||c.cover_auto||'',
-        go:{tab:c.tab,c:c.id}
-      });
-    });
-    // Boards came out of the navigation when Gift Guides replaced it, so they
-    // no longer appear in search. The data and the ?tab=boards link still work.
-    if(SHOW_BOARDS)boards.filter(b=>b.published).forEach(b=>{
-      idx.push({kind:'board',label:'Inspiration Boards',title:b.title||'',
-        sub:b.intro||((b.look_count||0)+' looks'),
-        hay:[b.title,b.intro].join(' '),img:b.cover||'',go:{tab:'boards',board:b.id}});
-    });
-    // These lists are left over from an earlier shape of the site: their t1
-    // values are latest, weekly and collections, and not one of those renders
-    // them any more. A result for one would send a reader to an empty page,
-    // which is exactly what it did. Their pieces are real, so those stay.
-    const listName={};
-    lists.forEach(l=>{listName[l.id]=sqClean(l.name);});
-    // Whichever maisons are actually in the data, longest first, so The Row
-    // does not match before a longer name that starts the same way
-    const maisons=[...new Set(items.map(it=>sqClean(it.brand)).filter(Boolean))]
-      .sort((a,b)=>b.length-a.length);
-    const seen={};
-    items.forEach(it=>{
-      const got=sqPiece(it,maisons);
-      if(!got)return;
-      // the same piece is pinned to several lists, and one copy carries the
-      // photograph while the others do not. Keep the one that does.
-      const key=sqNorm(got.title)+'|'+sqNorm(got.brand);
-      const prev=seen[key];
-      if(prev){ if(!prev.img&&got.img)prev.img=got.img; return; }
-      // Without a link there is nowhere to send anyone, so it is not a result
-      const link=sqClean(it.link);
-      if(!/^https?:/.test(link))return;
-      const row={kind:'piece',label:'Pieces',title:got.title,
-        sub:[got.brand,listName[it.list_id]].filter(Boolean).join(' \u00b7 '),
-        hay:[it.name,it.brand,it.note].join(' '),img:got.img,
-        go:{out:link}};
-      seen[key]=row;
-      idx.push(row);
-    });
-    // The pieces inside the edits. These live on ShopMy, so until the nightly
-    // job started filing them none of the 3,000 were findable.
-    const editName={};
-    cols.forEach(c=>{editName[c.id]=sqClean(c.title);});
-    pins.forEach(pn=>{
-      const title=sqClean(pn.title), brand=sqClean(pn.brand);
-      if(!title)return;
-      const key=sqNorm(title)+'|'+sqNorm(brand);
-      const prev=seen[key];
-      // a piece already on her list, now with somewhere to buy it
-      if(prev){
-        if(!prev.img&&pn.image)prev.img=pn.image;
-        if(!prev.go.out&&pn.link)prev.go={out:pn.link};
-        return;
-      }
-      // an edit named after the maison would otherwise read "Khaite - Khaite"
-      const where=editName[pn.carousel_id]||'';
-      const row={kind:'piece',label:'Pieces',title:title,
-        sub:[brand,sqPrice(pn.price,pn.currency),
-             sqNorm(where)===sqNorm(brand)?'':where].filter(Boolean).join(' \u00b7 '),
-        hay:[pn.title,pn.brand,editName[pn.carousel_id]].join(' '),
-        img:sqClean(pn.image),
-        go:pn.link?{out:pn.link}:{tab:'weekly',c:pn.carousel_id}};
-      seen[key]=row;
-      idx.push(row);
-    });
-    _sqIdx=idx;
-    return idx;
-  })();
-  _sqBuilding.catch(()=>{_sqIdx=[];});
-  return _sqBuilding;
+// ══ SEARCH, SERVER SIDE ══
+// Postgres does the matching now. The browser sends the words and gets back at
+// most 40 rows, so nothing is downloaded up front and the index can grow to any
+// size without the page getting heavier. The function is mtp_search(), created
+// by search-server-side.sql.
+let _sqSeq=0, _sqCount=null;
+
+async function sqRun(q){
+  const seq=++_sqSeq;
+  const rows=await sbFetch('rpc/mtp_search',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({q:q,lim:40})
+  });
+  // A slow answer to an earlier keystroke must never paint over a newer one
+  if(seq!==_sqSeq)return null;
+  return Array.isArray(rows)?rows:[];
+}
+
+// Only for the line shown before anything is typed
+async function sqTotal(){
+  if(_sqCount!=null)return _sqCount;
+  try{
+    const n=await sbFetch('rpc/mtp_search_count',{
+      method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+    _sqCount=typeof n==='number'?n:(Array.isArray(n)?n[0]:null);
+  }catch(e){_sqCount=null;}
+  return _sqCount;
 }
 
 // Some rows carry a placeholder where the real value should be: a brand of "-",
 // an image of "none". They are not data, so they are not treated as any.
-const SQ_EMPTY=/^(-+|none|n\/a|na|null|undefined|tbd|\.)$/i;
-function sqClean(v){
-  const t=String(v==null?'':v).trim();
-  return SQ_EMPTY.test(t)?'':t;
-}
-// A piece as it should read, out of a row where the brand, the name and the
-// fabric composition were all typed into one field.
-function sqPiece(it,maisons){
-  let title=sqClean(it.name);
-  let brand=sqClean(it.brand);
-  if(!title)return null;
-  title=title.replace(/[\.,;\s]*\b(material|fabric|composition)\s*:.*$/i,'');
-  if(!brand){
-    const m=(maisons||[]).find(b=>new RegExp('^'+b.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\b','i').test(title));
-    if(m)brand=m;
-  }
-  if(brand){
-    title=title.replace(new RegExp('^'+brand.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*[-:,\u2013]?\\s*','i'),'');
-  }
-  title=title.replace(/^[\s\-:,\u2013]+/,'').replace(/[\s\-:,\u2013\.]+$/,'').trim();
-  if(!title)title=sqClean(it.name);
-  const img=sqClean(it.image);
-  return {title,brand,img:/^https?:|^data:/.test(img)?img:''};
-}
-// PostgREST hands back a thousand rows at a time and there are over three
-// thousand pieces, so they come in pages, all at once rather than in turn.
-async function sqPins(){
-  const PAGE=1000, cols='id,carousel_id,title,brand,image,link,price,currency';
-  try{
-    const first=await sbFetch('edit_pins?select='+cols+'&order=id.asc&limit='+PAGE);
-    if(!first||first.length<PAGE)return first||[];
-    const rest=await Promise.all([1,2,3,4].map(i=>
-      sbFetch('edit_pins?select='+cols+'&order=id.asc&limit='+PAGE+'&offset='+(i*PAGE)).catch(()=>[])
-    ));
-    return first.concat(...rest.map(r=>r||[]));
-  }catch(e){return [];}
-}
-// Her maisons quote in ten currencies. Printing a dollar sign on all of them
-// would be wrong in the one place a reader actually checks.
-function sqPrice(v,cur){
-  const n=Number(String(v||'').replace(/[^0-9.]/g,''));
-  if(!n||!isFinite(n))return '';
-  const code=String(cur||'').trim().toUpperCase();
-  if(!/^[A-Z]{3}$/.test(code))return '';
-  try{
-    return new Intl.NumberFormat('en-US',{style:'currency',currency:code,
-      maximumFractionDigits:n%1?2:0}).format(n);
-  }catch(e){return code+' '+Math.round(n);}
-}
+// Shared by the creator tools and the search overlay for comparing names
 function sqNorm(v){
   return String(v||'').toLowerCase()
     .normalize('NFD').replace(/[̀-ͯ]/g,'')   // Sezane finds Sézane
     .replace(/[^a-z0-9 ]+/g,' ').replace(/\s+/g,' ').trim();
 }
-function sqScore(row,words){
-  const t=sqNorm(row.title), hay=sqNorm(row.hay);
-  let total=0;
-  for(const w of words){
-    if(t.startsWith(w))total+=12;
-    else if(t.includes(w))total+=7;
-    else if(hay.includes(w))total+=2;
-    else return 0;                 // every word has to land somewhere
-  }
-  return total;
-}
-const SQ_ORDER=['Posts','On Sale Now','The Edits','Stockist','Inspiration Boards','Pieces'];
+const SQ_ORDER=['Posts','On Sale Now','The Edits','Stockist','Gift Guides','Inspiration Boards','Pieces'];
 
 function searchType(q){
   clearTimeout(_sqTimer);
-  _sqTimer=setTimeout(()=>sqRender(q),140);
-}
-function sqRender(q){
+  _sqLast=q;
   const body=document.getElementById('sq-body');
   if(!body)return;
   const words=sqNorm(q).split(' ').filter(w=>w.length>1);
-  _sqLast=q;
   if(!words.length){
-    body.innerHTML='<p class="sq-note">'+(_sqIdx?_sqIdx.length+' things to look through':'Gathering everything…')+'</p>';
+    body.innerHTML='<p class="sq-note">'+(_sqCount
+      ? _sqCount.toLocaleString()+' things to look through'
+      : 'Posts, edits, stockists, gift guides, and every piece inside them')+'</p>';
+    sqTotal().then(n=>{
+      const still=!sqNorm(_sqLast).split(' ').filter(w=>w.length>1).length;
+      if(n&&still&&document.getElementById('sq-body')===body)
+        body.innerHTML='<p class="sq-note">'+n.toLocaleString()+' things to look through</p>';
+    });
     return;
   }
-  if(!_sqIdx){body.innerHTML='<p class="sq-note">Gathering everything…</p>';return;}
-  const hits=[];
-  _sqIdx.forEach(r=>{const sc=sqScore(r,words);if(sc)hits.push({r,sc});});
-  if(!hits.length){
+  // 220ms, so typing a maison name is one query rather than six
+  _sqTimer=setTimeout(()=>{
+    sqRun(q).then(rows=>{if(rows)sqPaint(rows,q);}).catch(e=>{
+      console.error('[MTP] search failed:',e);
+      body.innerHTML='<div class="sq-empty"><p>Search is not answering just now. Try again in a moment.</p></div>';
+    });
+  },220);
+}
+
+function sqPaint(rows,q){
+  const body=document.getElementById('sq-body');
+  if(!body)return;
+  if(!rows.length){
     body.innerHTML='<div class="sq-empty"><p>Nothing here for "'+h(q)+'".</p></div>';
     return;
   }
-  hits.sort((a,b)=>b.sc-a.sc);
   const groups={};
-  hits.forEach(({r})=>{(groups[r.label]=groups[r.label]||[]).push(r);});
-  const order=SQ_ORDER.filter(k=>groups[k]).concat(Object.keys(groups).filter(k=>SQ_ORDER.indexOf(k)<0));
+  rows.forEach(r=>{(groups[r.label]=groups[r.label]||[]).push(r);});
+  const order=SQ_ORDER.filter(k=>groups[k])
+    .concat(Object.keys(groups).filter(k=>SQ_ORDER.indexOf(k)<0));
   body.innerHTML=order.map(k=>{
-    const rows=groups[k];
-    return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+rows.length+'</span></h3>'
-      +rows.slice(0,k==='Pieces'?14:8).map(r=>
-        '<button class="sq-r" onclick=\'sqGo('+JSON.stringify(r.go).replace(/'/g,'&#39;')+')\'>'
+    const list=groups[k];
+    return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+list.length+'</span></h3>'
+      +list.map(r=>
+        '<button class="sq-r" onclick=\''+'sqGo('+JSON.stringify(r.go||{}).replace(/'/g,'&#39;')+')\'>'
         +(r.img
             ?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'sq-r-img sq-r-none\'}));">'
             :'<span class="sq-r-img sq-r-none"></span>')
-        +'<span class="sq-r-txt"><span class="sq-r-t">'+h(r.title)+'</span>'
+        +'<span class="sq-r-txt"><span class="sq-r-t">'+h(r.title||'')+'</span>'
         +(r.sub?'<span class="sq-r-s">'+h(r.sub)+'</span>':'')+'</span>'
         +'<span class="sq-r-k">'+h(k)+'</span></button>').join('')
-      +(rows.length>(k==='Pieces'?14:8)
-          ?'<p class="sq-note" style="padding-top:11px;">and '+(rows.length-(k==='Pieces'?14:8))+' more</p>':'')
       +'</section>';
   }).join('');
 }
