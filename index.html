@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18am search-clear -->
+<!-- MTP BUILD 2026-11-18an background-collections -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -420,6 +420,8 @@ body.creator .ed-acts{display:flex;}
 .nav2.nav2-ed{justify-content:space-between;gap:8px;padding:0 var(--gutter);}
 .nav2-ed .t2{font-family:var(--serif);font-size:19px;font-weight:300;letter-spacing:.03em;text-transform:uppercase;color:var(--soft);padding:15px 4px;border-bottom-width:1px;}
 .nav2-ed .t2.on{color:var(--ink);}
+/* Only she ever sees this one, so it should not read like a category */
+.nav2-ed .t2.t2-bg{font-style:italic;}
 .nav2-ed .t2-n{font-family:var(--sans);font-size:9px;letter-spacing:.1em;margin-left:5px;}
 @media(max-width:1000px){.ed-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:34px 20px;}}
 @media(max-width:700px){
@@ -2451,7 +2453,8 @@ async function wcFetchCloud(t){
     coverOwn:r.cover||'', blurbOwn:r.blurb||'',
     coverAuto:r.cover_auto||'',
     options:Array.isArray(r.cover_options)?r.cover_options:[],
-    pins:r.pin_count||0, created:r.created_at||''
+    pins:r.pin_count||0, created:r.created_at||'',
+    hidden:!!r.hidden
   }));
   _wcData[t]=arr;wcCacheSave(t,arr);return arr;
 }
@@ -2510,11 +2513,18 @@ function wcKnownGroups(){
   const custom=[...inUse].filter(k=>!seeded.includes(k)).sort((a,b)=>wcGroupLabel(a).localeCompare(wcGroupLabel(b)));
   return [...seeded,...custom];
 }
+// A hidden collection is indexed and searchable but never drawn as a card.
+// Only she can see them, and only by choosing the Background filter.
+const WC_HIDDEN_KEY='__hidden';
 function wcVisible(list){
-  return _wcFilter==='all'?list:list.filter(c=>(c.group||'')===_wcFilter);
+  if(_wcFilter===WC_HIDDEN_KEY)return isCreator?list.filter(c=>c.hidden):[];
+  const live=list.filter(c=>!c.hidden);
+  return _wcFilter==='all'?live:live.filter(c=>(c.group||'')===_wcFilter);
 }
 function wcCount(list,key){
-  return key==='all'?list.length:list.filter(c=>(c.group||'')===key).length;
+  if(key===WC_HIDDEN_KEY)return list.filter(c=>c.hidden).length;
+  const live=list.filter(c=>!c.hidden);
+  return key==='all'?live.length:live.filter(c=>(c.group||'')===key).length;
 }
 
 // Sub-nav filter chips live in the bar the site already had for second-level nav
@@ -2523,8 +2533,11 @@ function wcRenderFilters(list){
   if(!nav)return;
   const groups=wcGroupsPresent(list);
   if(list.length<WC_FILTER_MIN||groups.length<3){nav.classList.add('hide');nav.classList.remove('nav2-ed');nav.innerHTML='';return;}
-  nav.innerHTML=groups.map(g=>
-    `<button class="t2${_wcFilter===g.key?' on':''}" onclick="wcSetFilter('${g.key}')">${h(g.label)} <span class="t2-n">${wcCount(list,g.key)}</span></button>`
+  const chips=groups.slice();
+  const nHidden=list.filter(c=>c.hidden).length;
+  if(isCreator&&nHidden)chips.push({key:WC_HIDDEN_KEY,label:'Background'});
+  nav.innerHTML=chips.map(g=>
+    `<button class="t2${_wcFilter===g.key?' on':''}${g.key===WC_HIDDEN_KEY?' t2-bg':''}" onclick="wcSetFilter('${g.key}')">${h(g.label)} <span class="t2-n">${wcCount(list,g.key)}</span></button>`
   ).join('');
   nav.classList.add('nav2-ed');
   nav.classList.remove('hide');
@@ -2659,7 +2672,8 @@ function renderWeekly(){
   // A ?c=<id> link lands straight on that edit, once the data is actually there
   if(_wcAnchorId&&all.some(c=>c.id===_wcAnchorId)){_wcDetail=_wcAnchorId;_wcAnchorId=null;}
   if(_wcDetail&&!all.some(c=>c.id===_wcDetail))_wcDetail=null;
-  if(_wcFilter!=='all'&&all.length&&!all.some(c=>(c.group||'')===_wcFilter))_wcFilter='all';
+  if(_wcFilter===WC_HIDDEN_KEY&&!(isCreator&&all.some(c=>c.hidden)))_wcFilter='all';
+  else if(_wcFilter!=='all'&&_wcFilter!==WC_HIDDEN_KEY&&all.length&&!all.some(c=>(c.group||'')===_wcFilter))_wcFilter='all';
 
   if(!all.length&&!isCreator){
     if(nav)nav.classList.add('hide');
@@ -2733,7 +2747,7 @@ async function wcPersist(tab,arr){
   // cover_auto, blurb_auto and pin_count belong to the server job and are never
   // sent from here, so a reorder cannot wipe what the nightly sync found.
   const rows=arr.map((c,i)=>({
-    id:c.id,title:c.title,src:c.src,group:c.group||'',tab:tab,sort_order:i,
+    id:c.id,title:c.title,src:c.src,group:c.group||'',tab:tab,sort_order:i,hidden:!!c.hidden,
     cover:c.coverOwn||null, blurb:c.blurbOwn||null
   }));
   if(rows.length){
@@ -2776,6 +2790,7 @@ function wcOpenAdd(){
   document.getElementById('wc-form-title').textContent=`Add to ${WC_TAB_LABELS[_wcFormTab]}`;
   document.getElementById('wc-f-title').value='';
   document.getElementById('wc-f-src').value='';
+  const hAdd=document.getElementById('wc-f-hidden');if(hAdd)hAdd.checked=false;
   const nb=document.getElementById('wc-f-blurb');if(nb)nb.value='';
   // nothing to show from ShopMy until the collection has been fetched once
   _wcCoverAuto='';wcCoverStrip([]);wcCoverPick('');
@@ -2792,6 +2807,7 @@ function wcOpenEdit(i){
   document.getElementById('wc-form-title').textContent='Edit Collection';
   document.getElementById('wc-f-title').value=c.title||'';
   document.getElementById('wc-f-src').value=c.src||'';
+  const hEd=document.getElementById('wc-f-hidden');if(hEd)hEd.checked=!!c.hidden;
   const bl=document.getElementById('wc-f-blurb');if(bl)bl.value=c.blurbOwn||'';
   _wcCoverAuto=c.coverAuto||'';
   wcCoverStrip(c.options);
@@ -2887,6 +2903,7 @@ async function wcSaveForm(){
   // Blank means fall back to whatever the nightly ShopMy sync found
   const coverOwn=_wcCover;
   const blurbOwn=(document.getElementById('wc-f-blurb')||{}).value||'';
+  const hidden=!!(document.getElementById('wc-f-hidden')||{}).checked;
   if(document.getElementById('wc-f-group').value==='__new'&&!group){toast('Give the new group a name');return;}
   if(!title){toast('Give the collection a name');return;}
   if(!src){toast('Paste the ShopMy embed code or collection link');return;}
@@ -2898,7 +2915,7 @@ async function wcSaveForm(){
     if(_wcEditIdx===null){
       if(arr.some(c=>c.src===src)){toast(`That collection is already on ${WC_TAB_LABELS[tab]}`);return;}
       const nid=uid();
-      arr.unshift({id:nid,title,src,group,
+      arr.unshift({id:nid,title,src,group,hidden,
         coverOwn:coverOwn.trim(),blurbOwn:blurbOwn.trim(),
         cover:coverOwn.trim(),blurb:blurbOwn.trim(),coverAuto:'',options:[],
         pins:0,created:new Date().toISOString()});
@@ -2909,14 +2926,14 @@ async function wcSaveForm(){
       // Only this row changed, so only this row is written. Sending all 27 on
       // every small edit would mean posting her uploaded covers each time.
       const was=arr[_wcEditIdx];
-      arr[_wcEditIdx]={...was,title,src,group,
+      arr[_wcEditIdx]={...was,title,src,group,hidden,
         coverOwn:coverOwn.trim(),blurbOwn:blurbOwn.trim(),
         cover:coverOwn.trim()||was.coverAuto||'',
         blurb:blurbOwn.trim()||(was.blurbOwn?'':was.blurb)};
       await sbFetch(`wc_carousels?id=eq.${encodeURIComponent(was.id)}`,{
         method:'PATCH',
         headers:{'Prefer':'return=minimal'},
-        body:JSON.stringify({title,src,group,cover:coverOwn.trim()||null,blurb:blurbOwn.trim()||null})
+        body:JSON.stringify({title,src,group,hidden,cover:coverOwn.trim()||null,blurb:blurbOwn.trim()||null})
       });
       _wcData[tab]=arr;wcCacheSave(tab,arr);
       wcCloseForm();renderWeekly();toast('Saved');
@@ -8776,6 +8793,12 @@ async function runFetchImages(){
     <div class="fg">
       <label class="fl">Description <span class="flh">(optional, one line under the title on the card. Blank uses the description from ShopMy)</span></label>
       <input type="text" class="fi" id="wc-f-blurb" maxlength="300" placeholder="e.g. Every Row piece worth knowing about, kept current.">
+    </div>
+    <div class="fg">
+      <label class="fl" style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:12.5px;line-height:1.6;">
+        <input type="checkbox" id="wc-f-hidden" style="margin-top:2px;flex:0 0 auto;">
+        <span>Keep this in the background. Its pieces stay searchable, but it is not shown as a card on the page.</span>
+      </label>
     </div>
     <div class="fg">
       <label class="fl">Cover <span class="flh">(tap a piece from this edit, or use a picture of your own)</span></label>
