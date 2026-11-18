@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18an background-collections -->
+<!-- MTP BUILD 2026-11-18ao gift-grid -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -402,6 +402,40 @@ body.creator .ed-acts{display:flex;}
   .gift-grid .ed-title{font-size:21px;}
   /* The description is the point of a guide card, so it stays on a phone */
   .gift-grid .ed-blurb{display:block;font-size:13px;}
+}
+
+/* ── GIFT GUIDE: her own product grid ──────────────────────────────────
+   The ShopMy embed is their page inside an iframe: no prices in her type,
+   no sorting, and a white background that cannot be changed. For a guide
+   called Under $100, sorting by price is most of the point, so the gift
+   guides draw their own grid from the pins the nightly sync already files. */
+.gg-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:26px 0 20px;padding-bottom:13px;border-bottom:1px solid var(--border);}
+.gg-n{font-family:var(--sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--soft);}
+.gg-sorts{display:flex;align-items:center;gap:4px;flex-wrap:wrap;}
+.gg-sort{background:none;border:1px solid transparent;cursor:pointer;font-family:var(--sans);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:7px 11px;transition:all .15s;}
+.gg-sort:hover{color:var(--ink);}
+.gg-sort.on{color:var(--ink);border-color:var(--border);}
+.gg-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:34px 22px;}
+.gg-item{position:relative;min-width:0;display:flex;flex-direction:column;}
+.gg-ph{display:block;aspect-ratio:4/5;overflow:hidden;background:var(--white);}
+.gg-ph img{width:100%;height:100%;object-fit:cover;display:block;transition:opacity .2s;}
+.gg-item:hover .gg-ph img{opacity:.85;}
+.gg-brand{font-family:var(--sans);font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:var(--soft);margin:13px 0 5px;}
+.gg-name{font-family:var(--serif);font-size:15px;line-height:1.35;color:var(--ink);text-decoration:none;display:block;margin-bottom:6px;}
+.gg-name:hover{text-decoration:underline;text-underline-offset:3px;}
+.gg-price{font-family:var(--sans);font-size:12px;color:var(--mid);margin-top:auto;}
+.gg-empty{font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:50px 0;text-align:center;}
+/* Her arranging controls, never drawn for a reader */
+.gg-acts{position:absolute;top:7px;right:7px;display:none;gap:4px;z-index:3;}
+body.creator .gg-item.gg-move .gg-acts{display:flex;}
+.gg-act{width:25px;height:25px;border:1px solid var(--border);background:var(--white);cursor:pointer;font-family:var(--sans);font-size:10px;line-height:1;color:var(--mid);padding:0;display:flex;align-items:center;justify-content:center;}
+.gg-act:hover:not(:disabled){border-color:var(--ink);color:var(--ink);}
+.gg-act:disabled{opacity:.3;cursor:default;}
+@media(max-width:1100px){.gg-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:28px 18px;}}
+@media(max-width:760px){
+  .gg-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 12px;}
+  .gg-name{font-size:13.5px;}
+  .gg-bar{margin-top:18px;}
 }
 /* The one edit she picked, on its own */
 .ed-detail{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 100px;}
@@ -2454,7 +2488,8 @@ async function wcFetchCloud(t){
     coverAuto:r.cover_auto||'',
     options:Array.isArray(r.cover_options)?r.cover_options:[],
     pins:r.pin_count||0, created:r.created_at||'',
-    hidden:!!r.hidden
+    hidden:!!r.hidden,
+    pinOrder:Array.isArray(r.pin_order)?r.pin_order:null
   }));
   _wcData[t]=arr;wcCacheSave(t,arr);return arr;
 }
@@ -2579,6 +2614,7 @@ function wcOpen(id){
   window.scrollTo(0,0);
 }
 function wcBack(){
+  _ggSort='featured';
   if(_wcDetail&&history.state&&history.state.c){history.back();return;}
   _wcDetail=null;
   try{history.replaceState({tab:wcTab()},'','?tab='+tabToSlug(wcTab()));}catch(e){}
@@ -2642,6 +2678,137 @@ function wcCardHtml(c,i,total){
     </article>`;
 }
 
+
+// ══ GIFT GUIDE GRID ══
+// Drawn from edit_pins, which the nightly ShopMy job already fills, so this
+// shows prices, sorts, and is set in her own type instead of ShopMy's.
+let _ggPins={}, _ggSort='featured', _ggLoading={};
+
+// ShopMy stores price as plain text. Sorting needs a number out of it.
+function ggNum(v){
+  const n=parseFloat(String(v==null?'':v).replace(/[^0-9.]/g,''));
+  return isNaN(n)?null:n;
+}
+function ggMoney(price,currency){
+  const n=ggNum(price);
+  if(n===null)return '';
+  const cur=String(currency||'').toUpperCase();
+  const sym=cur==='EUR'?'€':cur==='GBP'?'£':cur===''||cur==='USD'?'$':'';
+  const body=sym+n.toLocaleString('en-US',{maximumFractionDigits:n%1?2:0});
+  return sym?body:body+' '+cur;
+}
+// Her order wins. Anything she has not placed falls in behind it, in the order
+// ShopMy had them, so a new pin never disappears.
+function ggArrange(pins,order){
+  if(!Array.isArray(order)||!order.length)return pins.slice();
+  const rank={}; order.forEach((id,i)=>{rank[String(id)]=i;});
+  return pins.slice().sort((a,b)=>{
+    const ra=rank[String(a.id)], rb=rank[String(b.id)];
+    if(ra!=null&&rb!=null)return ra-rb;
+    if(ra!=null)return -1;
+    if(rb!=null)return 1;
+    return (a.sort_order||0)-(b.sort_order||0);
+  });
+}
+function ggSorted(c){
+  const pins=_ggPins[c.id]||[];
+  if(_ggSort==='low'||_ggSort==='high'){
+    const dir=_ggSort==='low'?1:-1;
+    return pins.slice().sort((a,b)=>{
+      const x=ggNum(a.price), y=ggNum(b.price);
+      // a piece with no price sits at the end either way, never in the middle
+      if(x===null&&y===null)return 0;
+      if(x===null)return 1;
+      if(y===null)return -1;
+      return (x-y)*dir;
+    });
+  }
+  return ggArrange(pins,c.pinOrder);
+}
+async function ggLoad(c){
+  if(_ggPins[c.id]||_ggLoading[c.id])return;
+  _ggLoading[c.id]=true;
+  try{
+    const rows=await sbFetch('edit_pins?select=id,title,brand,image,link,price,currency,sort_order'
+      +'&carousel_id=eq.'+encodeURIComponent(c.id)+'&order=sort_order.asc&limit=1000');
+    // A collection often opens with a banner pin: no maison, no price, and a
+    // link back to the post. It is not a product, so it is not in the grid.
+    _ggPins[c.id]=(rows||[]).filter(r=>r.link&&/^https?:/.test(r.link)&&String(r.title||'').trim());
+  }catch(e){
+    console.error('[MTP] guide pins failed:',e);
+    _ggPins[c.id]=[];
+  }
+  _ggLoading[c.id]=false;
+  if(_wcDetail===c.id)renderWeekly();
+}
+function ggSetSort(k){
+  if(_ggSort===k)return;
+  _ggSort=k;renderWeekly();
+}
+function ggMove(id,dir){
+  const c=wcList().find(x=>x.id===_wcDetail);
+  if(!c)return;
+  const list=ggArrange(_ggPins[c.id]||[],c.pinOrder);
+  const i=list.findIndex(p=>String(p.id)===String(id));
+  const j=i+dir;
+  if(i<0||j<0||j>=list.length)return;
+  const t=list[i];list[i]=list[j];list[j]=t;
+  c.pinOrder=list.map(p=>p.id);
+  renderWeekly();
+  ggSaveOrder(c);
+}
+let _ggSaveTimer=null;
+function ggSaveOrder(c){
+  clearTimeout(_ggSaveTimer);
+  // She may move several in a row, so write once when she stops
+  _ggSaveTimer=setTimeout(async()=>{
+    try{
+      await sbFetch('wc_carousels?id=eq.'+encodeURIComponent(c.id),{
+        method:'PATCH',headers:{'Prefer':'return=minimal'},
+        body:JSON.stringify({pin_order:c.pinOrder})
+      });
+      toast('Order saved');
+    }catch(e){toast('⚠ Could not save that order');}
+  },700);
+}
+function ggResetOrder(){
+  const c=wcList().find(x=>x.id===_wcDetail);
+  if(!c)return;
+  c.pinOrder=null;
+  renderWeekly();
+  sbFetch('wc_carousels?id=eq.'+encodeURIComponent(c.id),{
+    method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({pin_order:null})
+  }).then(()=>toast('Back to ShopMy order')).catch(()=>toast('⚠ Could not reset'));
+}
+function ggGridHtml(c){
+  const pins=_ggPins[c.id];
+  if(!pins)return '<div class="gg-empty">Loading the pieces…</div>';
+  if(!pins.length)return '<div class="gg-empty">Nothing in this guide yet. Add pieces to it on ShopMy.</div>';
+  const list=ggSorted(c);
+  const movable=isCreator&&_ggSort==='featured';
+  const priced=pins.filter(p=>ggNum(p.price)!==null).length;
+  const sorts=[['featured','Featured'],['low','Price, low to high'],['high','Price, high to low']]
+    .map(([k,label])=>`<button class="gg-sort${_ggSort===k?' on':''}" onclick="ggSetSort('${k}')">${label}</button>`).join('');
+  const reset=(isCreator&&c.pinOrder&&c.pinOrder.length)
+    ? `<button class="gg-sort" onclick="ggResetOrder()" title="Forget my order and use ShopMy's">Reset order</button>`:'';
+  return `<div class="gg-bar">
+      <span class="gg-n">${pins.length} piece${pins.length===1?'':'s'}${priced<pins.length?', '+priced+' with a price':''}</span>
+      <span class="gg-sorts">${sorts}${reset}</span>
+    </div>
+    <div class="gg-grid">${list.map((p,idx)=>`
+      <article class="gg-item${movable?' gg-move':''}">
+        <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored">
+          ${p.image?`<img src="${h(p.image)}" alt="" loading="lazy" onerror="this.remove();">`:''}
+        </a>
+        ${p.brand?`<div class="gg-brand">${h(p.brand)}</div>`:''}
+        <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored">${h(p.title)}</a>
+        <div class="gg-price">${h(ggMoney(p.price,p.currency))}</div>
+        ${movable?`<div class="gg-acts">
+          <button class="gg-act" title="Move earlier" ${idx===0?'disabled':''} onclick="ggMove('${h(String(p.id))}',-1)">◀</button>
+          <button class="gg-act" title="Move later" ${idx===list.length-1?'disabled':''} onclick="ggMove('${h(String(p.id))}',1)">▶</button>
+        </div>`:''}
+      </article>`).join('')}</div>`;
+}
 function wcDetailHtml(c,i,total){
   const d=c.created?new Date(c.created):null;
   const date=d&&!isNaN(d)?d.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
@@ -2654,7 +2821,9 @@ function wcDetailHtml(c,i,total){
         ${meta?`<div class="ed-dmeta">${h(meta)}</div>`:''}
         <h2 class="ed-dtitle">${h(c.title)}</h2>
         ${c.blurb?`<p class="ed-dblurb">${h(c.blurb)}</p>`:''}
-        <iframe class="ed-frame" title="${h(c.title)}" src="${h(wcEmbedSrc(c))}" style="height:${wcFrameHeight(c.pins)}px;" loading="lazy"></iframe>
+        ${wcTab()==='gifts'
+          ? ggGridHtml(c)
+          : `<iframe class="ed-frame" title="${h(c.title)}" src="${h(wcEmbedSrc(c))}" style="height:${wcFrameHeight(c.pins)}px;" loading="lazy"></iframe>`}
         <div class="ed-foot">
           ${id?`<a class="ed-out" href="https://shopmy.us/collections/public/${h(id)}" target="_blank" rel="noopener">Open this edit on ShopMy</a>`:'<span></span>'}
           ${isCreator?`<button class="wc-bar-btn ghost" onclick="wcOpenEdit(${i})">✎ Edit this one</button>`:''}
@@ -2682,6 +2851,8 @@ function renderWeekly(){
     // One edit, nothing else on the page, no filter row competing with it
     if(nav){nav.classList.add('hide');nav.classList.remove('nav2-ed');}
     const c=all.find(x=>x.id===_wcDetail);
+    // A gift guide draws its own grid, so its pieces have to be fetched once
+    if(tab==='gifts')ggLoad(c);
     feed.innerHTML=wcDetailHtml(c,all.indexOf(c),all.length)+subscribeBlock();
   }else{
     wcRenderFilters(all);
