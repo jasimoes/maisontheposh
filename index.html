@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17q banner-in-form -->
+<!-- MTP BUILD 2026-11-17r banner-paste -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -789,6 +789,9 @@ a.sp-pick-name:hover{text-decoration:underline;text-underline-offset:3px;text-de
 .sp-ban-up{display:inline-block;padding:11px 16px;border:1px dashed var(--faint);cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);transition:all .15s;}
 .sp-ban-up:hover{border-color:var(--mid);color:var(--mid);}
 .sp-ban-up input{display:none;}
+.sp-ban.over{outline:2px solid var(--ink);outline-offset:4px;}
+.sp-ban-msg{font-family:var(--sans);font-size:11px;line-height:1.6;color:var(--soft);margin-top:7px;min-height:1px;}
+.sp-ban-msg.bad{color:#A33030;}
 
 /* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
@@ -6366,7 +6369,13 @@ let _spPastedImage=null,_spPastedLink=null;
 // second screen. _spBanner is whatever the form is holding: a file she chose,
 // a link she pasted, the banner lifted out of a sale email, or the one already
 // on the post she is editing.
-let _spBanner='';
+let _spBanner='',_spBanTimer=null;
+function spBanMsg(t,bad){
+  const el=document.getElementById('sp-ban-msg');
+  if(!el)return;
+  el.textContent=t||'';
+  el.classList.toggle('bad',!!bad);
+}
 function spBannerPaint(){
   const img=document.getElementById('sp-f-banprev');
   const rm=document.getElementById('sp-ban-rm');
@@ -6375,6 +6384,13 @@ function spBannerPaint(){
   if(rm)rm.style.display=_spBanner?'inline-block':'none';
   if(txt)txt.textContent=_spBanner?'Choose a different one':'Choose a picture';
 }
+// A link that does not resolve to a picture used to hide the preview and say
+// nothing, which looked exactly like pasting having done nothing at all.
+function spBannerBroke(){
+  const img=document.getElementById('sp-f-banprev');
+  if(img)img.style.display='none';
+  if(_spBanner)spBanMsg('That link did not load as a picture. It may point at a page rather than an image file.',true);
+}
 // fromField stops the link box being rewritten under her while she types
 function spBannerSet(v,fromField){
   _spBanner=String(v||'').trim();
@@ -6382,13 +6398,42 @@ function spBannerSet(v,fromField){
     const f=document.getElementById('sp-f-banlink');
     if(f)f.value=_spBanner.startsWith('data:')?'':_spBanner;
   }
+  spBanMsg(_spBanner&&_spBanner.startsWith('data:')?'Picture ready. It saves with the post.':'');
   spBannerPaint();
+}
+// Typing a url a letter at a time would otherwise try to load h, then ht, then
+// htt, each one failing and flashing the error line.
+function spBannerTyped(v){
+  clearTimeout(_spBanTimer);
+  const t=String(v||'').trim();
+  if(!t){spBannerSet('',true);return;}
+  spBanMsg('');
+  _spBanTimer=setTimeout(()=>spBannerSet(t,true),450);
+}
+// Paste, whichever way she means it: the picture itself off the clipboard, a
+// link to one, or an image copied out of a web page which arrives as markup.
+function spBannerPaste(ev){
+  const dt=ev&&ev.clipboardData;
+  if(!dt)return;
+  let files=[...(dt.files||[])].filter(f=>f.type&&f.type.startsWith('image/'));
+  if(!files.length){
+    files=[...(dt.items||[])].filter(it=>it.kind==='file'&&it.type&&it.type.startsWith('image/'))
+      .map(it=>it.getAsFile()).filter(Boolean);
+  }
+  if(files.length){ev.preventDefault();ev.stopPropagation();spBannerFile(files);return;}
+  const html=dt.getData('text/html')||'';
+  const src=(html.match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1];
+  if(src&&/^https?:/.test(src)){ev.preventDefault();ev.stopPropagation();spBannerSet(src);return;}
+  const text=(dt.getData('text/plain')||'').trim();
+  if(/^(https?:|data:image)/.test(text)){ev.preventDefault();ev.stopPropagation();spBannerSet(text);}
+  // anything else falls through and pastes as ordinary text
 }
 async function spBannerFile(files){
   const f=[...(files||[])].find(x=>x.type&&x.type.startsWith('image/'));
-  if(!f){toast('That was not an image file');return;}
+  if(!f){spBanMsg('That was not an image file.',true);return;}
+  spBanMsg('Reading the picture…');
   const raw=await bdReadFile(f);
-  if(!raw){toast('That image could not be read');return;}
+  if(!raw){spBanMsg('That image could not be read.',true);return;}
   spBannerSet(await compressImage(raw,700));
 }
 
@@ -8402,8 +8447,12 @@ async function runFetchImages(){
     <div class="fg"><label class="fl">Shop link <span class="flh">(this is the Shop Now button, and where a tapped code sends them)</span></label><input type="url" class="fi" id="sp-f-shoplink" placeholder="https://…"></div>
     <div class="fg">
       <label class="fl">Banner <span class="flh">(optional. A pasted email fills this itself)</span></label>
-      <div class="sp-ban">
-        <img id="sp-f-banprev" src="" alt="" style="display:none;" onerror="this.style.display='none';">
+      <div class="sp-ban" id="sp-ban-zone" tabindex="0"
+           onpaste="spBannerPaste(event)"
+           ondragover="event.preventDefault();this.classList.add('over')"
+           ondragleave="this.classList.remove('over')"
+           ondrop="event.preventDefault();this.classList.remove('over');spBannerFile(event.dataTransfer.files)">
+        <img id="sp-f-banprev" src="" alt="" style="display:none;" onerror="spBannerBroke()">
         <div class="sp-ban-side">
           <label class="sp-ban-up">
             <input type="file" accept="image/*" onchange="spBannerFile(this.files);this.value='';">
@@ -8412,7 +8461,8 @@ async function runFetchImages(){
           <button type="button" class="btn-g" id="sp-ban-rm" style="display:none;margin:0;" onclick="spBannerSet('')">Remove</button>
         </div>
       </div>
-      <input type="url" class="fi" id="sp-f-banlink" placeholder="Or paste an image link" style="font-size:12px;margin-top:8px;" oninput="spBannerSet(this.value.trim(),true)">
+      <input type="text" class="fi" id="sp-f-banlink" placeholder="Or paste an image link, or paste the picture itself" style="font-size:12px;margin-top:8px;" autocomplete="off" spellcheck="false" oninput="spBannerTyped(this.value)" onpaste="spBannerPaste(event)">
+      <div class="sp-ban-msg" id="sp-ban-msg"></div>
     </div>
     <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale: what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
     <div class="fg">
