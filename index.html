@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ao gift-grid -->
+<!-- MTP BUILD 2026-11-18ap dashboard -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -404,6 +404,33 @@ body.creator .ed-acts{display:flex;}
   .gift-grid .ed-blurb{display:block;font-size:13px;}
 }
 
+
+/* ── DASHBOARD, hers alone ─────────────────────────────────────────── */
+.st-wrap{max-width:var(--shell);margin:0 auto;padding:0 var(--gutter) 90px;}
+.st-days{display:flex;gap:6px;margin:0 0 26px;}
+.st-day{background:none;border:1px solid transparent;cursor:pointer;font-family:var(--sans);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:7px 12px;}
+.st-day.on{color:var(--ink);border-color:var(--border);}
+.st-tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-bottom:30px;}
+.st-tile{background:var(--white);padding:22px 20px;}
+.st-num{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1;color:var(--ink);}
+.st-lab{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:9px;line-height:1.5;}
+.st-chart{display:flex;align-items:flex-end;gap:3px;height:120px;background:var(--white);padding:16px;margin-bottom:34px;}
+.st-bar{flex:1;background:var(--ink);opacity:.72;min-height:2px;transition:opacity .15s;}
+.st-bar:hover{opacity:1;}
+.st-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 34px;}
+.st-sec{background:var(--white);padding:24px 26px;}
+.st-h{font-family:var(--serif);font-size:19px;font-weight:300;color:var(--ink);margin:0 0 4px;}
+.st-note{font-family:var(--sans);font-size:11px;color:var(--soft);line-height:1.6;margin:0 0 12px;}
+.st-list{list-style:none;margin:10px 0 0;padding:0;counter-reset:st;}
+.st-list li{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--rule-soft,#EFEDE7);font-size:13.5px;color:var(--ink);}
+.st-list li:last-child{border-bottom:none;}
+.st-list li span{min-width:0;overflow:hidden;text-overflow:ellipsis;}
+.st-list li em{display:block;font-style:normal;font-family:var(--sans);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--soft);margin-top:3px;}
+.st-list li b{font-family:var(--sans);font-size:11px;font-weight:400;color:var(--soft);flex:0 0 auto;}
+.st-none{font-family:var(--sans);font-size:11.5px;color:var(--soft);line-height:1.7;margin:10px 0 0;}
+.st-foot{font-family:var(--sans);font-size:11px;color:var(--soft);line-height:1.8;margin-top:34px;max-width:var(--measure);}
+@media(max-width:1000px){.st-tiles{grid-template-columns:repeat(2,minmax(0,1fr));}.st-cols{grid-template-columns:1fr;}}
+@media(max-width:700px){.st-tiles{grid-template-columns:1fr 1fr;gap:10px;}.st-num{font-size:26px;}}
 /* ── GIFT GUIDE: her own product grid ──────────────────────────────────
    The ShopMy embed is their page inside an iframe: no prices in her type,
    no sorting, and a white background that cannot be changed. For a guide
@@ -1658,6 +1685,7 @@ body.bd-viewing .fov{z-index:700;}
     <button class="t1"    data-t1="stockist"    onclick="setT1('stockist',this)">Stockist</button>
     <button class="t1"    data-t1="gifts"       onclick="setT1('gifts',this)">Gift Guides</button>
     <button class="t1"    data-t1="sales"       onclick="setT1('sales',this)">On Sale Now</button>
+    <button class="t1 creator-only" data-t1="stats" onclick="setT1('stats',this)">Dashboard</button>
     <button class="t1 creator-only" data-t1="widgets" onclick="setT1('widgets',this)">My Widgets</button>
   </nav>
 </header>
@@ -2376,6 +2404,7 @@ function slugToTab(s){return SLUG_TAB[s]||s;}
 
 function setT1(val,btn){
   activeT1=val;activeCat='all';
+  if(typeof ev==='function')ev('view',val);
   _boardOpen=null;
   document.querySelectorAll('.t1').forEach(b=>b.classList.remove('on'));
   // About is reached from the row above the logo, which has no .t1 of its own
@@ -2398,6 +2427,7 @@ function setCat(val,btn){activeCat=val;document.querySelectorAll('.t2').forEach(
 function render(){
   const feed=document.getElementById('feed');
   feed.style.display='block';
+  if(activeT1==='stats'){renderStats();return;}
   if(activeT1==='widgets'){renderWidgets();return;}
   if(activeT1==='sales'){renderSales();return;}
   if(activeT1==='about'){(async()=>{if(!_about)await loadAbout();renderAbout();})();return;}
@@ -2450,7 +2480,8 @@ const TAB_META={
   gifts:{t:'Gift Guides | MaisonThePosh',d:'Considered gifts, gathered into one list at a time.'},
   sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
   about:{t:'About & Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
-  widgets:{t:'MaisonThePosh',d:''}
+  widgets:{t:'MaisonThePosh',d:''},
+  stats:{t:'Dashboard | MaisonThePosh',d:''}
 };
 function applyTabMeta(tab){
   const m=TAB_META[tab];
@@ -2606,6 +2637,7 @@ function wcCopyLink(id){
 let _wcDetail=null;
 
 function wcOpen(id){
+  try{const c=wcList().find(x=>x.id===id);if(c)ev('open',c.title,WC_TAB_LABELS[wcTab()]||'');}catch(e){}
   _wcDetail=id;
   // push, not replace: Back out of an edit should land on the wall of covers,
   // the same way Back out of search lands on the page behind it
@@ -2678,6 +2710,95 @@ function wcCardHtml(c,i,total){
     </article>`;
 }
 
+
+
+// ══ WHAT READERS DO ══
+// One row per action, written and forgotten. No cookies and no identifiers:
+// the table only records what happened, never who. Her own visits are skipped,
+// the same way they are skipped in Google Analytics.
+function ev(kind,label,extra){
+  try{
+    if(isCreator)return;
+    const body=JSON.stringify({kind:kind,
+      label:label==null?null:String(label).slice(0,200),
+      extra:extra==null?null:String(extra).slice(0,200)});
+    // keepalive so a click that navigates away still gets recorded
+    fetch(SUPA_URL+'/rest/v1/site_events',{
+      method:'POST',keepalive:true,
+      headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,
+               'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:body
+    }).catch(()=>{});
+  }catch(e){}
+}
+
+// ══ DASHBOARD ══
+let _stDays=30, _stData=null, _stLoading=false;
+async function stLoad(force){
+  if(_stLoading)return;
+  if(_stData&&_stData.days===_stDays&&!force)return;
+  _stLoading=true;
+  try{
+    _stData=await sbFetch('rpc/mtp_stats',{method:'POST',
+      headers:{'Content-Type':'application/json'},body:JSON.stringify({days:_stDays})});
+  }catch(e){console.error('[MTP] stats failed:',e);_stData={error:String(e).slice(0,120)};}
+  _stLoading=false;
+  if(activeT1==='stats')renderStats();
+}
+function stSetDays(d){_stDays=d;_stData=null;renderStats();stLoad(true);}
+function stRows(list,empty,fmt){
+  if(!list||!list.length)return `<p class="st-none">${empty}</p>`;
+  return `<ol class="st-list">${list.map(fmt).join('')}</ol>`;
+}
+function renderStats(){
+  const feed=document.getElementById('feed');
+  const nav=document.getElementById('nav2');
+  if(nav){nav.classList.add('hide');nav.innerHTML='';}
+  const d=_stData;
+  const t=(d&&d.totals)||{};
+  const pick=[7,30,90].map(n=>`<button class="st-day${_stDays===n?' on':''}" onclick="stSetDays(${n})">${n} days</button>`).join('');
+  const days=(d&&d.by_day)||[];
+  const views=days.reduce((a,x)=>a+(x.views||0),0);
+  const peak=days.reduce((a,x)=>Math.max(a,x.views||0),0)||1;
+  const chart=days.length
+    ? `<div class="st-chart">${days.map(x=>`<span class="st-bar" style="height:${Math.max(2,Math.round((x.views||0)/peak*100))}%" title="${h(x.d)}: ${x.views||0}"></span>`).join('')}</div>`
+    : '<p class="st-none">Nothing recorded yet. It starts counting as soon as this build is live.</p>';
+  const tile=(n,label)=>`<div class="st-tile"><div class="st-num">${(n||0).toLocaleString()}</div><div class="st-lab">${label}</div></div>`;
+  feed.innerHTML=`<div class="st-wrap">
+    <div class="ed-hd"><h2>Dashboard</h2><p>Only you can see this page. No cookies, no names, just what happened.</p></div>
+    <div class="st-days">${pick}</div>
+    ${d&&d.error?`<p class="st-none">Could not read the numbers. ${h(d.error)}</p>`:''}
+    <div class="st-tiles">
+      ${tile(views,'page views')}
+      ${tile(t.search,'searches')}
+      ${tile(t.search_empty,'searches with no answer')}
+      ${tile(t.out,'clicks out to a retailer')}
+      ${tile(t.open,'edits and guides opened')}
+    </div>
+    ${chart}
+    <div class="st-cols">
+      <section class="st-sec">
+        <h3 class="st-h">What people searched for</h3>
+        ${stRows(d&&d.top_searches,'No searches yet.',r=>`<li><span>${h(r.t)}</span><b>${r.n}</b></li>`)}
+      </section>
+      <section class="st-sec">
+        <h3 class="st-h">Searches that found nothing</h3>
+        <p class="st-note">Each of these is a reader telling you what to write next.</p>
+        ${stRows(d&&d.empty_searches,'Nothing came up empty.',r=>`<li><span>${h(r.t)}</span><b>${r.n}</b></li>`)}
+      </section>
+      <section class="st-sec">
+        <h3 class="st-h">Pieces clicked through</h3>
+        ${stRows(d&&d.top_out,'No click throughs yet.',r=>`<li><span>${h(r.t)}${r.w?`<em>${h(r.w)}</em>`:''}</span><b>${r.n}</b></li>`)}
+      </section>
+      <section class="st-sec">
+        <h3 class="st-h">Most opened</h3>
+        ${stRows(d&&d.top_open,'Nothing opened yet.',r=>`<li><span>${h(r.t)}</span><b>${r.n}</b></li>`)}
+      </section>
+    </div>
+    <p class="st-foot">Visitor totals, where they came from and which country they are in live in Google Analytics, which has been running on this site all along. This page covers the things only your own site knows.</p>
+  </div>`;
+  if(!_stData&&!_stLoading)stLoad();
+}
 
 // ══ GIFT GUIDE GRID ══
 // Drawn from edit_pins, which the nightly ShopMy job already fills, so this
@@ -2797,11 +2918,11 @@ function ggGridHtml(c){
     </div>
     <div class="gg-grid">${list.map((p,idx)=>`
       <article class="gg-item${movable?' gg-move':''}">
-        <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored">
+        <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">
           ${p.image?`<img src="${h(p.image)}" alt="" loading="lazy" onerror="this.remove();">`:''}
         </a>
         ${p.brand?`<div class="gg-brand">${h(p.brand)}</div>`:''}
-        <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored">${h(p.title)}</a>
+        <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">${h(p.title)}</a>
         <div class="gg-price">${h(ggMoney(p.price,p.currency))}</div>
         ${movable?`<div class="gg-acts">
           <button class="gg-act" title="Move earlier" ${idx===0?'disabled':''} onclick="ggMove('${h(String(p.id))}',-1)">◀</button>
@@ -5645,7 +5766,12 @@ function searchType(q){
   }
   // 220ms, so typing a maison name is one query rather than six
   _sqTimer=setTimeout(()=>{
-    sqRun(q).then(rows=>{if(rows)sqPaint(rows,q);}).catch(e=>{
+    sqRun(q).then(rows=>{
+      if(!rows)return;
+      // Recorded once the answer is known, so a half typed word is not a search
+      ev(rows.length?'search':'search_empty', q.trim().slice(0,120));
+      sqPaint(rows,q);
+    }).catch(e=>{
       console.error('[MTP] search failed:',e);
       body.innerHTML='<div class="sq-empty"><p>Search is not answering just now. Try again in a moment.</p></div>';
     });
@@ -5698,7 +5824,11 @@ function sqGo(go,btnEl){
   // meant coming back to nothing and typing the search again, when what a reader
   // is usually doing is working down a list of results one at a time.
   if(go.out){
-    if(btnEl)btnEl.classList.add('sq-seen');
+    if(btnEl){
+      btnEl.classList.add('sq-seen');
+      const t=btnEl.querySelector('.sq-r-t');
+      ev('out', t?t.textContent:'', 'search');
+    }
     window.open(go.out,'_blank','noopener');
     return;
   }
@@ -8120,7 +8250,7 @@ function restoreFromURL(){
   const lookId=params.get('look');
   const boardId=params.get('board');
   // Set active tab
-  const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets'];
+  const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets','stats'];
   const t=validTabs.includes(tab)?tab:'journal';
   activeT1=t;activeCat='all';
   applyTabMeta(t);
@@ -8216,7 +8346,7 @@ window.addEventListener('popstate',function(e){
     document.getElementById('feed').style.display='block';
     currentListId=null;
     _boardOpen=null;
-    const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets'];
+    const validTabs=['latest','boards','gifts','weekly','stockist','collections','journal','sales','about','widgets','stats'];
     activeT1=validTabs.includes(tab)?tab:'journal';
     activeCat='all';
     document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1===activeT1));
