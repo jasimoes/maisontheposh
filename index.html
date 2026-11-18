@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18y about-cut -->
+<!-- MTP BUILD 2026-11-18z about-cadence -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -629,7 +629,10 @@ body.creator .tl-add-row{display:flex;}
 .ab-list li{font-family:var(--serif);font-size:16px;color:var(--ink);line-height:1.4;padding:11px 0;border-bottom:1px solid var(--rule-soft,#EFEDE7);}
 .ab-list li:first-child{padding-top:0;}
 .ab-list li:last-child{border-bottom:none;padding-bottom:0;}
-.ab-note{font-size:12px;color:var(--soft);line-height:1.7;margin-top:18px;}
+/* How often she publishes is a promise to the reader, not a footnote.
+   It gets a rule above it and the serif, so it reads as a statement. */
+.ab-note{font-family:var(--serif);font-size:17px;font-weight:300;color:var(--ink);line-height:1.6;margin:26px 0 0;padding-top:22px;border-top:1px solid var(--rule-soft,#DEDAD3);max-width:var(--measure);}
+@media(max-width:700px){.ab-note{font-size:15px;}}
 /* The questions people actually ask, set so the question carries and the
    answer reads underneath it rather than beside it */
 .ab-faq{display:flex;flex-direction:column;border-top:1px solid var(--rule-soft,#DEDAD3);}
