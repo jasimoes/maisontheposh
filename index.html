@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17p sales-grid -->
+<!-- MTP BUILD 2026-11-17q banner-in-form -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -782,6 +782,14 @@ a.sp-pick-name:hover{text-decoration:underline;text-underline-offset:3px;text-de
   .sp-pick-row{padding:16px 0 18px;}
   .sp-pick-name{font-size:18px;}
 }
+/* The banner, chosen here rather than on a second screen afterwards */
+.sp-ban{display:flex;gap:14px;align-items:flex-start;}
+.sp-ban img{width:150px;aspect-ratio:3/2;object-fit:cover;background:var(--bg);display:block;flex:0 0 auto;}
+.sp-ban-side{display:flex;flex-direction:column;gap:8px;align-items:flex-start;}
+.sp-ban-up{display:inline-block;padding:11px 16px;border:1px dashed var(--faint);cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--soft);transition:all .15s;}
+.sp-ban-up:hover{border-color:var(--mid);color:var(--mid);}
+.sp-ban-up input{display:none;}
+
 /* MY PICKS form section */
 .sp-pick-fs{border:1px solid var(--border);padding:16px;margin-bottom:20px;}
 .sp-pick-fs-hd{display:flex;align-items:center;justify-content:space-between;gap:10px;}
@@ -6006,6 +6014,7 @@ function openNewPostForm(){
   spInitEndsField(null);
   spResetPasteBox();
   spPickReset(null);
+  spBannerSet('');
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
@@ -6022,6 +6031,7 @@ async function openEditPostForm(id){
   spInitEndsField(p.expires_at);
   spResetPasteBox(true);
   spPickReset(p);
+  spBannerSet(((p.images||[]).find(i=>i.image)||{}).image||'');
   document.getElementById('sp-ov').classList.add('open');
   setTimeout(()=>document.getElementById('sp-f-title').focus(),80);
 }
@@ -6351,6 +6361,37 @@ function spFindExclusions(text){
 
 let _spPastedImage=null,_spPastedLink=null;
 
+// ── The banner, set from the form ──
+// It used to be that a new sale was saved first and the picture added on a
+// second screen. _spBanner is whatever the form is holding: a file she chose,
+// a link she pasted, the banner lifted out of a sale email, or the one already
+// on the post she is editing.
+let _spBanner='';
+function spBannerPaint(){
+  const img=document.getElementById('sp-f-banprev');
+  const rm=document.getElementById('sp-ban-rm');
+  const txt=document.getElementById('sp-ban-up-txt');
+  if(img){img.style.display=_spBanner?'block':'none';if(_spBanner)img.src=_spBanner;}
+  if(rm)rm.style.display=_spBanner?'inline-block':'none';
+  if(txt)txt.textContent=_spBanner?'Choose a different one':'Choose a picture';
+}
+// fromField stops the link box being rewritten under her while she types
+function spBannerSet(v,fromField){
+  _spBanner=String(v||'').trim();
+  if(!fromField){
+    const f=document.getElementById('sp-f-banlink');
+    if(f)f.value=_spBanner.startsWith('data:')?'':_spBanner;
+  }
+  spBannerPaint();
+}
+async function spBannerFile(files){
+  const f=[...(files||[])].find(x=>x.type&&x.type.startsWith('image/'));
+  if(!f){toast('That was not an image file');return;}
+  const raw=await bdReadFile(f);
+  if(!raw){toast('That image could not be read');return;}
+  spBannerSet(await compressImage(raw,700));
+}
+
 function spHandlePaste(e){
   const cb=e.clipboardData||window.clipboardData;
   if(!cb)return;
@@ -6387,6 +6428,8 @@ function spParsePasted(text,html){
     if(ex&&!ex.value){ex.value=spToDateInput(d.endDate);spSyncEndsHint();}
   }
   _spPastedImage=d.image||null;
+  // show her what the email gave us instead of saving it out of sight
+  if(_spPastedImage&&!_spBanner)spBannerSet(_spPastedImage);
   _spPastedLink=d.link||null;
   // so the link the email gave us is visible and editable, not hidden in a variable
   set('sp-f-shoplink',d.link||'');
@@ -6410,15 +6453,16 @@ function spParsePasted(text,html){
 function spResetPasteBox(hide){
   const wrap=document.getElementById('sp-paste-wrap');
   if(wrap)wrap.style.display=hide?'none':'block';
-  _spPastedImage=null;_spPastedLink=null;
+  _spPastedImage=null;_spPastedLink=null;spBannerSet('');
+  const bl=document.getElementById('sp-f-banlink');if(bl)bl.value='';
   const box=document.getElementById('sp-paste');if(box)box.value='';
   const f=document.getElementById('sp-paste-found');if(f){f.classList.remove('on');f.innerHTML='';}
   const c=document.getElementById('sp-paste-clear');if(c)c.style.display='none';
 }
 
 function spClearPaste(){
-  _spPastedImage=null;_spPastedLink=null;
-  ['sp-paste','sp-f-title','sp-f-subtitle','sp-f-body','sp-f-expires'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  _spPastedImage=null;_spPastedLink=null;spBannerSet('');
+  ['sp-paste','sp-f-title','sp-f-subtitle','sp-f-body','sp-f-expires','sp-f-banlink'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   const f=document.getElementById('sp-paste-found');
   f.classList.remove('on');f.innerHTML='';
   document.getElementById('sp-paste-clear').style.display='none';
@@ -6481,13 +6525,23 @@ async function savePostForm(){
       // The shop link lives on the banner. Put it there, making a banner-less
       // row for it if this post has no image yet, so she never has to open
       // Add Image just to set a link.
-      if(p&&shopLink!==spShopLink(p)){
+      if(p){
         const imgs=p.images||(p.images=[]);
-        const target=imgs.find(i=>(i.link||'').trim())||imgs[0];
-        if(target){target.link=shopLink;await savePostImage(target);}
-        else if(shopLink){
-          const img={id:uid(),post_id:p.id,image:'',caption:'',price:'',link:shopLink,sort_order:0};
-          await savePostImage(img);imgs.push(img);
+        const was=((imgs.find(i=>i.image)||{}).image)||'';
+        const linkChanged=shopLink!==spShopLink(p);
+        const banChanged=_spBanner!==was;
+        if(linkChanged||banChanged){
+          // the banner and the shop link live on the same row, so one write
+          // carries both and she never has to open Add Image to set either
+          const target=imgs.find(i=>i.image)||imgs.find(i=>(i.link||'').trim())||imgs[0];
+          if(target){
+            if(banChanged)target.image=_spBanner;
+            if(linkChanged)target.link=shopLink;
+            await savePostImage(target);
+          }else if(_spBanner||shopLink){
+            const img={id:uid(),post_id:p.id,image:_spBanner,caption:'',price:'',link:shopLink,sort_order:0};
+            await savePostImage(img);imgs.push(img);
+          }
         }
       }
     } else {
@@ -6495,10 +6549,10 @@ async function savePostForm(){
       await savePost(newPost);
       // Anything she typed, or the pasted email gave us, becomes the banner in one go
       const firstLink=shopLink||_spPastedLink||'';
-      if(_spPastedImage||firstLink){
+      if(_spBanner||firstLink){
         // a banner lifted out of an email arrives at full size, and one of them
         // was 647KB on its own. Same squeeze an uploaded file already gets.
-        let banner=_spPastedImage||'';
+        let banner=_spBanner||'';
         if(banner.startsWith('data:image'))banner=await compressImage(banner,700);
         const img={id:uid(),post_id:newPost.id,image:banner,caption:'',price:'',link:firstLink,sort_order:0};
         try{await savePostImage(img);newPost.images=[img];}
@@ -8346,6 +8400,20 @@ async function runFetchImages(){
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional, e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
     <div class="fg"><label class="fl">Shop link <span class="flh">(this is the Shop Now button, and where a tapped code sends them)</span></label><input type="url" class="fi" id="sp-f-shoplink" placeholder="https://…"></div>
+    <div class="fg">
+      <label class="fl">Banner <span class="flh">(optional. A pasted email fills this itself)</span></label>
+      <div class="sp-ban">
+        <img id="sp-f-banprev" src="" alt="" style="display:none;" onerror="this.style.display='none';">
+        <div class="sp-ban-side">
+          <label class="sp-ban-up">
+            <input type="file" accept="image/*" onchange="spBannerFile(this.files);this.value='';">
+            <span id="sp-ban-up-txt">Choose a picture</span>
+          </label>
+          <button type="button" class="btn-g" id="sp-ban-rm" style="display:none;margin:0;" onclick="spBannerSet('')">Remove</button>
+        </div>
+      </div>
+      <input type="url" class="fi" id="sp-f-banlink" placeholder="Or paste an image link" style="font-size:12px;margin-top:8px;" oninput="spBannerSet(this.value.trim(),true)">
+    </div>
     <div class="fg"><label class="fl">Your Write-up</label><textarea class="fi fta" id="sp-f-body" rows="6" placeholder="Your take on the sale: what's worth it, what to grab first, any codes or conditions…" style="font-style:normal;min-height:120px;"></textarea></div>
     <div class="fg">
       <label class="fl">Sale ends <span class="flh">(leave empty if it has no end date)</span></label>
