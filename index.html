@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17i tab-scroll -->
+<!-- MTP BUILD 2026-11-17j search-pieces-in-edits -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5186,12 +5186,13 @@ function sqBuild(){
   _sqBuilding=(async()=>{
     const idx=[];
     const grab=async(path)=>{try{return await sbFetch(path)||[];}catch(e){return [];}};
-    const [posts,cols,boards,lists,items]=await Promise.all([
+    const [posts,cols,boards,lists,items,pins]=await Promise.all([
       grab('posts?select=id,slug,title,subtitle,excerpt,body,source,image,published_at,expires_at'),
       grab('wc_carousels?select=id,title,group,tab,blurb,blurb_auto,cover,cover_auto,pin_count'),
       grab('boards?select=id,title,intro,cover,published,look_count'),
       grab('lists?select=id,name,note,t1,cat'),
-      grab('items?select=id,list_id,name,brand,note,image')
+      grab('items?select=id,list_id,name,brand,note,image'),
+      sqPins()
     ]);
     posts.forEach(p=>{
       const isPost=(p.source||'')==='substack';
@@ -5249,6 +5250,32 @@ function sqBuild(){
       seen[key]=row;
       idx.push(row);
     });
+    // The pieces inside the edits. These live on ShopMy, so until the nightly
+    // job started filing them none of the 3,000 were findable.
+    const editName={};
+    cols.forEach(c=>{editName[c.id]=sqClean(c.title);});
+    pins.forEach(pn=>{
+      const title=sqClean(pn.title), brand=sqClean(pn.brand);
+      if(!title)return;
+      const key=sqNorm(title)+'|'+sqNorm(brand);
+      const prev=seen[key];
+      // a piece already on her list, now with somewhere to buy it
+      if(prev){
+        if(!prev.img&&pn.image)prev.img=pn.image;
+        if(!prev.go.out&&pn.link)prev.go={out:pn.link};
+        return;
+      }
+      // an edit named after the maison would otherwise read "Khaite - Khaite"
+      const where=editName[pn.carousel_id]||'';
+      const row={kind:'piece',label:'Pieces',title:title,
+        sub:[brand,sqPrice(pn.price,pn.currency),
+             sqNorm(where)===sqNorm(brand)?'':where].filter(Boolean).join(' \u00b7 '),
+        hay:[pn.title,pn.brand,editName[pn.carousel_id]].join(' '),
+        img:sqClean(pn.image),
+        go:pn.link?{out:pn.link}:{tab:'weekly',c:pn.carousel_id}};
+      seen[key]=row;
+      idx.push(row);
+    });
     _sqIdx=idx;
     return idx;
   })();
@@ -5281,6 +5308,31 @@ function sqPiece(it,maisons){
   if(!title)title=sqClean(it.name);
   const img=sqClean(it.image);
   return {title,brand,img:/^https?:|^data:/.test(img)?img:''};
+}
+// PostgREST hands back a thousand rows at a time and there are over three
+// thousand pieces, so they come in pages, all at once rather than in turn.
+async function sqPins(){
+  const PAGE=1000, cols='id,carousel_id,title,brand,image,link,price,currency';
+  try{
+    const first=await sbFetch('edit_pins?select='+cols+'&order=id.asc&limit='+PAGE);
+    if(!first||first.length<PAGE)return first||[];
+    const rest=await Promise.all([1,2,3,4].map(i=>
+      sbFetch('edit_pins?select='+cols+'&order=id.asc&limit='+PAGE+'&offset='+(i*PAGE)).catch(()=>[])
+    ));
+    return first.concat(...rest.map(r=>r||[]));
+  }catch(e){return [];}
+}
+// Her maisons quote in ten currencies. Printing a dollar sign on all of them
+// would be wrong in the one place a reader actually checks.
+function sqPrice(v,cur){
+  const n=Number(String(v||'').replace(/[^0-9.]/g,''));
+  if(!n||!isFinite(n))return '';
+  const code=String(cur||'').trim().toUpperCase();
+  if(!/^[A-Z]{3}$/.test(code))return '';
+  try{
+    return new Intl.NumberFormat('en-US',{style:'currency',currency:code,
+      maximumFractionDigits:n%1?2:0}).format(n);
+  }catch(e){return code+' '+Math.round(n);}
 }
 function sqNorm(v){
   return String(v||'').toLowerCase()
@@ -5327,7 +5379,7 @@ function sqRender(q){
   body.innerHTML=order.map(k=>{
     const rows=groups[k];
     return '<section class="sq-sec"><h3 class="sq-h">'+h(k)+'<span>'+rows.length+'</span></h3>'
-      +rows.slice(0,8).map(r=>
+      +rows.slice(0,k==='Pieces'?14:8).map(r=>
         '<button class="sq-r" onclick=\'sqGo('+JSON.stringify(r.go).replace(/'/g,'&#39;')+')\'>'
         +(r.img
             ?'<img class="sq-r-img" src="'+h(r.img)+'" alt="" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement(\'span\'),{className:\'sq-r-img sq-r-none\'}));">'
@@ -5335,7 +5387,8 @@ function sqRender(q){
         +'<span class="sq-r-txt"><span class="sq-r-t">'+h(r.title)+'</span>'
         +(r.sub?'<span class="sq-r-s">'+h(r.sub)+'</span>':'')+'</span>'
         +'<span class="sq-r-k">'+h(k)+'</span></button>').join('')
-      +(rows.length>8?'<p class="sq-note" style="padding-top:11px;">and '+(rows.length-8)+' more</p>':'')
+      +(rows.length>(k==='Pieces'?14:8)
+          ?'<p class="sq-note" style="padding-top:11px;">and '+(rows.length-(k==='Pieces'?14:8))+' more</p>':'')
       +'</section>';
   }).join('');
 }
