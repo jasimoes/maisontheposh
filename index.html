@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ab hero-half2 -->
+<!-- MTP BUILD 2026-11-18ad hero-crop -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -586,13 +586,18 @@ body.creator .tl-add-row{display:flex;}
 /* The page opens on one picture, edge to edge, before any writing */
 .ab-hero{margin:0 0 44px;max-width:var(--shell);margin-left:auto;margin-right:auto;padding:0 var(--gutter);}
 .ab-hero img{width:100%;aspect-ratio:28/3;object-fit:cover;object-position:center;display:block;background:var(--bg);}
+/* The crop adjuster in the editor. The box is the real shape of the band on
+   the page, so what she lines up here is exactly what a reader sees. */
+.ab-crop{width:100%;aspect-ratio:28/3;overflow:hidden;background:var(--bg);border:1px solid var(--faint);}
+.ab-crop img{width:100%;height:100%;object-fit:cover;object-position:center 50%;display:block;}
+.ab-crop-r{width:100%;margin-top:14px;accent-color:var(--ink);}
+.ab-crop-h{display:flex;justify-content:space-between;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:2px;}
 .ab-hero figcaption{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-top:10px;}
 
 @media(max-width:860px){
   .ab-hero{margin-bottom:26px;padding:0;}
-  /* A phone is a third the width, so the desktop ratio would leave a 55px
-     sliver. This keeps the band readable at the same visual weight. */
-  .ab-hero img{aspect-ratio:21/9;}
+  /* Same shape as desktop: she wants the band, not the whole photograph. */
+  .ab-hero img{aspect-ratio:28/3;}
 }
 .ab-top{max-width:none;}
 .ab-top .ab-lead,.ab-body p{max-width:var(--measure);}
@@ -3274,7 +3279,7 @@ function renderAbout(){
   // The page opens on one picture running the full width, then the writing
   // with its label stepped out to the left, then her portrait beside it.
   const heroHtml=hero
-    ? `<figure class="ab-hero"><img src="${h(hero)}" alt="${h(a.hero_alt||'')}" onerror="this.closest('.ab-hero').remove()">${a.hero_alt?`<figcaption>${h(a.hero_alt)}</figcaption>`:''}</figure>`
+    ? `<figure class="ab-hero"><img src="${h(hero)}" alt="${h(a.hero_alt||'')}" style="object-position:center ${(()=>{const n=parseFloat(a.hero_pos);return isNaN(n)?50:Math.max(0,Math.min(100,n));})()}%" onerror="this.closest('.ab-hero').remove()">${a.hero_alt?`<figcaption>${h(a.hero_alt)}</figcaption>`:''}</figure>`
     : '';
   const portrait=photo
     ? `<figure class="ab-portrait"><img src="${h(photo)}" alt="${h(a.photo_alt||'Juliana')}" loading="lazy" onerror="this.closest('.ab-portrait').remove()">${a.photo_alt?`<figcaption>${h(a.photo_alt)}</figcaption>`:''}</figure>`
@@ -3335,6 +3340,8 @@ function abOpenEdit(){
   document.getElementById('ab-e-alt').value=a.photo_alt||'';
   document.getElementById('ab-e-photo').value=a.photo||'';
   document.getElementById('ab-e-hero').value=a.hero||'';
+  const hp=document.getElementById('ab-e-heropos');
+  if(hp)hp.value=(a.hero_pos===undefined||a.hero_pos===null||a.hero_pos==='')?'50':String(a.hero_pos);
   const fq=document.getElementById('ab-e-faq');if(fq)fq.value=a.faq||'';
   const ha=document.getElementById('ab-e-heroalt');if(ha)ha.value=a.hero_alt||'';
   abHeroPreview();
@@ -3368,8 +3375,22 @@ function abPhotoClear(){
 function abHeroPreview(){
   const v=document.getElementById('ab-e-hero').value.trim();
   const img=document.getElementById('ab-e-heroprev');
+  const row=document.getElementById('ab-e-croprow');
   if(!img)return;
-  img.src=v;img.style.display=v?'block':'none';
+  img.src=v;
+  if(row)row.style.display=v?'block':'none';
+  abPosMove((document.getElementById('ab-e-heropos')||{value:'50'}).value||'50');
+}
+// Which slice of a tall photo the wide band shows. 0 is the top edge, 100 the
+// bottom. The preview box is the same shape as the band, so this is literal.
+function abPosMove(v){
+  const n=Math.max(0,Math.min(100,parseFloat(v)||0));
+  const img=document.getElementById('ab-e-heroprev');
+  const hid=document.getElementById('ab-e-heropos');
+  const sl=document.getElementById('ab-e-posr');
+  if(img)img.style.objectPosition='center '+n+'%';
+  if(hid)hid.value=String(n);
+  if(sl&&String(sl.value)!==String(n))sl.value=n;
 }
 function abHeroFile(file){
   if(!file||!file.type.startsWith('image/'))return;
@@ -3416,6 +3437,7 @@ async function abSaveEdit(){
     signoff:document.getElementById('ab-e-signoff').value.trim(),
     photo:document.getElementById('ab-e-photo').value.trim(),
     hero:document.getElementById('ab-e-hero').value.trim(),
+    ...(_about&&'hero_pos' in _about?{hero_pos:(document.getElementById('ab-e-heropos')||{value:'50'}).value}:{}),
     faq:(document.getElementById('ab-e-faq')||{value:''}).value.trim(),
     hero_alt:(document.getElementById('ab-e-heroalt')||{value:''}).value.trim(),
     photo_alt:document.getElementById('ab-e-alt').value.trim(),
@@ -8685,8 +8707,13 @@ async function runFetchImages(){
         <p>Click, drag or paste the picture that opens the page</p>
       </div>
       <input type="hidden" id="ab-e-hero">
-      <img id="ab-e-heroprev" class="ab-photo-prev" src="" alt="" style="display:none;width:180px;">
-      <button type="button" class="btn-g" onclick="abHeroClear()" style="margin-top:8px;font-size:10px;letter-spacing:.12em;">Remove it</button>
+      <input type="hidden" id="ab-e-heropos" value="50">
+      <div id="ab-e-croprow" style="display:none;margin-top:12px;">
+        <div class="ab-crop"><img id="ab-e-heroprev" src="" alt=""></div>
+        <input type="range" class="ab-crop-r" id="ab-e-posr" min="0" max="100" value="50" oninput="abPosMove(this.value)">
+        <div class="ab-crop-h"><span>Top of the photo</span><span>Bottom of the photo</span></div>
+      </div>
+      <button type="button" class="btn-g" onclick="abHeroClear()" style="margin-top:10px;font-size:10px;letter-spacing:.12em;">Remove it</button>
     </div>
     <div class="fg"><label class="fl">Caption under it <span class="flh">(optional)</span></label><input type="text" class="fi" id="ab-e-heroalt" placeholder=""></div>
     <div class="fg">
