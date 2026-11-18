@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18aa hero-half -->
+<!-- MTP BUILD 2026-11-18ab hero-half2 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -585,12 +585,14 @@ body.creator .tl-add-row{display:flex;}
 .ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:22px;}
 /* The page opens on one picture, edge to edge, before any writing */
 .ab-hero{margin:0 0 44px;max-width:var(--shell);margin-left:auto;margin-right:auto;padding:0 var(--gutter);}
-.ab-hero img{width:100%;aspect-ratio:42/9;object-fit:cover;object-position:center;display:block;background:var(--bg);}
+.ab-hero img{width:100%;aspect-ratio:28/3;object-fit:cover;object-position:center;display:block;background:var(--bg);}
 .ab-hero figcaption{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-top:10px;}
 
 @media(max-width:860px){
   .ab-hero{margin-bottom:26px;padding:0;}
-  .ab-hero img{aspect-ratio:32/9;}
+  /* A phone is a third the width, so the desktop ratio would leave a 55px
+     sliver. This keeps the band readable at the same visual weight. */
+  .ab-hero img{aspect-ratio:21/9;}
 }
 .ab-top{max-width:none;}
 .ab-top .ab-lead,.ab-body p{max-width:var(--measure);}
