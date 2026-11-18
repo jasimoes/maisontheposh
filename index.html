@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-17r banner-paste -->
+<!-- MTP BUILD 2026-11-18w about-intro -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -583,6 +583,15 @@ body.creator .tl-add-row{display:flex;}
    so the eye has a column to run down. */
 .ab-wrap{max-width:1040px;margin:0 auto;background:var(--white);padding:52px 60px 56px;}
 .ab-eyebrow{font-family:var(--sans);font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--soft);margin-bottom:22px;}
+/* The page opens on one picture, edge to edge, before any writing */
+.ab-hero{margin:0 0 44px;max-width:var(--shell);margin-left:auto;margin-right:auto;padding:0 var(--gutter);}
+.ab-hero img{width:100%;aspect-ratio:21/9;object-fit:cover;display:block;background:var(--bg);}
+.ab-hero figcaption{font-family:var(--sans);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--soft);margin-top:10px;}
+
+@media(max-width:860px){
+  .ab-hero{margin-bottom:26px;padding:0;}
+  .ab-hero img{aspect-ratio:16/9;}
+}
 .ab-top{max-width:none;}
 .ab-top .ab-lead,.ab-body p{max-width:var(--measure);}
 .ab-sec{display:grid;grid-template-columns:190px minmax(0,1fr);column-gap:56px;align-items:start;}
@@ -599,6 +608,9 @@ body.creator .tl-add-row{display:flex;}
    dead column under the opening line. Stacks above the text on a phone. */
 .ab-top{margin-bottom:26px;}
 .ab-top::after{content:'';display:block;clear:both;}
+/* One neutral sentence saying what the site is, before she starts speaking
+   in the first person. Quiet on purpose: it is a fact, not the voice. */
+.ab-intro{font-family:var(--sans);font-size:12.5px;line-height:1.75;letter-spacing:.01em;color:var(--soft);margin:0 0 24px;max-width:62ch;}
 .ab-lead{font-family:var(--serif);font-size:25px;font-weight:300;line-height:1.45;color:var(--ink);margin:0 0 18px;text-wrap:balance;}
 .ab-portrait{float:right;width:190px;margin:4px 0 18px 30px;}
 .ab-portrait img{width:100%;aspect-ratio:4/5;object-fit:cover;object-position:center top;display:block;background:var(--bg);}
@@ -608,6 +620,8 @@ body.creator .tl-add-row{display:flex;}
 /* The one line that carries the thesis gets the ink, nothing else in the run */
 .ab-body p.ab-turn{color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.55;margin:22px 0;}
 .ab-sec{border-top:1px solid var(--border);margin-top:38px;padding-top:30px;}
+/* The first block needs no rule above it: the picture is the divider */
+.ab-sec.ab-sec-first{border-top:none;margin-top:0;padding-top:0;}
 .ab-h{font-family:var(--sans);font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--soft);margin-bottom:18px;}
 /* A list, not a heap of chips. Hairlines keep it even however long the items run */
 .ab-list{list-style:none;margin:0;padding:0;}
@@ -615,6 +629,16 @@ body.creator .tl-add-row{display:flex;}
 .ab-list li:first-child{padding-top:0;}
 .ab-list li:last-child{border-bottom:none;padding-bottom:0;}
 .ab-note{font-size:12px;color:var(--soft);line-height:1.7;margin-top:18px;}
+/* The questions people actually ask, set so the question carries and the
+   answer reads underneath it rather than beside it */
+.ab-faq{display:flex;flex-direction:column;}
+.ab-q{padding:22px 0;border-bottom:1px solid var(--rule-soft,#EFEDE7);}
+.ab-q:first-child{padding-top:0;}
+.ab-q:last-child{border-bottom:none;padding-bottom:0;}
+.ab-q-t{font-family:var(--sans);font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);margin:0 0 12px;line-height:1.5;}
+.ab-q-a{font-family:var(--serif);font-size:17px;font-weight:300;line-height:1.65;color:var(--mid);margin:0 0 10px;max-width:var(--measure);}
+.ab-q-a:last-child{margin-bottom:0;}
+@media(max-width:700px){.ab-q-a{font-size:15px;}.ab-q-t{font-size:10px;}}
 .ab-signoff{font-family:var(--serif);font-size:19px;color:var(--ink);margin-top:30px;font-style:italic;}
 .ab-slot{border:1px dashed var(--faint);background:var(--surf);padding:16px 18px;font-size:11.5px;color:var(--soft);line-height:1.7;}
 body:not(.creator) .ab-slot{display:none;}
@@ -3192,6 +3216,7 @@ let _abSent=false;
 
 // ── About: copy and portrait live in Supabase so she can edit them here ──
 const AB_FALLBACK={
+  intro:"Founded in 2025, Maisontheposh is a USA-based editorial platform built around curated shopping, wardrobe inspiration, and discovering the pieces worth investing in.",
   lead:"I am an engineer with more than 20 years of experience leading hardware product development, and I love fashion.",
   body:"Engineering taught me to be curious about how things are made: why certain decisions get made, how materials perform, how something fits, what it costs, and whether the finished product actually delivers what was intended.\n\nI bring that same curiosity to fashion. I love beautiful clothes and the excitement of a new collection, but looking has never been enough for me. I want to understand it.\n\nWhy did a designer choose that fabric? Why does one coat hang beautifully while another does not? How much cashmere, wool, leather or viscose was actually used? How have prices changed? Does the construction justify the price? And sometimes, why does something that looks extraordinary on the runway make no sense in real life?\n\nThat makes me a fashion engineer.\n\nMaisonThePosh began with my love of shopping and discovering beautiful things, and grew into something much more analytical. I follow the collections, study the runway, try the clothes, compare materials and fit, track prices and availability, and look at the data behind what the maisons are doing.\n\nThe focus is luxury, with high street mixed in. Price alone does not make something good, and affordable does not mean something cannot be beautifully designed.\n\nBecause I actually shop, wear, return, resell and live with many of the things I write about, there is always a practical side to the analysis.\n\nThe question I keep coming back to is simple: is it worth buying, and why?",
   cover:"In-depth maison and collection reviews\nRunway analysis\nMaterial and construction deep dives\nFit notes\nPrice and value comparisons\nShopping edits\nResale and authentication\nStockist research\nThe occasional spreadsheet, when fashion requires one",
@@ -3224,21 +3249,46 @@ function renderAbout(){
     return `<p${turn?' class="ab-turn"':''}>${h(p)}</p>`;
   }).join('');
   const cover=String(a.cover||'').split('\n').map(x=>x.trim()).filter(Boolean);
+  // One block per question: the first line asks it, the rest answer it
+  const faq=String(a.faq||'').split(/\n\s*\n/).map(b=>{
+    const lines=b.split('\n').map(x=>x.trim()).filter(Boolean);
+    if(lines.length<2)return null;
+    return {q:lines[0].replace(/\?*$/,'')+'?',a:lines.slice(1)};
+  }).filter(Boolean);
   const photo=(a.photo||'').trim();
+  const hero=(a.hero||'').trim();
+  // The page opens on one picture running the full width, then the writing
+  // with its label stepped out to the left, then her portrait beside it.
+  const heroHtml=hero
+    ? `<figure class="ab-hero"><img src="${h(hero)}" alt="${h(a.hero_alt||'')}" onerror="this.closest('.ab-hero').remove()">${a.hero_alt?`<figcaption>${h(a.hero_alt)}</figcaption>`:''}</figure>`
+    : '';
   const portrait=photo
     ? `<figure class="ab-portrait"><img src="${h(photo)}" alt="${h(a.photo_alt||'Juliana')}" loading="lazy" onerror="this.closest('.ab-portrait').remove()">${a.photo_alt?`<figcaption>${h(a.photo_alt)}</figcaption>`:''}</figure>`
     : '';
 
   feed.innerHTML=`
+  ${heroHtml}
   <div class="ab-wrap">
-    <div class="ab-eyebrow">About</div>
-    <div class="ab-top">
-      ${portrait}
-      <p class="ab-lead">${h(a.lead||'')}</p>
-      <div class="ab-body">${bodyHtml}</div>
+    <div class="ab-sec ab-sec-first">
+      <div class="ab-h">About Maisontheposh</div>
+      <div class="ab-top">
+        ${portrait}
+        ${(()=>{const t=(a.intro===undefined||a.intro===null)?AB_FALLBACK.intro:a.intro;return t?`<p class="ab-intro">${h(t)}</p>`:'';})()}
+        <p class="ab-lead">${h(a.lead||'')}</p>
+        <div class="ab-body">${bodyHtml}</div>
+        ${a.signoff?`<p class="ab-signoff">${h(a.signoff)}</p>`:''}
+      </div>
     </div>
-    ${a.signoff?`<p class="ab-signoff">${h(a.signoff)}</p>`:''}
     <button class="ab-editbtn" onclick="abOpenEdit()">✎ Edit this page</button>
+
+    ${faq.length?`<div class="ab-sec">
+      <div class="ab-h">Questions</div>
+      <div class="ab-faq">${faq.map(q=>`
+        <div class="ab-q">
+          <h3 class="ab-q-t">${h(q.q)}</h3>
+          ${q.a.map(line=>`<p class="ab-q-a">${h(line)}</p>`).join('')}
+        </div>`).join('')}</div>
+    </div>`:''}
 
     ${cover.length?`<div class="ab-sec">
       <div class="ab-h">What you'll find here</div>
@@ -3261,6 +3311,8 @@ function renderAbout(){
 // ── About editor ──
 function abOpenEdit(){
   const a=_about||AB_FALLBACK;
+  const ai=document.getElementById('ab-e-intro');
+  if(ai)ai.value=(a.intro===undefined||a.intro===null)?AB_FALLBACK.intro:a.intro;
   document.getElementById('ab-e-lead').value=a.lead||'';
   document.getElementById('ab-e-body').value=a.body||'';
   document.getElementById('ab-e-cover').value=a.cover||'';
@@ -3268,6 +3320,10 @@ function abOpenEdit(){
   document.getElementById('ab-e-signoff').value=a.signoff||'';
   document.getElementById('ab-e-alt').value=a.photo_alt||'';
   document.getElementById('ab-e-photo').value=a.photo||'';
+  document.getElementById('ab-e-hero').value=a.hero||'';
+  const fq=document.getElementById('ab-e-faq');if(fq)fq.value=a.faq||'';
+  const ha=document.getElementById('ab-e-heroalt');if(ha)ha.value=a.hero_alt||'';
+  abHeroPreview();
   abPhotoPreview();
   abSaveErr('');
   document.getElementById('ab-ov').classList.add('open');
@@ -3294,6 +3350,26 @@ function abPhotoClear(){
   document.getElementById('ab-e-photo').value='';
   abPhotoPreview();
 }
+// The wide one across the top. Bigger than the portrait, so a bigger ceiling.
+function abHeroPreview(){
+  const v=document.getElementById('ab-e-hero').value.trim();
+  const img=document.getElementById('ab-e-heroprev');
+  if(!img)return;
+  img.src=v;img.style.display=v?'block':'none';
+}
+function abHeroFile(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const r=new FileReader();
+  r.onload=async e=>{
+    document.getElementById('ab-e-hero').value=await compressImage(e.target.result,1400);
+    abHeroPreview();
+  };
+  r.readAsDataURL(file);
+}
+function abHeroClear(){
+  document.getElementById('ab-e-hero').value='';
+  abHeroPreview();
+}
 // Turns a Supabase error into something she can act on, instead of a shrug
 function abSaveProblem(msg){
   const t=String(msg||'');
@@ -3316,12 +3392,18 @@ async function abSaveEdit(){
   abSaveErr('');
   const row={
     id:'main',
+    // Only send this if the column is there. Posting a column Supabase does not
+    // have fails the whole save, and the SQL for it may not be run yet.
+    ...(_about&&'intro' in _about?{intro:(document.getElementById('ab-e-intro')||{value:''}).value.trim()}:{}),
     lead:document.getElementById('ab-e-lead').value.trim(),
     body:document.getElementById('ab-e-body').value.trim(),
     cover:document.getElementById('ab-e-cover').value.trim(),
     cadence:document.getElementById('ab-e-cadence').value.trim(),
     signoff:document.getElementById('ab-e-signoff').value.trim(),
     photo:document.getElementById('ab-e-photo').value.trim(),
+    hero:document.getElementById('ab-e-hero').value.trim(),
+    faq:(document.getElementById('ab-e-faq')||{value:''}).value.trim(),
+    hero_alt:(document.getElementById('ab-e-heroalt')||{value:''}).value.trim(),
     photo_alt:document.getElementById('ab-e-alt').value.trim(),
     updated_at:new Date().toISOString()
   };
@@ -6369,7 +6451,7 @@ let _spPastedImage=null,_spPastedLink=null;
 // second screen. _spBanner is whatever the form is holding: a file she chose,
 // a link she pasted, the banner lifted out of a sale email, or the one already
 // on the post she is editing.
-let _spBanner='',_spBanTimer=null;
+let _spBanner='',_spBanTimer=null,_spBanFallback='';
 function spBanMsg(t,bad){
   const el=document.getElementById('sp-ban-msg');
   if(!el)return;
@@ -6386,14 +6468,53 @@ function spBannerPaint(){
 }
 // A link that does not resolve to a picture used to hide the preview and say
 // nothing, which looked exactly like pasting having done nothing at all.
+// The picture is on screen, so whatever was said about it a moment ago while
+// the server was being asked is no longer true.
+function spBannerOk(){
+  const el=document.getElementById('sp-ban-msg');
+  if(el&&el.classList.contains('bad'))spBanMsg('');
+}
 function spBannerBroke(){
   const img=document.getElementById('sp-f-banprev');
   if(img)img.style.display='none';
-  if(_spBanner)spBanMsg('That link did not load as a picture. It may point at a page rather than an image file.',true);
+  if(_spBanner)spBanMsg(_spBanFallback||'That link did not load as a picture. It may point at a page rather than an image file.',true);
+}
+// A link copied off a retailer page usually will not load anywhere but that
+// retailer: Mytheresa refuses it outright. So the server fetches the bytes
+// once and the picture is stored with the post, which also means it cannot go
+// missing later when the retailer takes the page down.
+async function spBannerFromLink(url){
+  const u=String(url||'').trim();
+  if(!/^https?:/i.test(u))return;
+  _spBanFallback='';
+  spBanMsg('Fetching the picture…');
+  try{
+    const res=await fetch(`${SUPA_URL}/functions/v1/super-action`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${SUPA_KEY}`},
+      body:JSON.stringify({action:'fetch-image',url:u})
+    });
+    const data=await res.json().catch(()=>({}));
+    if(data&&data.ok&&data.dataUrl){
+      spBannerSet(await compressImage(data.dataUrl,700));
+      spBanMsg('Picture saved with the post.');
+      return;
+    }
+    // The server could not take a copy, but the link itself may still display.
+    // Let it try: onload clears this, onerror replaces it with the real reason.
+    _spBanFallback=(data&&data.error)||'That picture could not be fetched.';
+    spBannerSet(u,true);
+    spBanMsg(_spBanFallback,true);
+  }catch(e){
+    _spBanFallback='Could not reach the picture. Check the link.';
+    spBannerSet(u,true);
+    spBanMsg(_spBanFallback,true);
+  }
 }
 // fromField stops the link box being rewritten under her while she types
 function spBannerSet(v,fromField){
   _spBanner=String(v||'').trim();
+  if(!_spBanner)_spBanFallback='';
   if(!fromField){
     const f=document.getElementById('sp-f-banlink');
     if(f)f.value=_spBanner.startsWith('data:')?'':_spBanner;
@@ -6408,7 +6529,10 @@ function spBannerTyped(v){
   const t=String(v||'').trim();
   if(!t){spBannerSet('',true);return;}
   spBanMsg('');
-  _spBanTimer=setTimeout(()=>spBannerSet(t,true),450);
+  _spBanTimer=setTimeout(()=>{
+    if(/^https?:/i.test(t))spBannerFromLink(t);
+    else spBannerSet(t,true);
+  },600);
 }
 // Paste, whichever way she means it: the picture itself off the clipboard, a
 // link to one, or an image copied out of a web page which arrives as markup.
@@ -6423,9 +6547,18 @@ function spBannerPaste(ev){
   if(files.length){ev.preventDefault();ev.stopPropagation();spBannerFile(files);return;}
   const html=dt.getData('text/html')||'';
   const src=(html.match(/<img[^>]+src=["']([^"']+)["']/i)||[])[1];
-  if(src&&/^https?:/.test(src)){ev.preventDefault();ev.stopPropagation();spBannerSet(src);return;}
+  if(src&&/^https?:/.test(src)){
+    ev.preventDefault();ev.stopPropagation();
+    const f=document.getElementById('sp-f-banlink');if(f)f.value=src;
+    clearTimeout(_spBanTimer);spBannerFromLink(src);return;
+  }
   const text=(dt.getData('text/plain')||'').trim();
-  if(/^(https?:|data:image)/.test(text)){ev.preventDefault();ev.stopPropagation();spBannerSet(text);}
+  if(/^data:image/.test(text)){ev.preventDefault();ev.stopPropagation();spBannerSet(text);return;}
+  if(/^https?:/.test(text)){
+    ev.preventDefault();ev.stopPropagation();
+    const f=document.getElementById('sp-f-banlink');if(f)f.value=text;
+    clearTimeout(_spBanTimer);spBannerFromLink(text);
+  }
   // anything else falls through and pastes as ordinary text
 }
 async function spBannerFile(files){
@@ -8452,7 +8585,7 @@ async function runFetchImages(){
            ondragover="event.preventDefault();this.classList.add('over')"
            ondragleave="this.classList.remove('over')"
            ondrop="event.preventDefault();this.classList.remove('over');spBannerFile(event.dataTransfer.files)">
-        <img id="sp-f-banprev" src="" alt="" style="display:none;" onerror="spBannerBroke()">
+        <img id="sp-f-banprev" src="" alt="" style="display:none;" onload="spBannerOk()" onerror="spBannerBroke()">
         <div class="sp-ban-side">
           <label class="sp-ban-up">
             <input type="file" accept="image/*" onchange="spBannerFile(this.files);this.value='';">
@@ -8524,11 +8657,26 @@ async function runFetchImages(){
   <div class="fp" style="max-width:600px;" onclick="event.stopPropagation()">
     <h3 class="ftitle">Edit About</h3>
     <div class="fg">
+      <label class="fl">What the site is <span class="flh">(one small sentence above your opening line)</span></label>
+      <textarea class="fi fta" id="ab-e-intro" rows="2" style="font-style:normal;min-height:56px;" placeholder="Founded in 2025, Maisontheposh is a USA-based editorial platform built around curated shopping, wardrobe inspiration, and discovering the pieces worth investing in."></textarea>
+    </div>
+    <div class="fg">
       <label class="fl">Opening line <span class="flh">(the large one at the top)</span></label>
       <textarea class="fi fta" id="ab-e-lead" rows="2" style="font-style:normal;min-height:56px;"></textarea>
     </div>
     <div class="fg">
-      <label class="fl">Your photo <span class="flh">(optional)</span></label>
+      <label class="fl">Picture across the top <span class="flh">(optional. A wide one works best)</span></label>
+      <div class="dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])abHeroFile(event.dataTransfer.files[0])">
+        <input type="file" accept="image/*" onchange="abHeroFile(this.files[0])">
+        <p>Click, drag or paste the picture that opens the page</p>
+      </div>
+      <input type="hidden" id="ab-e-hero">
+      <img id="ab-e-heroprev" class="ab-photo-prev" src="" alt="" style="display:none;width:180px;">
+      <button type="button" class="btn-g" onclick="abHeroClear()" style="margin-top:8px;font-size:10px;letter-spacing:.12em;">Remove it</button>
+    </div>
+    <div class="fg"><label class="fl">Caption under it <span class="flh">(optional)</span></label><input type="text" class="fi" id="ab-e-heroalt" placeholder=""></div>
+    <div class="fg">
+      <label class="fl">Your photo <span class="flh">(optional, sits beside the writing)</span></label>
       <div class="dropz" ondragover="event.preventDefault();this.classList.add('over')" ondragleave="this.classList.remove('over')" ondrop="event.preventDefault();this.classList.remove('over');if(event.dataTransfer.files[0])abPhotoFile(event.dataTransfer.files[0])">
         <input type="file" accept="image/*" onchange="abPhotoFile(this.files[0])">
         <p>Click, drag or paste a picture of you</p>
@@ -8541,6 +8689,10 @@ async function runFetchImages(){
     <div class="fg">
       <label class="fl">About you <span class="flh">(leave a blank line between paragraphs)</span></label>
       <textarea class="fi fta" id="ab-e-body" rows="14" style="font-style:normal;min-height:280px;"></textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Questions <span class="flh">(first line asks it, the lines under it answer it, blank line between questions)</span></label>
+      <textarea class="fi fta" id="ab-e-faq" rows="12" style="font-style:normal;min-height:220px;" placeholder="Do you only recommend expensive maisons&#10;No. The point is the reasoning, not the price.&#10;&#10;Who is MTP for&#10;Anyone who wants to know why a piece costs what it costs."></textarea>
     </div>
     <div class="fg">
       <label class="fl">What you'll find here <span class="flh">(one per line)</span></label>
