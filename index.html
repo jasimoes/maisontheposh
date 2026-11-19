@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18ap dashboard -->
+<!-- MTP BUILD 2026-11-18aq creator-bar -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1564,12 +1564,11 @@ body.bd-viewing .fov{z-index:700;}
   <div class="creator-bar-left">
     <div class="creator-dot"></div>
     <span>Creator Mode, only you see this</span>
-    <span id="img-counter" style="opacity:.5;font-size:10px;margin-left:6px;"></span>
     <span id="sync-status" style="font-size:10px;margin-left:6px;"></span>
   </div>
   <div style="display:flex;gap:10px;align-items:center;">
-    <button class="btn-toggle-mode" onclick="openImporter()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">↑ Import ShopMy</button>
-    <button class="btn-toggle-mode" id="btn-fetch-images" onclick="runFetchImages()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">⟳ Fetch Images</button>
+    <button class="btn-toggle-mode" onclick="goStats()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">Dashboard</button>
+    <button class="btn-toggle-mode" onclick="wcSyncNow(this)" id="btn-sync-now" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">Sync ShopMy now</button>
     <button class="btn-toggle-mode" onclick="toggleMode()">Preview as Visitor</button>
   </div>
 </div>
@@ -8742,6 +8741,32 @@ function updateImageCounter(){
   const withImg=all.filter(it=>it.image).length;
   const el=document.getElementById('img-counter');
   if(el)el.textContent=`${withImg}/${total} images`;
+}
+
+// The Dashboard button in the creator bar. A selector with quotes in it does
+// not survive being written inline, so it lives here instead.
+function goStats(){
+  const btn=document.querySelector('.t1[data-t1=\'stats\']');
+  setT1('stats',btn);
+}
+// Pulls covers, descriptions and pieces from ShopMy straight away rather than
+// waiting for the 05:23 job. Useful right after filling a guide.
+async function wcSyncNow(btn){
+  const label=btn.textContent;
+  btn.textContent='Syncing…';btn.disabled=true;
+  try{
+    const res=await fetch(SUPA_URL+'/functions/v1/super-action',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+      body:JSON.stringify({action:'sync-covers'})
+    });
+    const d=await res.json();
+    toast(`ShopMy: ${d.written||0} of ${d.found||0} collections updated`);
+    Object.keys(_wcLoaded).forEach(k=>{_wcLoaded[k]=false;});
+    _ggPins={};
+    if(wcIsTab(activeT1))renderWeekly();
+  }catch(e){toast('\u26a0 Sync failed');}
+  btn.textContent=label;btn.disabled=false;
 }
 
 async function runFetchImages(){
