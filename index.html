@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-19at portrait-center -->
+<!-- MTP BUILD 2026-11-19au about-order -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -728,6 +728,17 @@ body.creator .tl-add-row{display:flex;}
    It gets a rule above it and the serif, so it reads as a statement. */
 .ab-note{font-family:var(--serif);font-size:17px;font-weight:700;font-style:italic;color:var(--ink);line-height:1.6;margin:26px 0 0;padding-top:22px;border-top:1px solid var(--rule-soft,#DEDAD3);max-width:var(--measure);}
 @media(max-width:700px){.ab-note{font-size:15px;}}
+/* A reader who has just read why to trust her needs somewhere to go that is
+   not the brand partnership form. */
+.ab-join{border-top:1px solid var(--rule-soft,#DEDAD3);padding-top:24px;max-width:var(--measure);}
+.ab-join-t{font-family:var(--serif);font-size:22px;font-weight:300;line-height:1.35;color:var(--ink);margin:0 0 8px;}
+.ab-join-s{font-family:var(--sans);font-size:12.5px;line-height:1.7;color:var(--soft);margin:0 0 20px;}
+.ab-join-b{font-family:var(--sans);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--white,#fff);background:var(--ink);border:1px solid var(--ink);padding:14px 34px;cursor:pointer;transition:all .18s;}
+.ab-join-b:hover{background:none;color:var(--ink);}
+@media(max-width:700px){
+  .ab-join-t{font-size:19px;}
+  .ab-join-b{width:100%;padding:15px 0;}
+}
 /* The questions people actually ask, set so the question carries and the
    answer reads underneath it rather than beside it */
 .ab-faq{display:flex;flex-direction:column;border-top:1px solid var(--rule-soft,#DEDAD3);}
@@ -3692,6 +3703,12 @@ function renderAbout(){
     </div>
     <button class="ab-editbtn" onclick="abOpenEdit()">✎ Edit this page</button>
 
+    ${cover.length?`<div class="ab-sec">
+      <div class="ab-h">What you'll find here</div>
+      <ul class="ab-list">${cover.map(x=>`<li>${h(x)}</li>`).join('')}</ul>
+      ${a.cadence?`<p class="ab-note">${h(a.cadence)}</p>`:''}
+    </div>`:''}
+
     ${faq.length?`<div class="ab-sec">
       <div class="ab-h">Questions</div>
       <div class="ab-faq">${faq.map(q=>`
@@ -3701,11 +3718,14 @@ function renderAbout(){
         </details>`).join('')}</div>
     </div>`:''}
 
-    ${cover.length?`<div class="ab-sec">
-      <div class="ab-h">What you'll find here</div>
-      <ul class="ab-list">${cover.map(x=>`<li>${h(x)}</li>`).join('')}</ul>
-      ${a.cadence?`<p class="ab-note">${h(a.cadence)}</p>`:''}
-    </div>`:''}
+    <div class="ab-sec">
+      <div class="ab-h">Read it</div>
+      <div class="ab-join">
+        <p class="ab-join-t">The edit arrives on Saturday mornings.</p>
+        <p class="ab-join-s">Free to read. No sponsored enthusiasm, ever.</p>
+        <button class="ab-join-b" onclick="goSubscribe()">Subscribe</button>
+      </div>
+    </div>
 
     <div class="ab-slot" style="margin-top:34px;">
       <strong>Only you can see this.</strong> When you want reach figures on the page, tell me what to publish and I will add a stats row here, subscribers, open rate, monthly clicks, countries, whatever you are comfortable with. Brands ask for these, so it is worth filling in before a pitch.
