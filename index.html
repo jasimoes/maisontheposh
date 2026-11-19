@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-18aq creator-bar -->
+<!-- MTP BUILD 2026-11-19at portrait-center -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -414,9 +414,11 @@ body.creator .ed-acts{display:flex;}
 .st-tile{background:var(--white);padding:22px 20px;}
 .st-num{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1;color:var(--ink);}
 .st-lab{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:9px;line-height:1.5;}
-.st-chart{display:flex;align-items:flex-end;gap:3px;height:120px;background:var(--white);padding:16px;margin-bottom:34px;}
+.st-chart{display:flex;align-items:flex-end;gap:2px;height:120px;background:var(--white);padding:16px;margin-bottom:0;}
 .st-bar{flex:1;background:var(--ink);opacity:.72;min-height:2px;transition:opacity .15s;}
 .st-bar:hover{opacity:1;}
+.st-bar.st-bar-0{opacity:.12;}
+.st-axis{display:flex;justify-content:space-between;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:7px 2px 34px;}
 .st-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 34px;}
 .st-sec{background:var(--white);padding:24px 26px;}
 .st-h{font-family:var(--serif);font-size:19px;font-weight:300;color:var(--ink);margin:0 0 4px;}
@@ -754,7 +756,9 @@ body.creator .ab-editbtn{display:inline-block;}
 .ab-photo-prev{width:110px;display:block;margin-top:10px;background:var(--bg);}
 @media(max-width:700px){
   .ab-wrap{padding:30px 18px 16px;}
-  .ab-portrait{float:none;width:200px;margin:0 0 20px;}
+  /* Stacked above the writing on a phone, so it sits in the middle of the
+     column rather than hard against the left edge. */
+  .ab-portrait{float:none;width:210px;margin:0 auto 22px;text-align:center;}
   .ab-lead{font-size:22px;}
   .ab-list li{font-size:15px;}
 }
@@ -2731,6 +2735,26 @@ function ev(kind,label,extra){
   }catch(e){}
 }
 
+// Everything else that leaves the site: a post opening on Substack, a sale
+// link, a banner, the social links in the header. One listener rather than a
+// hook on every render, so nothing new has to remember to be counted.
+// Anything inside a ShopMy iframe is another origin and cannot be seen here.
+document.addEventListener('click',e=>{
+  try{
+    const a=e.target&&e.target.closest?e.target.closest('a[href]'):null;
+    if(!a||a.dataset.ev)return;
+    const href=a.getAttribute('href')||'';
+    if(!/^https?:/i.test(href))return;
+    let host='';try{host=new URL(href,location.href).host;}catch(_){return;}
+    if(!host||host===location.host)return;
+    const label=(a.getAttribute('title')||a.textContent||'').replace(/\s+/g,' ').trim()
+      || (a.querySelector('img')?(a.querySelector('img').alt||'image'):host);
+    ev('out',label.slice(0,120),TAB_LABEL[activeT1]||activeT1);
+  }catch(_){}
+},true);
+const TAB_LABEL={journal:'Posts',weekly:'The Edits',stockist:'Stockist',gifts:'Gift Guides',
+  sales:'On Sale Now',about:'About',stats:'Dashboard'};
+
 // ══ DASHBOARD ══
 let _stDays=30, _stData=null, _stLoading=false;
 async function stLoad(force){
@@ -2756,12 +2780,24 @@ function renderStats(){
   const d=_stData;
   const t=(d&&d.totals)||{};
   const pick=[7,30,90].map(n=>`<button class="st-day${_stDays===n?' on':''}" onclick="stSetDays(${n})">${n} days</button>`).join('');
-  const days=(d&&d.by_day)||[];
-  const views=days.reduce((a,x)=>a+(x.views||0),0);
-  const peak=days.reduce((a,x)=>Math.max(a,x.views||0),0)||1;
-  const chart=days.length
-    ? `<div class="st-chart">${days.map(x=>`<span class="st-bar" style="height:${Math.max(2,Math.round((x.views||0)/peak*100))}%" title="${h(x.d)}: ${x.views||0}"></span>`).join('')}</div>`
-    : '<p class="st-none">Nothing recorded yet. It starts counting as soon as this build is live.</p>';
+  // Draw the whole window, not only the days that have something in them.
+  // One day of data drawn on its own becomes a single bar the width of the
+  // page, which reads as a chart of nothing.
+  const got={};
+  ((d&&d.by_day)||[]).forEach(x=>{got[x.d]=x.views||0;});
+  const span=_stDays;
+  const series=[];
+  for(let k=span-1;k>=0;k--){
+    const dt=new Date();dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-k);
+    const key=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
+    series.push({d:key,views:got[key]||0});
+  }
+  const views=series.reduce((a,x)=>a+x.views,0);
+  const peak=series.reduce((a,x)=>Math.max(a,x.views),0)||1;
+  const fmtDay=k=>{const [y,m,day]=k.split('-');return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric'});};
+  const chart=`<div class="st-chart">${series.map(x=>
+      `<span class="st-bar${x.views?'':' st-bar-0'}" style="height:${x.views?Math.max(4,Math.round(x.views/peak*100)):2}%" title="${h(fmtDay(x.d))}: ${x.views}"></span>`).join('')}</div>
+    <div class="st-axis"><span>${h(fmtDay(series[0].d))}</span><span>today</span></div>`;
   const tile=(n,label)=>`<div class="st-tile"><div class="st-num">${(n||0).toLocaleString()}</div><div class="st-lab">${label}</div></div>`;
   feed.innerHTML=`<div class="st-wrap">
     <div class="ed-hd"><h2>Dashboard</h2><p>Only you can see this page. No cookies, no names, just what happened.</p></div>
@@ -2917,11 +2953,11 @@ function ggGridHtml(c){
     </div>
     <div class="gg-grid">${list.map((p,idx)=>`
       <article class="gg-item${movable?' gg-move':''}">
-        <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">
+        <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored" data-ev="1" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">
           ${p.image?`<img src="${h(p.image)}" alt="" loading="lazy" onerror="this.remove();">`:''}
         </a>
         ${p.brand?`<div class="gg-brand">${h(p.brand)}</div>`:''}
-        <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">${h(p.title)}</a>
+        <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored" data-ev="1" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">${h(p.title)}</a>
         <div class="gg-price">${h(ggMoney(p.price,p.currency))}</div>
         ${movable?`<div class="gg-acts">
           <button class="gg-act" title="Move earlier" ${idx===0?'disabled':''} onclick="ggMove('${h(String(p.id))}',-1)">◀</button>
