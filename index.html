@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bh disc-plain -->
+<!-- MTP BUILD 2026-11-20bi row-code -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -880,7 +880,9 @@ body.creator .sp-drag-handle{display:flex;}
 .sr-main{grid-area:meta;min-width:0;}
 .sr-title{display:none;}
 .sr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
-.sr-shop{grid-area:shop;justify-self:start;align-self:end;display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
+.sr-acts{grid-area:shop;justify-self:start;align-self:end;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.sr-code{flex:0 0 auto;}
+.sr-shop{display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
 .sr-shop:hover{opacity:.8;}
 /* A row with nothing inside keeps the same column so everything stays in
    line, it just has no arrow and no hover. */
@@ -902,7 +904,7 @@ body.creator .sp-drag-handle{display:flex;}
   /* A name over a 120px picture is not readable, so on a phone the picture
      goes back to a thumbnail and the name sits beside it, with the button on
      its own line underneath. */
-  .sr>summary{grid-template-columns:54px minmax(0,1fr) auto;
+  .sr>summary,.sr-flat>.sr-head{grid-template-columns:54px minmax(0,1fr) auto;
     grid-template-areas:"cover main chev" ". shop ."; column-gap:12px;row-gap:8px;
     align-items:center;padding:12px 12px 14px;}
   .sr-cover{height:54px;}
@@ -912,7 +914,8 @@ body.creator .sp-drag-handle{display:flex;}
   .sr-main{grid-area:main;display:flex;flex-direction:column;gap:6px;}
   .sr-title{display:block;font-family:var(--serif);font-size:16px;font-weight:400;line-height:1.3;color:var(--ink);}
   .sr-chev{margin-top:-4px;}
-  .sr-shop{grid-area:shop;justify-self:start;align-self:auto;padding:9px 20px;font-size:9.5px;}
+  .sr-acts{grid-area:shop;justify-self:start;align-self:auto;}
+  .sr-shop{padding:9px 20px;font-size:9.5px;}
   .sr-open{padding:0 12px 4px;}
 }
 .sp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
@@ -6236,6 +6239,9 @@ function renderSaleEntry(p){
   // has actually picked something get a chevron; the rest are a flat row with
   // their Shop Now button and no way to open them.
   const hasPicks=spPicksOf(p).length>0;
+  // A code is no use sitting inside a description nobody opens. It belongs on
+  // the row, next to the button, and tapping it copies it and opens the sale.
+  const codes=spPromoCodes(p);
   const canOpen=hasPicks||isCreator;
   const ended=spIsEnded(p);
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
@@ -6253,7 +6259,10 @@ function renderSaleEntry(p){
         <span class="sr-title">${h(p.title||'')}</span>
         <span class="sr-meta">${h(meta)}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}</span>
       </span>
-      ${shopLink?`<a class="sr-shop" href="${h(fixUrl(shopLink))}" target="_blank" rel="noopener sponsored" onclick="event.stopPropagation()">Shop now &rarr;</a>`:''}
+      <span class="sr-acts">
+        ${shopLink?`<a class="sr-shop" href="${h(fixUrl(shopLink))}" target="_blank" rel="noopener sponsored" onclick="event.stopPropagation()">Shop now &rarr;</a>`:''}
+        ${codes.length?`<button type="button" class="sp-code sr-code" data-code="${h(codes[0])}" data-link="${h(fixUrl(shopLink)||'')}" onclick="spCopyCode(event,this)" title="Tap to copy this code and open the sale"><span class="sp-code-t">${h(codes[0])}</span>${SP_CODE_ICO}</button>`:''}
+      </span>
       ${canOpen?'<span class="sr-chev" aria-hidden="true"></span>':'<span class="sr-chev-none" aria-hidden="true"></span>'}
     </span>`;
   const shell=`class="sr${ended?' is-ended':''}${canOpen?'':' sr-flat'}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}" data-post-id="${h(p.id)}" draggable="${isCreator?'true':'false'}"`;
@@ -6448,6 +6457,10 @@ function spShopLink(p){
 }
 // The code and the link ride on data attributes rather than inside the onclick
 // string, so an apostrophe in a url cannot break the handler.
+// The two small squares say "this copies" before the tap, and the check
+// replaces them after it.
+const SP_CODE_ICO='<svg class="sp-code-ico i-copy" viewBox="0 0 12 12" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2"/><path d="M8.6 1.6H1.6v7"/></svg>'
+  +'<svg class="sp-code-ico i-ok" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.8 6.4 4.6 9.2 10.2 3"/></svg>';
 function spCodeHtml(text,codes,link){
   const safe=h(text);
   const list=(Array.isArray(codes)?codes:[codes]).filter(Boolean);
@@ -6458,8 +6471,7 @@ function spCodeHtml(text,codes,link){
   // The two small squares say "this copies" before the tap. The check replaces
   // them after it, and stays, because the shop opens in a new tab and a flash
   // of confirmation would be gone before the reader looked back.
-  const ico='<svg class="sp-code-ico i-copy" viewBox="0 0 12 12" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.2"/><path d="M8.6 1.6H1.6v7"/></svg>'
-    +'<svg class="sp-code-ico i-ok" viewBox="0 0 12 12" aria-hidden="true"><path d="M1.8 6.4 4.6 9.2 10.2 3"/></svg>';
+  const ico=SP_CODE_ICO;
   return safe.replace(rx,(m,pre,tok)=>
     pre+`<button type="button" class="sp-code" data-code="${h(tok)}" data-link="${h(link||'')}" onclick="spCopyCode(event,this)" title="${tip}"><span class="sp-code-t">${h(tok)}</span>${ico}</button>`);
 }
