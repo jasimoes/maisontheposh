@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bd cover-rows -->
+<!-- MTP BUILD 2026-11-20bf two-up -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -842,7 +842,21 @@ body.creator .sp-drag-handle{display:flex;}
 /* ══ ON SALE NOW: COMPACT ROWS ══
    One row per sale, about 100px, so 53 of them can be scanned instead of
    scrolled past. Opening a row shows the whole card. Only one opens at a time. */
+/* On a wide screen a single column of 129px rows left most of the page empty,
+   so they run 2 up. An open row spans both columns, because the card inside it
+   wants the full width. */
 .sp-list{display:flex;flex-direction:column;border-top:1px solid var(--border);}
+@media(min-width:1100px){
+  .sp-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;border-top:none;align-items:start;}
+  .sp-list>.sr{border:1px solid var(--border);}
+  .sp-list>.sr[open]{grid-column:1 / -1;}
+  .sr>summary{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;padding:12px 14px;}
+  .sr[open]>summary{grid-template-columns:260px minmax(0,1fr) auto;column-gap:26px;padding:12px 18px;}
+  .sr-cover{height:96px;}
+  .sr-cover-t{font-size:15px;left:12px;right:12px;bottom:9px;}
+  .sr[open] .sr-cover{height:104px;}
+  .sr[open] .sr-cover-t{font-size:17px;}
+}
 .sr{border-bottom:1px solid var(--border);background:var(--white);}
 .sr.is-ended{opacity:.62;}
 /* The sale name sits over its own picture, and the button sits where the name
@@ -931,7 +945,9 @@ body.creator .sp-drag-handle{display:flex;}
 .sp-code-hint.done{color:var(--go);}
 .sp-code-hint.done::before{background:var(--go);}
 /* How deep the sale is, next to the date, so 24 of them can be read at a glance */
-.sp-disc{display:inline-block;margin-left:12px;padding:2px 7px;background:var(--ink);color:#fff;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
+/* An outline, not a black block: a solid black badge sitting next to the
+   black Shop Now button made the row read as two buttons. */
+.sp-disc{display:inline-block;margin-left:12px;padding:2px 8px;background:none;color:var(--ink);border:1px solid var(--ink);font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
 @media(max-width:600px){.sp-disc{margin-left:8px;}}
 /* Scanning 24 sales. Same row of chips as the board. */
 /* It stays under the site header while the feed scrolls, so a reader 14 sales
