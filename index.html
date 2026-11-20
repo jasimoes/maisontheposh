@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bj skip-me -->
+<!-- MTP BUILD 2026-11-20bk price-note -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -453,6 +453,7 @@ body.creator .ed-acts{display:flex;}
 .gg-name{font-family:var(--serif);font-size:15px;line-height:1.35;color:var(--ink);text-decoration:none;display:block;margin-bottom:6px;}
 .gg-name:hover{text-decoration:underline;text-underline-offset:3px;}
 .gg-price{font-family:var(--sans);font-size:12px;color:var(--mid);margin-top:auto;}
+.gg-note{font-family:var(--sans);font-size:10.5px;line-height:1.6;color:var(--soft);margin:-8px 0 20px;}
 .gg-empty{font-family:var(--sans);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);padding:50px 0;text-align:center;}
 /* Her arranging controls, never drawn for a reader */
 .gg-acts{position:absolute;top:7px;right:7px;display:none;gap:4px;z-index:3;}
@@ -3069,6 +3070,7 @@ function ggGridHtml(c){
       <span class="gg-n">${pins.length} piece${pins.length===1?'':'s'}${priced<pins.length?', '+priced+' with a price':''}</span>
       <span class="gg-sorts">${sorts}${reset}</span>
     </div>
+    ${priced?`<p class="gg-note">Prices are the maison's own, and a piece may be less in a sale.</p>`:''}
     <div class="gg-grid">${list.map((p,idx)=>`
       <article class="gg-item${movable?' gg-move':''}">
         <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored" data-ev="1" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">
