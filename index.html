@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bg picks-only -->
+<!-- MTP BUILD 2026-11-20bh disc-plain -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -952,9 +952,9 @@ body.creator .sp-drag-handle{display:flex;}
 .sp-code-hint.done{color:var(--go);}
 .sp-code-hint.done::before{background:var(--go);}
 /* How deep the sale is, next to the date, so 24 of them can be read at a glance */
-/* An outline, not a black block: a solid black badge sitting next to the
-   black Shop Now button made the row read as two buttons. */
-.sp-disc{display:inline-block;margin-left:12px;padding:2px 8px;background:none;color:var(--ink);border:1px solid var(--ink);font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
+/* No box at all. It is one more thing on a row that already has a button;
+   the ink color against the grey meta is enough to make it read. */
+.sp-disc{display:inline-block;margin-left:12px;padding:0;background:none;border:none;color:var(--ink);font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-variant-numeric:lining-nums tabular-nums;}
 @media(max-width:600px){.sp-disc{margin-left:8px;}}
 /* Scanning 24 sales. Same row of chips as the board. */
 /* It stays under the site header while the feed scrolls, so a reader 14 sales
