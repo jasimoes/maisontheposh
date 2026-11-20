@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bf two-up -->
+<!-- MTP BUILD 2026-11-20bg picks-only -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -850,7 +850,7 @@ body.creator .sp-drag-handle{display:flex;}
   .sp-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;border-top:none;align-items:start;}
   .sp-list>.sr{border:1px solid var(--border);}
   .sp-list>.sr[open]{grid-column:1 / -1;}
-  .sr>summary{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;padding:12px 14px;}
+  .sr>summary,.sr-flat>.sr-head{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;padding:12px 14px;}
   .sr[open]>summary{grid-template-columns:260px minmax(0,1fr) auto;column-gap:26px;padding:12px 18px;}
   .sr-cover{height:96px;}
   .sr-cover-t{font-size:15px;left:12px;right:12px;bottom:9px;}
@@ -862,11 +862,12 @@ body.creator .sp-drag-handle{display:flex;}
 /* The sale name sits over its own picture, and the button sits where the name
    used to, so the thing to click is next to what you just read rather than at
    the far side of the screen. */
-.sr>summary{list-style:none;cursor:pointer;display:grid;
+.sr>summary,.sr-flat>.sr-head{list-style:none;cursor:pointer;display:grid;
   grid-template-columns:260px minmax(0,1fr) auto;
   grid-template-areas:"cover shop chev" "cover meta chev";
   column-gap:26px;row-gap:9px;align-content:center;padding:12px 18px;transition:background .14s;}
 .sr>summary::-webkit-details-marker{display:none;}
+.sr-flat>.sr-head{cursor:default;}
 .sr>summary::marker{content:'';}
 .sr>summary:hover{background:rgba(0,0,0,.018);}
 .sr-cover{grid-area:cover;position:relative;height:104px;overflow:hidden;background:var(--surf);display:block;}
@@ -881,13 +882,19 @@ body.creator .sp-drag-handle{display:flex;}
 .sr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
 .sr-shop{grid-area:shop;justify-self:start;align-self:end;display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
 .sr-shop:hover{opacity:.8;}
+/* A row with nothing inside keeps the same column so everything stays in
+   line, it just has no arrow and no hover. */
+.sr-chev-none{grid-area:chev;width:10px;height:10px;display:block;}
+.sr.sr-flat>.sr-head{cursor:default;}
+.sr.sr-flat:hover{background:none;}
+.sr-flat .sr-head{list-style:none;cursor:default;display:grid;}
 .sr-chev{grid-area:chev;align-self:center;width:10px;height:10px;border-right:1.3px solid var(--soft);border-bottom:1.3px solid var(--soft);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s;}
 .sr[open] .sr-chev{transform:rotate(225deg);margin-top:4px;}
 .sr-open{padding:0 18px 4px;}
 /* the open half is already inside the row, so it drops its own frame */
 .sp.sp-inner{background:none;padding:0 0 18px;}
 @media(max-width:860px){
-  .sr>summary{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;}
+  .sr>summary,.sr-flat>.sr-head{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;}
   .sr-cover{height:92px;}
   .sr-cover-t{font-size:15px;}
 }
@@ -6206,12 +6213,12 @@ function renderPostEntry(p,inner){
     ${inner?'':dragHandle}
     ${inner?'':`<div class="sp-meta">${date}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}${spCheckedLine(p)}</div>`}
     ${inner?'':`<div class="sp-title">${spCodeHtml(p.title,code,shopLink)}</div>`}
-    ${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code,shopLink)+'</div>':''}
-    ${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code,shopLink)+'</div>':''}
+    ${inner&&!isCreator?'':`${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code,shopLink)+'</div>':''}`}
+    ${inner&&!isCreator?'':`${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code,shopLink)+'</div>':''}`}
     ${spCodeHint(code,shopLink)}
     ${creatorActs}
-    <div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>
-    ${addImgBtn}
+    ${inner&&!isCreator?'':`<div class="sp-images" id="sp-images-${h(p.id)}">${imagesHtml}</div>`}
+    ${inner&&!isCreator?'':addImgBtn}
     ${renderPicks(p)}
   </div>`;
 }
@@ -6225,6 +6232,11 @@ function spThumb(p){
   return img?img.image:'';
 }
 function renderSaleEntry(p){
+  // A row that opens onto nothing is a broken promise. Only the sales where she
+  // has actually picked something get a chevron; the rest are a flat row with
+  // their Shop Now button and no way to open them.
+  const hasPicks=spPicksOf(p).length>0;
+  const canOpen=hasPicks||isCreator;
   const ended=spIsEnded(p);
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
   const disc=spDiscountOf(p);
@@ -6232,9 +6244,7 @@ function renderSaleEntry(p){
   const shopLink=spShopLink(p);
   const cat=spCatOf(p);
   const meta=[date,cat?spCatLabel(cat):''].filter(Boolean).join(' \u00b7 ');
-  return `<details class="sr${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}"
-      data-post-id="${h(p.id)}" draggable="${isCreator?'true':'false'}" ontoggle="srToggled(this)">
-    <summary class="sr-head">
+  const head=`<span class="sr-head">
       <span class="sr-cover${thumb?'':' is-blank'}">
         ${thumb?`<img src="${h(thumb)}" alt="" loading="lazy" onerror="this.remove()">`:''}
         <span class="sr-cover-t">${h(p.title||'')}</span>
@@ -6244,8 +6254,12 @@ function renderSaleEntry(p){
         <span class="sr-meta">${h(meta)}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}</span>
       </span>
       ${shopLink?`<a class="sr-shop" href="${h(fixUrl(shopLink))}" target="_blank" rel="noopener sponsored" onclick="event.stopPropagation()">Shop now &rarr;</a>`:''}
-      <span class="sr-chev" aria-hidden="true"></span>
-    </summary>
+      ${canOpen?'<span class="sr-chev" aria-hidden="true"></span>':'<span class="sr-chev-none" aria-hidden="true"></span>'}
+    </span>`;
+  const shell=`class="sr${ended?' is-ended':''}${canOpen?'':' sr-flat'}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}" data-post-id="${h(p.id)}" draggable="${isCreator?'true':'false'}"`;
+  if(!canOpen)return `<div ${shell}>${head}</div>`;
+  return `<details ${shell} ontoggle="srToggled(this)">
+    ${head.replace('<span class="sr-head">','<summary class="sr-head">').replace(/<\/span>$/,'</summary>')}
     <div class="sr-open">${renderPostEntry(p,true)}</div>
   </details>`;
 }
