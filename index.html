@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bc phone-shop -->
+<!-- MTP BUILD 2026-11-20bd cover-rows -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -845,36 +845,54 @@ body.creator .sp-drag-handle{display:flex;}
 .sp-list{display:flex;flex-direction:column;border-top:1px solid var(--border);}
 .sr{border-bottom:1px solid var(--border);background:var(--white);}
 .sr.is-ended{opacity:.62;}
-.sr>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:18px;padding:14px 18px;transition:background .14s;}
+/* The sale name sits over its own picture, and the button sits where the name
+   used to, so the thing to click is next to what you just read rather than at
+   the far side of the screen. */
+.sr>summary{list-style:none;cursor:pointer;display:grid;
+  grid-template-columns:260px minmax(0,1fr) auto;
+  grid-template-areas:"cover shop chev" "cover meta chev";
+  column-gap:26px;row-gap:9px;align-content:center;padding:12px 18px;transition:background .14s;}
 .sr>summary::-webkit-details-marker{display:none;}
 .sr>summary::marker{content:'';}
 .sr>summary:hover{background:rgba(0,0,0,.018);}
-.sr-thumb{flex:0 0 auto;width:68px;height:68px;overflow:hidden;background:var(--surf);display:block;}
-.sr-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
-.sr-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
-.sr-title{font-family:var(--serif);font-size:19px;font-weight:400;line-height:1.3;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sr-cover{grid-area:cover;position:relative;height:104px;overflow:hidden;background:var(--surf);display:block;}
+.sr-cover.is-blank{background:var(--band-ink,#3A3732);}
+.sr-cover img{width:100%;height:100%;object-fit:cover;display:block;}
+/* a scrim, so a white name stays readable over a pale photograph */
+.sr-cover::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.08) 0%,rgba(0,0,0,.52) 100%);}
+.sr-cover-t{position:absolute;left:14px;right:14px;bottom:11px;z-index:2;color:#fff;font-family:var(--serif);font-size:17px;font-weight:400;line-height:1.25;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;text-shadow:0 1px 3px rgba(0,0,0,.45);}
+.sr-main{grid-area:meta;min-width:0;}
+.sr-title{display:none;}
 .sr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
-/* Same black button the card has always used, so the row reads as the card */
-.sr-shop{flex:0 0 auto;display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
+.sr-shop{grid-area:shop;justify-self:start;align-self:end;display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
 .sr-shop:hover{opacity:.8;}
-.sr-chev{flex:0 0 auto;width:10px;height:10px;border-right:1.3px solid var(--soft);border-bottom:1.3px solid var(--soft);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s;}
+.sr-chev{grid-area:chev;align-self:center;width:10px;height:10px;border-right:1.3px solid var(--soft);border-bottom:1.3px solid var(--soft);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s;}
 .sr[open] .sr-chev{transform:rotate(225deg);margin-top:4px;}
 .sr-open{padding:0 18px 4px;}
 /* the open half is already inside the row, so it drops its own frame */
 .sp.sp-inner{background:none;padding:0 0 18px;}
-@media(max-width:700px){
-  /* A grid rather than a wrapped flex row: the button has a cell of its own on
-     a second line, lined up under the title, and cannot stretch off the edge. */
-  .sr>summary{display:grid;grid-template-columns:54px minmax(0,1fr) auto;
-    grid-template-areas:"thumb main chev" ". shop ."; column-gap:12px;row-gap:8px;
-    align-items:center;padding:12px 12px 14px;}
-  .sr-thumb{grid-area:thumb;width:54px;height:54px;}
-  .sr-main{grid-area:main;}
-  .sr-chev{grid-area:chev;margin-top:-4px;}
-  .sr-shop{grid-area:shop;justify-self:start;padding:9px 20px;font-size:9.5px;}
-  .sr-title{font-size:16px;white-space:normal;}
-  .sr-open{padding:0 12px 4px;}
+@media(max-width:860px){
+  .sr>summary{grid-template-columns:200px minmax(0,1fr) auto;column-gap:18px;}
+  .sr-cover{height:92px;}
+  .sr-cover-t{font-size:15px;}
 }
+@media(max-width:700px){
+  /* A name over a 120px picture is not readable, so on a phone the picture
+     goes back to a thumbnail and the name sits beside it, with the button on
+     its own line underneath. */
+  .sr>summary{grid-template-columns:54px minmax(0,1fr) auto;
+    grid-template-areas:"cover main chev" ". shop ."; column-gap:12px;row-gap:8px;
+    align-items:center;padding:12px 12px 14px;}
+  .sr-cover{height:54px;}
+  .sr-cover::after{display:none;}
+  .sr-cover-t{display:none;}
+  .sr-cover.is-blank{background:var(--surf);}
+  .sr-main{grid-area:main;display:flex;flex-direction:column;gap:6px;}
+  .sr-title{display:block;font-family:var(--serif);font-size:16px;font-weight:400;line-height:1.3;color:var(--ink);}
+  .sr-chev{margin-top:-4px;}
+  .sr-shop{grid-area:shop;justify-self:start;align-self:auto;padding:9px 20px;font-size:9.5px;}
+  .sr-open{padding:0 12px 4px;}
 }
 .sp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
 .sp-cols > .sp{min-width:0;}
@@ -6201,7 +6219,10 @@ function renderSaleEntry(p){
   return `<details class="sr${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}"
       data-post-id="${h(p.id)}" draggable="${isCreator?'true':'false'}" ontoggle="srToggled(this)">
     <summary class="sr-head">
-      <span class="sr-thumb">${thumb?`<img src="${h(thumb)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>
+      <span class="sr-cover${thumb?'':' is-blank'}">
+        ${thumb?`<img src="${h(thumb)}" alt="" loading="lazy" onerror="this.remove()">`:''}
+        <span class="sr-cover-t">${h(p.title||'')}</span>
+      </span>
       <span class="sr-main">
         <span class="sr-title">${h(p.title||'')}</span>
         <span class="sr-meta">${h(meta)}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}</span>
