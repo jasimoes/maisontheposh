@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bi row-code -->
+<!-- MTP BUILD 2026-11-20bj skip-me -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2829,6 +2829,10 @@ function wcCardHtml(c,i,total){
 function ev(kind,label,extra){
   try{
     if(isCreator)return;
+    // Her own devices are already marked for Google Analytics the first time
+    // she signs in to creator mode. Honour the same mark here, otherwise her
+    // phone counts as a visitor every time she checks the site.
+    if(localStorage.getItem('mtp_no_track')==='1')return;
     const body=JSON.stringify({kind:kind,
       label:label==null?null:String(label).slice(0,200),
       extra:extra==null?null:String(extra).slice(0,200)});
