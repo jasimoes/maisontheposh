@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-19au about-order -->
+<!-- MTP BUILD 2026-11-20ba sale-rows -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -839,6 +839,35 @@ body.creator .sp-drag-handle{display:flex;}
    ends in white inside its own card rather than in a ragged grey step. */
 /* 3 across on a full desktop. At 2 the cards ran about 620px wide, which made
    a one line sale look like a billboard. 2 again on a narrow laptop, 1 on a phone. */
+/* ══ ON SALE NOW: COMPACT ROWS ══
+   One row per sale, about 100px, so 53 of them can be scanned instead of
+   scrolled past. Opening a row shows the whole card. Only one opens at a time. */
+.sp-list{display:flex;flex-direction:column;border-top:1px solid var(--border);}
+.sr{border-bottom:1px solid var(--border);background:var(--white);}
+.sr.is-ended{opacity:.62;}
+.sr>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:18px;padding:14px 18px;transition:background .14s;}
+.sr>summary::-webkit-details-marker{display:none;}
+.sr>summary::marker{content:'';}
+.sr>summary:hover{background:rgba(0,0,0,.018);}
+.sr-thumb{flex:0 0 auto;width:68px;height:68px;overflow:hidden;background:var(--surf);display:block;}
+.sr-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.sr-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+.sr-title{font-family:var(--serif);font-size:19px;font-weight:400;line-height:1.3;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
+.sr-shop{flex:0 0 auto;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--go,#2F6B4F);text-decoration:none;border-bottom:1px solid rgba(47,107,79,.3);padding-bottom:2px;}
+.sr-shop:hover{border-bottom-color:var(--go,#2F6B4F);}
+.sr-chev{flex:0 0 auto;width:10px;height:10px;border-right:1.3px solid var(--soft);border-bottom:1.3px solid var(--soft);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s;}
+.sr[open] .sr-chev{transform:rotate(225deg);margin-top:4px;}
+.sr-open{padding:0 18px 4px;}
+/* the open half is already inside the row, so it drops its own frame */
+.sp.sp-inner{background:none;padding:0 0 18px;}
+@media(max-width:700px){
+  .sr>summary{gap:12px;padding:12px 12px;}
+  .sr-thumb{width:54px;height:54px;}
+  .sr-title{font-size:16px;white-space:normal;}
+  .sr-shop{display:none;}
+  .sr-open{padding:0 12px 4px;}
+}
 .sp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
 .sp-cols > .sp{min-width:0;}
 /* At 3 up a card is about 400px, so the generous padding and the 26px title
@@ -881,6 +910,17 @@ body.creator .sp-drag-handle{display:flex;}
 /* Scanning 24 sales. Same row of chips as the board. */
 /* It stays under the site header while the feed scrolls, so a reader 14 sales
    down can still switch filters without going back to the top. */
+/* The category row sits above the urgency row. Not sticky: two sticky rows
+   eat most of a phone screen, and the second one is the one you scroll with. */
+.sp-cats{display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin:0 0 6px;}
+.sp-cat{background:none;border:1px solid transparent;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:8px 13px;transition:all .15s;white-space:nowrap;}
+.sp-cat:hover{color:var(--ink);}
+.sp-cat.on{color:var(--ink);border-color:var(--border);background:var(--white);}
+@media(max-width:700px){
+  .sp-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:4px;}
+  .sp-cats::-webkit-scrollbar{display:none;}
+  .sp-cat{font-size:9.5px;padding:8px 10px;}
+}
 .sp-filters{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 0 26px;position:sticky;top:var(--header-h,122px);z-index:120;background:var(--white);}
 .sp-filters::-webkit-scrollbar{display:none;}
 .sp-filter{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);background:none;border:none;border-bottom:1.5px solid transparent;padding:10px 13px;cursor:pointer;white-space:nowrap;transition:all .18s;margin-bottom:-1px;font-weight:400;}
@@ -1584,7 +1624,7 @@ body.bd-viewing .fov{z-index:700;}
   <div style="display:flex;gap:10px;align-items:center;">
     <button class="btn-toggle-mode" onclick="goStats()" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">Dashboard</button>
     <button class="btn-toggle-mode" onclick="wcSyncNow(this)" id="btn-sync-now" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.3);">Sync ShopMy now</button>
-    <button class="btn-toggle-mode" onclick="toggleMode()">Preview as Visitor</button>
+    <button class="btn-toggle-mode" id="btn-preview-mode" onclick="toggleMode()">Preview as Visitor</button>
   </div>
 </div>
 
@@ -2265,7 +2305,9 @@ function toggleMode(){
     sessionStorage.removeItem('mtp_creator');
     document.body.classList.remove('creator');
     document.getElementById('creator-bar').classList.add('hide');
-    document.querySelector('.btn-toggle-mode').textContent='Preview as Visitor';
+    // by id, not by class: querySelector picked the first button in the bar,
+    // which is why Dashboard kept being relabelled Preview as Visitor
+    document.getElementById('btn-preview-mode').textContent='Preview as Visitor';
     if(activeT1==='widgets') setT1('journal',document.querySelector('[data-t1="journal"]'));
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='none');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='none');
@@ -2298,7 +2340,9 @@ function submitPW(){
     window['ga-disable-G-MXZV44VECN']=true;
     document.body.classList.add('creator');
     document.getElementById('creator-bar').classList.remove('hide');
-    document.querySelector('.btn-toggle-mode').textContent='Preview as Visitor';
+    // by id, not by class: querySelector picked the first button in the bar,
+    // which is why Dashboard kept being relabelled Preview as Visitor
+    document.getElementById('btn-preview-mode').textContent='Preview as Visitor';
     document.querySelectorAll('.creator-only').forEach(el=>el.style.display='');
     document.querySelectorAll('.creator-only-btn').forEach(el=>el.style.display='');
     render();
@@ -2758,8 +2802,15 @@ document.addEventListener('click',e=>{
     if(!/^https?:/i.test(href))return;
     let host='';try{host=new URL(href,location.href).host;}catch(_){return;}
     if(!host||host===location.host)return;
-    const label=(a.getAttribute('title')||a.textContent||'').replace(/\s+/g,' ').trim()
-      || (a.querySelector('img')?(a.querySelector('img').alt||'image'):host);
+    let label=(a.getAttribute('title')||a.textContent||'').replace(/\s+/g,' ').trim();
+    // A generic call to action names the button, not the thing. Climb to the
+    // card it sits in and take its heading instead.
+    if(!label||/^(shop now|shop|read more|read it|read|view item|view|open|buy|see more|more|here|link|visit|go)\b/i.test(label)){
+      const card=a.closest('.sp,.ed-card,.gg-item,article,section,li');
+      const head=card&&card.querySelector('.sp-title,.ed-title,.gg-name,h1,h2,h3,h4');
+      const alt=a.querySelector('img')&&a.querySelector('img').alt;
+      label=(head&&head.textContent.replace(/\s+/g,' ').trim())||alt||label||host;
+    }
     ev('out',label.slice(0,120),TAB_LABEL[activeT1]||activeT1);
   }catch(_){}
 },true);
@@ -5702,7 +5753,7 @@ async function renderJournal(){
 // Everything the site holds, in one field. The index is built the first time
 // she or a reader opens it and then kept for the session, so the second search
 // costs nothing. Five small queries, none of which the page waits on at load.
-let _sqTimer=null, _sqLast='';
+let _sqTimer=null, _sqLast='', _sqLogTimer=null;
 
 function goAbout(){
   searchClose('nav');
@@ -5823,9 +5874,13 @@ function searchType(q){
   _sqTimer=setTimeout(()=>{
     sqRun(q).then(rows=>{
       if(!rows)return;
-      // Recorded once the answer is known, so a half typed word is not a search
-      ev(rows.length?'search':'search_empty', q.trim().slice(0,120));
       sqPaint(rows,q);
+      // Typing "margaux" fires four queries, and logging each one filled the
+      // dashboard with ma, mar, margau. Only what she stopped on is recorded.
+      clearTimeout(_sqLogTimer);
+      _sqLogTimer=setTimeout(()=>{
+        if(_sqLast===q)ev(rows.length?'search':'search_empty', q.trim().slice(0,120));
+      },2200);
     }).catch(e=>{
       console.error('[MTP] search failed:',e);
       body.innerHTML='<div class="sq-empty"><p>Search is not answering just now. Try again in a moment.</p></div>';
@@ -6006,15 +6061,20 @@ async function renderSales(skipLoad){
   const ended=_posts.filter(spIsEnded)
     .sort((a,b)=>new Date(b.expires_at||0)-new Date(a.expires_at||0));
 
-  const bar=spFilterBar(live);
+  const catBar=spCatBar(live);
+  if(!catBar)_spCat='';                       // no chips, so no category filter
+  const inCat=_spCat?live.filter(p=>spCatOf(p)===_spCat):live;
+  // The counts on the second row are counts within the chosen category, so the
+  // numbers always add up to what is on screen.
+  const bar=spFilterBar(inCat);
   if(!bar)_spFilter='';                       // the row is gone, so is the filter
   const picked=SP_FILTERS.find(f=>f.k===_spFilter);
-  const shownLive=picked?live.filter(picked.test):live;
+  const shownLive=picked?inCat.filter(picked.test):inCat;
 
-  let inner=bar+`<div class="sp-cols">${shownLive.map(renderPostEntry).join('')}</div>`;
+  let inner=catBar+bar+`<div class="sp-list">${shownLive.map(renderSaleEntry).join('')}</div>`;
   if(!shownLive.length){
-    inner=bar+(picked
-      ? `<div class="sales-empty"><h3>Nothing in ${h(picked.label.toLowerCase())}</h3><p>Tap All to see every sale running.</p></div>`
+    inner=catBar+bar+(picked||_spCat
+      ? `<div class="sales-empty"><h3>Nothing in ${h(((_spCat?spCatLabel(_spCat)+' ':'')+(picked?picked.label.toLowerCase():'')).trim())}</h3><p>Tap All to see every sale running.</p></div>`
       : `<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`);
   }
   if(ended.length){
@@ -6023,11 +6083,11 @@ async function renderSales(skipLoad){
       <button class="sp-past-btn" onclick="spTogglePast()">${_spShowPast?'Hide':'Show'} past sales (${ended.length})</button>
       <div class="sp-past-line"></div>
     </div>`;
-    if(_spShowPast)inner+=`<div class="sp-cols">${ended.map(renderPostEntry).join('')}</div>`;
+    if(_spShowPast)inner+=`<div class="sp-list">${ended.map(renderSaleEntry).join('')}</div>`;
   }
   feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
   // dragging to reorder a filtered list would write the wrong order
-  if(isCreator&&!_spFilter)initPostDrag();
+  if(isCreator&&!_spFilter&&!_spCat)initPostDrag();
   if(!_spAnchorDone&&_spAnchorId&&_spAnchorTries<4){
     _spAnchorTries++;
     const sid=_spAnchorId;
@@ -6039,7 +6099,7 @@ let _postDragSrcId=null;
 function initPostDrag(){
   const feed=document.getElementById('sales-feed-list');
   if(!feed)return;
-  feed.querySelectorAll('.sp[data-post-id]').forEach(card=>{
+  feed.querySelectorAll('.sr[data-post-id]').forEach(card=>{
     card.addEventListener('dragstart',e=>{
       _postDragSrcId=card.dataset.postId;
       card.classList.add('sp-dragging');
@@ -6047,12 +6107,12 @@ function initPostDrag(){
     });
     card.addEventListener('dragend',()=>{
       card.classList.remove('sp-dragging');
-      feed.querySelectorAll('.sp').forEach(c=>c.classList.remove('sp-drag-over'));
+      feed.querySelectorAll('.sr').forEach(c=>c.classList.remove('sp-drag-over'));
     });
     card.addEventListener('dragover',e=>{
       e.preventDefault();
       e.dataTransfer.dropEffect='move';
-      feed.querySelectorAll('.sp').forEach(c=>c.classList.remove('sp-drag-over'));
+      feed.querySelectorAll('.sr').forEach(c=>c.classList.remove('sp-drag-over'));
       if(card.dataset.postId!==_postDragSrcId)card.classList.add('sp-drag-over');
     });
     card.addEventListener('dragleave',()=>card.classList.remove('sp-drag-over'));
@@ -6081,7 +6141,7 @@ async function reorderPosts(srcId,targetId){
   }catch(e){console.error('post reorder save failed',e);}
 }
 
-function renderPostEntry(p){
+function renderPostEntry(p,inner){
   const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}):'';
   const dragHandle=isCreator?`<div class="sp-drag-handle" title="Drag to reorder" onmousedown="event.stopPropagation()">⠿</div>`:'';
   const creatorActs=isCreator?`<div class="sp-creator-acts">
@@ -6098,10 +6158,12 @@ function renderPostEntry(p){
   const code=spPromoCodes(p);
   const shopLink=spShopLink(p);
   const disc=spDiscountOf(p);
-  return `<div class="sp${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}" style="position:relative;">
-    ${dragHandle}
-    <div class="sp-meta">${date}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}${spCheckedLine(p)}</div>
-    <div class="sp-title">${spCodeHtml(p.title,code,shopLink)}</div>
+  // inner: true when this is the open half of a compact row, so the date, the
+  // badge and the title are already on the row above and are not repeated here
+  return `<div class="sp${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}${inner?' sp-inner':''}"${inner?'':` id="sp-${h(p.id)}" draggable="${isCreator?'true':'false'}" data-post-id="${h(p.id)}"`} style="position:relative;">
+    ${inner?'':dragHandle}
+    ${inner?'':`<div class="sp-meta">${date}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}${spCheckedLine(p)}</div>`}
+    ${inner?'':`<div class="sp-title">${spCodeHtml(p.title,code,shopLink)}</div>`}
     ${p.subtitle?'<div class="sp-subtitle">'+spCodeHtml(p.subtitle,code,shopLink)+'</div>':''}
     ${p.body?'<div class="sp-body">'+spCodeHtml(p.body,code,shopLink)+'</div>':''}
     ${spCodeHint(code,shopLink)}
@@ -6110,6 +6172,42 @@ function renderPostEntry(p){
     ${addImgBtn}
     ${renderPicks(p)}
   </div>`;
+}
+
+// ══ COMPACT ROWS ══
+// 53 sales drawn as full cards ran to about 15 screens, and most of them held
+// only a title and a date. A row is about 100px, so the whole list is scannable,
+// and opening one shows everything the card used to show.
+function spThumb(p){
+  const img=(p.images||[]).find(i=>i.image);
+  return img?img.image:'';
+}
+function renderSaleEntry(p){
+  const ended=spIsEnded(p);
+  const date=p.published_at?new Date(p.published_at).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+  const disc=spDiscountOf(p);
+  const thumb=spThumb(p);
+  const shopLink=spShopLink(p);
+  const cat=spCatOf(p);
+  const meta=[date,cat?spCatLabel(cat):''].filter(Boolean).join(' \u00b7 ');
+  return `<details class="sr${ended?' is-ended':''}${_spFlashId===p.id?' sp-flash':''}" id="sp-${h(p.id)}"
+      data-post-id="${h(p.id)}" draggable="${isCreator?'true':'false'}" ontoggle="srToggled(this)">
+    <summary class="sr-head">
+      <span class="sr-thumb">${thumb?`<img src="${h(thumb)}" alt="" loading="lazy" onerror="this.remove()">`:''}</span>
+      <span class="sr-main">
+        <span class="sr-title">${h(p.title||'')}</span>
+        <span class="sr-meta">${h(meta)}${disc?`<span class="sp-disc">${h(disc.label)}</span>`:''}${spStatus(p)}</span>
+      </span>
+      ${shopLink?`<a class="sr-shop" href="${h(fixUrl(shopLink))}" target="_blank" rel="noopener sponsored" onclick="event.stopPropagation()">Shop now &rarr;</a>`:''}
+      <span class="sr-chev" aria-hidden="true"></span>
+    </summary>
+    <div class="sr-open">${renderPostEntry(p,true)}</div>
+  </details>`;
+}
+// Only one open at a time, so the list never turns back into 15 screens
+function srToggled(el){
+  if(!el.open)return;
+  document.querySelectorAll('#sales-feed-list details.sr[open]').forEach(d=>{if(d!==el)d.open=false;});
 }
 
 // ── promo codes ──
@@ -6161,7 +6259,37 @@ function spDiscountOf(p){
 // ── the scan row ──
 // Only appears once there are enough sales for scrolling to be a problem.
 const SP_FILTER_MIN=6;
-let _spFilter='';
+let _spFilter='', _spCat='';
+// What a sale is, as opposed to how urgent it is. She sets this per post; a
+// sale with nothing set still shows under All, it just has no category chip.
+const SP_CATS=[
+  {k:'apparel', label:'Apparel'},
+  {k:'shoes',   label:'Shoes'},
+  {k:'handbags',label:'Handbags'},
+  {k:'home',    label:'Home'},
+  {k:'kids',    label:'Kids'},
+  {k:'beauty',  label:'Beauty'},
+  {k:'health',  label:'Health'}
+];
+function spCatOf(p){return String((p&&p.category)||'').trim().toLowerCase();}
+function spCatLabel(k){const c=SP_CATS.find(x=>x.k===k);return c?c.label:k;}
+// Only the categories that actually have a sale running get a chip
+function spCatBar(live){
+  const counts={};
+  live.forEach(p=>{const c=spCatOf(p);if(c)counts[c]=(counts[c]||0)+1;});
+  const present=SP_CATS.filter(c=>counts[c.k]);
+  if(present.length<2)return '';
+  return `<div class="sp-cats">
+    <button type="button" class="sp-cat${_spCat===''?' on':''}" onclick="spSetCat('')">All</button>
+    ${present.map(c=>`<button type="button" class="sp-cat${_spCat===c.k?' on':''}" onclick="spSetCat('${c.k}')">${h(c.label)}<span class="sp-filter-n">${counts[c.k]}</span></button>`).join('')}
+  </div>`;
+}
+function spSetCat(k){
+  _spCat=(k===_spCat)?'':k;
+  renderSales(true);
+  const f=document.getElementById('sales-feed-list');
+  if(f)f.scrollIntoView({behavior:'smooth',block:'start'});
+}
 const SP_FILTERS=[
   {k:'today',label:'Ending today',test:p=>spDaysLeft(p.expires_at)===0},
   {k:'soon', label:'3 days or less',test:p=>{const d=spDaysLeft(p.expires_at);return d!==null&&d>=0&&d<=3;}},
@@ -6217,6 +6345,8 @@ function spJumpTo(id){
   }
   if(!el)return false;
   _spFlashId=id;
+  // a shared link should land on the sale open, not on a closed row
+  if(el.tagName==='DETAILS')el.open=true;
   el.scrollIntoView({behavior:'smooth',block:'start'});
   el.classList.add('sp-flash');
   setTimeout(()=>{
@@ -6358,8 +6488,18 @@ function spPicksOf(p){
       let name=(x.name||'').trim(), shop=(x.shop||'').trim();
       // Tidies rows saved before this existed, without her reopening them
       if(!shop&&PICK_SEP.test(name)){const sp=spSplitPickTitle(name);name=sp.name;shop=sp.shop;}
-      return {...x,name,shop};
+      return {...x,name,shop,link:fixUrl(x.link)};
     });
+}
+// A link pasted without its https:// is read by the browser as a path on this
+// site, so maisontheposh.com/go.shopmy.us/p-107831661 and a 404. Anything that
+// looks like a domain gets the scheme put back on.
+function fixUrl(v){
+  const t=String(v==null?'':v).trim();
+  if(!t)return '';
+  if(/^(https?:\/\/|mailto:|tel:|#|\/)/i.test(t))return t;
+  if(/^[a-z0-9.-]+\.[a-z]{2,}(\/|$|\?)/i.test(t))return 'https://'+t.replace(/^\/+/,'');
+  return t;
 }
 function renderPicks(p){
   const picks=spPicksOf(p);
@@ -6367,7 +6507,7 @@ function renderPicks(p){
   const rows=picks.map(x=>{
     const name=(x.name||'').trim();
     const shop=(x.shop||'').trim();
-    const link=(x.link||'').trim();
+    const link=fixUrl(x.link);
     // Brand sits above the product, the way a boutique lists it, and the
     // button goes straight underneath so the click is obvious.
     const label=name||shop||'View item';
@@ -6448,6 +6588,7 @@ function openNewPostForm(){
   document.getElementById('sp-form-title').textContent='New Post';
   document.getElementById('sp-f-title').value='';
   document.getElementById('sp-f-subtitle').value='';
+  document.getElementById('sp-f-category').value='';
   document.getElementById('sp-f-shoplink').value='';
   document.getElementById('sp-f-body').value='';
   spInitEndsField(null);
@@ -6465,6 +6606,7 @@ async function openEditPostForm(id){
   document.getElementById('sp-form-title').textContent='Edit Post';
   document.getElementById('sp-f-title').value=p.title||'';
   document.getElementById('sp-f-subtitle').value=p.subtitle||'';
+  document.getElementById('sp-f-category').value=spCatOf(p);
   document.getElementById('sp-f-shoplink').value=spShopLink(p);
   document.getElementById('sp-f-body').value=p.body||'';
   spInitEndsField(p.expires_at);
@@ -6574,7 +6716,7 @@ function spPickSync(){
   _spPicks.forEach(x=>{
     const row=document.querySelector(`[data-pick="${x.id}"]`);
     if(!row)return;
-    x.link=(row.querySelector('.sp-pick-link').value||'').trim();
+    x.link=fixUrl(row.querySelector('.sp-pick-link').value);
     x.name=(row.querySelector('.sp-pick-name-in').value||'').trim();
     x.shop=(row.querySelector('.sp-pick-shop-in').value||'').trim();
   });
@@ -6595,7 +6737,7 @@ function spPickRender(){
       <div class="fg">
         <label class="fl">Your link</label>
         <div class="sp-pick-fetch-row">
-          <input type="url" class="fi sp-pick-link" placeholder="https://…" value="${h(x.link)}">
+          <input type="url" class="fi sp-pick-link" placeholder="https://…" value="${h(x.link)}" onblur="this.value=fixUrl(this.value)">
           <button type="button" class="sp-pick-fetch" onclick="spPickFetch('${h(x.id)}',this)">Get details</button>
         </div>
         <div class="sp-pick-msg" data-msg="${h(x.id)}"></div>
@@ -7042,6 +7184,7 @@ async function savePostForm(){
   const title=document.getElementById('sp-f-title').value.trim();
   if(!title){toast('Title required');return;}
   const subtitle=document.getElementById('sp-f-subtitle').value.trim();
+  const category=document.getElementById('sp-f-category').value||null;
   const body=document.getElementById('sp-f-body').value.trim();
   const rawEnds=document.getElementById('sp-f-expires').value;
   const expires_at=rawEnds?new Date(rawEnds+'T23:59:59').toISOString():null;
@@ -7052,8 +7195,8 @@ async function savePostForm(){
   try{
     if(_editingPostId){
       const p=_posts.find(x=>x.id===_editingPostId);
-      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;}
-      await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks});
+      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;p.category=category;}
+      await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks,category});
       // The shop link lives on the banner. Put it there, making a banner-less
       // row for it if this post has no image yet, so she never has to open
       // Add Image just to set a link.
@@ -7077,7 +7220,7 @@ async function savePostForm(){
         }
       }
     } else {
-      const newPost={id:uid(),title,subtitle,body,expires_at,picks,published_at:new Date().toISOString(),images:[]};
+      const newPost={id:uid(),title,subtitle,body,expires_at,picks,category,published_at:new Date().toISOString(),images:[]};
       await savePost(newPost);
       // Anything she typed, or the pasted email gave us, becomes the banner in one go
       const firstLink=shopLink||_spPastedLink||'';
@@ -8957,6 +9100,18 @@ async function runFetchImages(){
     </div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional, e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
+    <div class="fg"><label class="fl">Category <span class="flh">(what the sale is, for the filter row)</span></label>
+      <select class="fi" id="sp-f-category">
+        <option value="">Not set</option>
+        <option value="apparel">Apparel</option>
+        <option value="shoes">Shoes</option>
+        <option value="handbags">Handbags</option>
+        <option value="home">Home</option>
+        <option value="kids">Kids</option>
+        <option value="beauty">Beauty</option>
+        <option value="health">Health</option>
+      </select>
+    </div>
     <div class="fg"><label class="fl">Shop link <span class="flh">(this is the Shop Now button, and where a tapped code sends them)</span></label><input type="url" class="fi" id="sp-f-shoplink" placeholder="https://…"></div>
     <div class="fg">
       <label class="fl">Banner <span class="flh">(optional. A pasted email fills this itself)</span></label>
