@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20ba sale-rows -->
+<!-- MTP BUILD 2026-11-20bc phone-shop -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -854,19 +854,27 @@ body.creator .sp-drag-handle{display:flex;}
 .sr-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
 .sr-title{font-family:var(--serif);font-size:19px;font-weight:400;line-height:1.3;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .sr-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);}
-.sr-shop{flex:0 0 auto;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--go,#2F6B4F);text-decoration:none;border-bottom:1px solid rgba(47,107,79,.3);padding-bottom:2px;}
-.sr-shop:hover{border-bottom-color:var(--go,#2F6B4F);}
+/* Same black button the card has always used, so the row reads as the card */
+.sr-shop{flex:0 0 auto;display:inline-block;padding:10px 22px;background:var(--ink);color:white;font-family:var(--sans);font-size:10px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;transition:opacity .18s;white-space:nowrap;}
+.sr-shop:hover{opacity:.8;}
 .sr-chev{flex:0 0 auto;width:10px;height:10px;border-right:1.3px solid var(--soft);border-bottom:1.3px solid var(--soft);transform:rotate(45deg);margin:-4px 4px 0 2px;transition:transform .2s;}
 .sr[open] .sr-chev{transform:rotate(225deg);margin-top:4px;}
 .sr-open{padding:0 18px 4px;}
 /* the open half is already inside the row, so it drops its own frame */
 .sp.sp-inner{background:none;padding:0 0 18px;}
 @media(max-width:700px){
-  .sr>summary{gap:12px;padding:12px 12px;}
-  .sr-thumb{width:54px;height:54px;}
+  /* A grid rather than a wrapped flex row: the button has a cell of its own on
+     a second line, lined up under the title, and cannot stretch off the edge. */
+  .sr>summary{display:grid;grid-template-columns:54px minmax(0,1fr) auto;
+    grid-template-areas:"thumb main chev" ". shop ."; column-gap:12px;row-gap:8px;
+    align-items:center;padding:12px 12px 14px;}
+  .sr-thumb{grid-area:thumb;width:54px;height:54px;}
+  .sr-main{grid-area:main;}
+  .sr-chev{grid-area:chev;margin-top:-4px;}
+  .sr-shop{grid-area:shop;justify-self:start;padding:9px 20px;font-size:9.5px;}
   .sr-title{font-size:16px;white-space:normal;}
-  .sr-shop{display:none;}
   .sr-open{padding:0 12px 4px;}
+}
 }
 .sp-cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;}
 .sp-cols > .sp{min-width:0;}
