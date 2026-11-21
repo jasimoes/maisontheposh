@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-20bk price-note -->
+<!-- MTP BUILD 2026-11-21bl sale-find -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -973,6 +973,25 @@ body.creator .sp-drag-handle{display:flex;}
   .sp-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:4px;}
   .sp-cats::-webkit-scrollbar{display:none;}
   .sp-cat{font-size:9.5px;padding:8px 10px;}
+}
+/* One sale per store means a store menu would be 100 entries long. Typing the
+   name is faster, and the A to Z chip is for looking down the list instead. */
+.sp-find-row{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap;}
+.sp-find-wrap{position:relative;display:inline-flex;align-items:center;flex:1 1 220px;max-width:320px;}
+.sp-find-ico{position:absolute;left:11px;width:12px;height:12px;fill:none;stroke:var(--soft);stroke-width:1.6;pointer-events:none;}
+.sp-find{width:100%;font-family:var(--sans);font-size:11px;letter-spacing:.06em;color:var(--ink);background:var(--white);border:1px solid var(--border);padding:10px 30px;outline:none;transition:border-color .15s;}
+.sp-find::placeholder{color:var(--soft);letter-spacing:.12em;text-transform:uppercase;font-size:9.5px;}
+.sp-find:focus{border-color:var(--ink);}
+.sp-find-x{position:absolute;right:5px;background:none;border:none;cursor:pointer;color:var(--soft);font-size:17px;line-height:1;padding:3px 6px;}
+.sp-find-x:hover{color:var(--ink);}
+.sp-az{background:none;border:1px solid transparent;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:8px 13px;transition:all .15s;white-space:nowrap;}
+.sp-az:hover{color:var(--ink);}
+.sp-az.on{color:var(--ink);border-color:var(--border);background:var(--white);}
+@media(max-width:700px){
+  .sp-find-row{gap:6px;margin-bottom:8px;}
+  .sp-find-wrap{flex:1 1 150px;}
+  .sp-find{font-size:16px;padding:9px 28px;}
+  .sp-az{font-size:9.5px;padding:8px 10px;}
 }
 .sp-filters{display:flex;align-items:center;gap:2px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--border);margin:0 0 26px;position:sticky;top:var(--header-h,122px);z-index:120;background:var(--white);}
 .sp-filters::-webkit-scrollbar{display:none;}
@@ -6115,26 +6134,23 @@ async function renderSales(skipLoad){
     feed.innerHTML=hdr+`<div class="sales-empty"><h3>Nothing posted yet</h3><p>${isCreator?'Hit "+ New Post" to write your first sale update.':'Check back soon.'}</p></div>`+subscribeBlock();
     return;
   }
-  const live=spSort(_posts.filter(p=>!spIsEnded(p)));
+  const live=spLiveSorted();
   const ended=_posts.filter(spIsEnded)
     .sort((a,b)=>new Date(b.expires_at||0)-new Date(a.expires_at||0));
 
   const catBar=spCatBar(live);
   if(!catBar)_spCat='';                       // no chips, so no category filter
+  const findRow=spFindRow(live);
+  if(!findRow)_spQ='';                        // no box on screen, so no query
   const inCat=_spCat?live.filter(p=>spCatOf(p)===_spCat):live;
   // The counts on the second row are counts within the chosen category, so the
   // numbers always add up to what is on screen.
   const bar=spFilterBar(inCat);
   if(!bar)_spFilter='';                       // the row is gone, so is the filter
   const picked=SP_FILTERS.find(f=>f.k===_spFilter);
-  const shownLive=picked?inCat.filter(picked.test):inCat;
+  const shownLive=(picked?inCat.filter(picked.test):inCat).filter(p=>spMatches(p,_spQ));
 
-  let inner=catBar+bar+`<div class="sp-list">${shownLive.map(renderSaleEntry).join('')}</div>`;
-  if(!shownLive.length){
-    inner=catBar+bar+(picked||_spCat
-      ? `<div class="sales-empty"><h3>Nothing in ${h(((_spCat?spCatLabel(_spCat)+' ':'')+(picked?picked.label.toLowerCase():'')).trim())}</h3><p>Tap All to see every sale running.</p></div>`
-      : `<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`);
-  }
+  let inner=catBar+findRow+bar+`<div id="sp-live-area">${spLiveAreaHtml(shownLive,picked)}</div>`;
   if(ended.length){
     inner+=`<div class="sp-past-bar">
       <div class="sp-past-line"></div>
@@ -6145,7 +6161,7 @@ async function renderSales(skipLoad){
   }
   feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
   // dragging to reorder a filtered list would write the wrong order
-  if(isCreator&&!_spFilter&&!_spCat)initPostDrag();
+  if(isCreator&&!_spFilter&&!_spCat&&!_spQ&&!_spAZ)initPostDrag();
   if(!_spAnchorDone&&_spAnchorId&&_spAnchorTries<4){
     _spAnchorTries++;
     const sid=_spAnchorId;
@@ -6333,7 +6349,7 @@ function spDiscountOf(p){
 // ── the scan row ──
 // Only appears once there are enough sales for scrolling to be a problem.
 const SP_FILTER_MIN=6;
-let _spFilter='', _spCat='';
+let _spFilter='', _spCat='', _spQ='', _spAZ=false;
 // What a sale is, as opposed to how urgent it is. She sets this per post; a
 // sale with nothing set still shows under All, it just has no category chip.
 const SP_CATS=[
@@ -6363,6 +6379,89 @@ function spSetCat(k){
   renderSales(true);
   const f=document.getElementById('sales-feed-list');
   if(f)f.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// ── find a store, and A to Z ──
+// Every sale on this page is a different store, so a store filter would be a
+// menu where each choice returns one row. Typing the name is the faster move.
+const SP_FIND_MIN=8;
+const SP_FIND_ICO='<svg class="sp-find-ico" viewBox="0 0 14 14" aria-hidden="true"><circle cx="6" cy="6" r="4.3"/><path d="M9.2 9.2 12.5 12.5"/></svg>';
+// The store name is the front of the title, which is how she writes them.
+function spStoreKey(p){
+  return String((p&&p.title)||'').trim()
+    .replace(/^(the|a)\s+/i,'')
+    .toLowerCase();
+}
+function spLiveSorted(){
+  const live=spSort(_posts.filter(p=>!spIsEnded(p)));
+  if(!_spAZ)return live;
+  return live.slice().sort((a,b)=>spStoreKey(a).localeCompare(spStoreKey(b),'en',{numeric:true}));
+}
+// The title carries the store, the picks carry the maisons inside the sale, so
+// searching both means "ganni" finds the sale and the piece.
+function spHay(p){
+  const picks=spPicksOf(p).map(x=>(x.name||'')+' '+(x.shop||'')).join(' ');
+  return (String(p.title||'')+' '+String(p.subtitle||'')+' '+picks).toLowerCase();
+}
+// A term matches a word that starts with it, so "an" finds Anthropologie and
+// not Spanx. From 4 letters on it can land mid word too, so "fleur" still
+// finds M.M.LaFleur.
+function spMatches(p,q){
+  const terms=String(q||'').toLowerCase().split(/\s+/).filter(Boolean);
+  if(!terms.length)return true;
+  const hay=spHay(p);
+  const words=hay.split(/[^a-z0-9]+/).filter(Boolean);
+  return terms.every(t=>words.some(w=>w.indexOf(t)===0)
+    ||(t.length>=4&&hay.indexOf(t)>-1)
+    ||(/[^a-z0-9]/.test(t)&&hay.indexOf(t)>-1));   // "3.1" and "m.m" are typed with the dots
+}
+function spFindRow(live){
+  if(live.length<SP_FIND_MIN)return '';
+  return `<div class="sp-find-row">
+    <span class="sp-find-wrap">
+      ${SP_FIND_ICO}
+      <input type="text" class="sp-find" id="sp-find" placeholder="Find a store" value="${h(_spQ)}" oninput="spFind(this.value)" autocomplete="off" spellcheck="false" aria-label="Find a store">
+      <button type="button" class="sp-find-x" id="sp-find-x" onclick="spFindClear()" title="Clear" style="display:${_spQ?'':'none'};">&times;</button>
+    </span>
+    <button type="button" class="sp-az${_spAZ?' on':''}" onclick="spToggleAZ()" title="Order the list by store name">A to Z</button>
+  </div>`;
+}
+// Typing repaints only the rows, so the box keeps the cursor and the keyboard
+// stays up on a phone.
+function spFind(v){
+  _spQ=v;
+  const x=document.getElementById('sp-find-x');
+  if(x)x.style.display=_spQ?'':'none';
+  spPaintLive();
+}
+function spFindClear(){
+  _spQ='';
+  const i=document.getElementById('sp-find');
+  if(i)i.value='';
+  const x=document.getElementById('sp-find-x');
+  if(x)x.style.display='none';
+  spPaintLive();
+  if(i)i.focus();
+}
+function spToggleAZ(){
+  _spAZ=!_spAZ;
+  renderSales(true);
+  if(_spQ){const i=document.getElementById('sp-find');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length);}}
+}
+function spLiveAreaHtml(rows,picked){
+  if(rows.length)return `<div class="sp-list">${rows.map(renderSaleEntry).join('')}</div>`;
+  if(_spQ)return `<div class="sales-empty"><h3>No sale matching &ldquo;${h(_spQ)}&rdquo;</h3><p>Try fewer letters, or clear the box to see every sale running.</p></div>`;
+  if(picked||_spCat)return `<div class="sales-empty"><h3>Nothing in ${h(((_spCat?spCatLabel(_spCat)+' ':'')+(picked?picked.label.toLowerCase():'')).trim())}</h3><p>Tap All to see every sale running.</p></div>`;
+  return `<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`;
+}
+function spPaintLive(){
+  const area=document.getElementById('sp-live-area');
+  if(!area){renderSales(true);return;}
+  const live=spLiveSorted();
+  const inCat=_spCat?live.filter(p=>spCatOf(p)===_spCat):live;
+  const picked=SP_FILTERS.find(f=>f.k===_spFilter);
+  const rows=(picked?inCat.filter(picked.test):inCat).filter(p=>spMatches(p,_spQ));
+  area.innerHTML=spLiveAreaHtml(rows,picked);
 }
 const SP_FILTERS=[
   {k:'today',label:'Ending today',test:p=>spDaysLeft(p.expires_at)===0},
