@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-21bl sale-find -->
+<!-- MTP BUILD 2026-11-22bm seo-meta -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -2515,6 +2515,7 @@ function goHome(){
   document.querySelectorAll('.t1').forEach(b=>b.classList.toggle('on',b.dataset.t1==='journal'));
   document.getElementById('nav2')&&document.getElementById('nav2').classList.add('hide');
   document.querySelectorAll('.t2').forEach(b=>b.classList.toggle('on',b.dataset.cat==='all'));
+  applyTabMeta('journal');
   history.pushState({tab:'journal'},'','/?tab=journal');
   render();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -2601,24 +2602,46 @@ function subscribeBlock(){
 // ══ PER-TAB TITLES ══
 // One title for the whole site meant Google saw one page and every shared link
 // looked identical. Each tab now names itself.
+// t  is the browser and search result title
+// d  is the line printed under the heading on the page, so it is her own copy
+// md is what Google shows underneath the title, which can say more than d
+// c  is this tab's one true address, so Google stops treating tabs as copies
+const SITE_ORIGIN='https://maisontheposh.com';
 const TAB_META={
-  journal:{t:'Posts | MaisonThePosh',d:'Essays, collection analyses and curation notes.'},
-  weekly:{t:'The Edits | MaisonThePosh',d:'My shoppable edits, brand by brand and category by category.'},
-  stockist:{t:'Stockist | MaisonThePosh',d:'Where to buy it, retailer by retailer.'},
-  latest:{t:'The List | MaisonThePosh',d:'The things I actually love and keep going back to.'},
-  boards:{t:'Inspiration Boards | MaisonThePosh',d:'Looks I am building around, gathered one board at a time.'},
-  gifts:{t:'Gift Guides | MaisonThePosh',d:'Considered gifts, gathered into one list at a time.'},
-  sales:{t:'On Sale Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.'},
-  about:{t:'About & Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.'},
-  widgets:{t:'MaisonThePosh',d:''},
-  stats:{t:'Dashboard | MaisonThePosh',d:''}
+  journal:{t:'MaisonThePosh | Engineered Luxury, Edited',d:'Essays, collection analyses and curation notes.',
+    md:'Collection reviews and essays on The Row, Toteme, Phoebe Philo and the quieter maisons worth owning, written by an engineer who shops like one.',c:'/'},
+  weekly:{t:'Quiet Luxury Edits by Maison | MaisonThePosh',d:'My shoppable edits, brand by brand and category by category.',
+    md:'Shoppable edits maison by maison and category by category: The Row, Toteme, Phoebe Philo and the quiet luxury alternatives that hold up.',c:'/?tab=edits'},
+  stockist:{t:'Where to Buy The Row and Toteme | MaisonThePosh',d:'Where to buy it, retailer by retailer.',
+    md:'Where to buy The Row, Toteme, Phoebe Philo and more, retailer by retailer, with the stockists that actually carry each maison.',c:'/?tab=stockist'},
+  latest:{t:'The List: Pieces I Love and Wear | MaisonThePosh',d:'The things I actually love and keep going back to.',
+    md:'The pieces I actually love, wear and keep going back to, gathered in one list.',c:'/?tab=latest'},
+  boards:{t:'Outfit Inspiration Boards | MaisonThePosh',d:'Looks I am building around, gathered one board at a time.',
+    md:'Outfit inspiration boards, built one look at a time around the pieces I keep coming back to.',c:'/?tab=boards'},
+  gifts:{t:'Luxury Gift Guides 2026 | MaisonThePosh',d:'Considered gifts, gathered into one list at a time.',
+    md:'Luxury gift guides for 2026: considered pieces by price and by person, from under 100 to the ones worth saving for.',c:'/?tab=gifts'},
+  sales:{t:'Designer Sales On Now | MaisonThePosh',d:'Sales worth knowing about, while they are still running.',
+    md:'Designer sales worth knowing about while they are still running, with the promo codes, the end dates and the pieces I would buy.',c:'/?tab=sales'},
+  about:{t:'About Juliana and Partnerships | MaisonThePosh',d:'Who is behind MaisonThePosh, what it covers, and how brands can get in touch.',c:'/?tab=about'},
+  widgets:{t:'MaisonThePosh',d:'',c:'/'},
+  stats:{t:'Dashboard | MaisonThePosh',d:'',c:'/'}
 };
 function applyTabMeta(tab){
   const m=TAB_META[tab];
   if(!m)return;
   document.title=m.t;
-  const el=document.querySelector('meta[name="description"]');
-  if(el&&m.d)el.setAttribute('content',m.d);
+  const set=(sel,attr,val)=>{const el=document.querySelector(sel);if(el&&val)el.setAttribute(attr,val);};
+  const desc=m.md||m.d;
+  set('meta[name="description"]','content',desc);
+  set('meta[property="og:title"]','content',m.t);
+  set('meta[property="og:description"]','content',desc);
+  set('meta[name="twitter:title"]','content',m.t);
+  set('meta[name="twitter:description"]','content',desc);
+  // The canonical is the whole point: without it every tab looks to Google like
+  // a copy of the front page, and only one of them can win.
+  const url=SITE_ORIGIN+(m.c||'/');
+  set('link[rel="canonical"]','href',url);
+  set('meta[property="og:url"]','content',url);
 }
 
 // Affiliate disclosure — edit the wording here and it changes on every tab
@@ -2827,7 +2850,7 @@ function wcCardHtml(c,i,total){
   const right=gift?wcShortDate(c.created):(n?n+(n===1?' piece':' pieces'):'');
   return `<article class="ed-card" data-wc-i="${i}" data-wc-id="${h(c.id)}" draggable="${isCreator}" onclick="wcOpen('${h(c.id)}')">
       <div class="ed-top"><span class="ed-grp">${h(grp)}</span><span class="ed-n">${h(right)}</span></div>
-      <div class="ed-cover">${c.cover?`<img src="${h(c.cover)}" alt="" loading="lazy" onerror="this.remove();">`:''}</div>
+      <div class="ed-cover">${c.cover?`<img src="${h(c.cover)}" alt="${h(c.title||'')}" loading="lazy" onerror="this.remove();">`:''}</div>
       <h3 class="ed-title">${h(c.title)}</h3>
       ${c.blurb?`<p class="ed-blurb">${h(c.blurb)}</p>`:''}
       <div class="ed-acts">
@@ -3093,7 +3116,7 @@ function ggGridHtml(c){
     <div class="gg-grid">${list.map((p,idx)=>`
       <article class="gg-item${movable?' gg-move':''}">
         <a class="gg-ph" href="${h(p.link)}" target="_blank" rel="noopener sponsored" data-ev="1" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">
-          ${p.image?`<img src="${h(p.image)}" alt="" loading="lazy" onerror="this.remove();">`:''}
+          ${p.image?`<img src="${h(p.image)}" alt="${h([p.brand,p.title].filter(Boolean).join(' '))}" loading="lazy" onerror="this.remove();">`:''}
         </a>
         ${p.brand?`<div class="gg-brand">${h(p.brand)}</div>`:''}
         <a class="gg-name" href="${h(p.link)}" target="_blank" rel="noopener sponsored" data-ev="1" onclick="ev('out',${JSON.stringify(p.title||'')},${JSON.stringify(c.title||'')})">${h(p.title)}</a>
