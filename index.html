@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-22bm seo-meta -->
+<!-- MTP BUILD 2026-11-23bn no-cats -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -963,17 +963,6 @@ body.creator .sp-drag-handle{display:flex;}
 /* Scanning 24 sales. Same row of chips as the board. */
 /* It stays under the site header while the feed scrolls, so a reader 14 sales
    down can still switch filters without going back to the top. */
-/* The category row sits above the urgency row. Not sticky: two sticky rows
-   eat most of a phone screen, and the second one is the one you scroll with. */
-.sp-cats{display:flex;align-items:center;gap:2px;flex-wrap:wrap;margin:0 0 6px;}
-.sp-cat{background:none;border:1px solid transparent;cursor:pointer;font-family:var(--sans);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:8px 13px;transition:all .15s;white-space:nowrap;}
-.sp-cat:hover{color:var(--ink);}
-.sp-cat.on{color:var(--ink);border-color:var(--border);background:var(--white);}
-@media(max-width:700px){
-  .sp-cats{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-bottom:4px;}
-  .sp-cats::-webkit-scrollbar{display:none;}
-  .sp-cat{font-size:9.5px;padding:8px 10px;}
-}
 /* One sale per store means a store menu would be 100 entries long. Typing the
    name is faster, and the A to Z chip is for looking down the list instead. */
 .sp-find-row{display:flex;align-items:center;gap:10px;margin:0 0 10px;flex-wrap:wrap;}
@@ -6161,19 +6150,14 @@ async function renderSales(skipLoad){
   const ended=_posts.filter(spIsEnded)
     .sort((a,b)=>new Date(b.expires_at||0)-new Date(a.expires_at||0));
 
-  const catBar=spCatBar(live);
-  if(!catBar)_spCat='';                       // no chips, so no category filter
   const findRow=spFindRow(live);
   if(!findRow)_spQ='';                        // no box on screen, so no query
-  const inCat=_spCat?live.filter(p=>spCatOf(p)===_spCat):live;
-  // The counts on the second row are counts within the chosen category, so the
-  // numbers always add up to what is on screen.
-  const bar=spFilterBar(inCat);
+  const bar=spFilterBar(live);
   if(!bar)_spFilter='';                       // the row is gone, so is the filter
   const picked=SP_FILTERS.find(f=>f.k===_spFilter);
-  const shownLive=(picked?inCat.filter(picked.test):inCat).filter(p=>spMatches(p,_spQ));
+  const shownLive=(picked?live.filter(picked.test):live).filter(p=>spMatches(p,_spQ));
 
-  let inner=catBar+findRow+bar+`<div id="sp-live-area">${spLiveAreaHtml(shownLive,picked)}</div>`;
+  let inner=findRow+bar+`<div id="sp-live-area">${spLiveAreaHtml(shownLive,picked)}</div>`;
   if(ended.length){
     inner+=`<div class="sp-past-bar">
       <div class="sp-past-line"></div>
@@ -6184,7 +6168,7 @@ async function renderSales(skipLoad){
   }
   feed.innerHTML=hdr+`<div class="sales-feed" id="sales-feed-list">${inner}</div>`+subscribeBlock();
   // dragging to reorder a filtered list would write the wrong order
-  if(isCreator&&!_spFilter&&!_spCat&&!_spQ&&!_spAZ)initPostDrag();
+  if(isCreator&&!_spFilter&&!_spQ&&!_spAZ)initPostDrag();
   if(!_spAnchorDone&&_spAnchorId&&_spAnchorTries<4){
     _spAnchorTries++;
     const sid=_spAnchorId;
@@ -6293,8 +6277,7 @@ function renderSaleEntry(p){
   const disc=spDiscountOf(p);
   const thumb=spThumb(p);
   const shopLink=spShopLink(p);
-  const cat=spCatOf(p);
-  const meta=[date,cat?spCatLabel(cat):''].filter(Boolean).join(' \u00b7 ');
+  const meta=date;
   const head=`<span class="sr-head">
       <span class="sr-cover${thumb?'':' is-blank'}">
         ${thumb?`<img src="${h(thumb)}" alt="" loading="lazy" onerror="this.remove()">`:''}
@@ -6372,37 +6355,10 @@ function spDiscountOf(p){
 // ── the scan row ──
 // Only appears once there are enough sales for scrolling to be a problem.
 const SP_FILTER_MIN=6;
-let _spFilter='', _spCat='', _spQ='', _spAZ=false;
-// What a sale is, as opposed to how urgent it is. She sets this per post; a
-// sale with nothing set still shows under All, it just has no category chip.
-const SP_CATS=[
-  {k:'apparel', label:'Apparel'},
-  {k:'shoes',   label:'Shoes'},
-  {k:'handbags',label:'Handbags'},
-  {k:'home',    label:'Home'},
-  {k:'kids',    label:'Kids'},
-  {k:'beauty',  label:'Beauty'},
-  {k:'health',  label:'Health'}
-];
-function spCatOf(p){return String((p&&p.category)||'').trim().toLowerCase();}
-function spCatLabel(k){const c=SP_CATS.find(x=>x.k===k);return c?c.label:k;}
-// Only the categories that actually have a sale running get a chip
-function spCatBar(live){
-  const counts={};
-  live.forEach(p=>{const c=spCatOf(p);if(c)counts[c]=(counts[c]||0)+1;});
-  const present=SP_CATS.filter(c=>counts[c.k]);
-  if(present.length<2)return '';
-  return `<div class="sp-cats">
-    <button type="button" class="sp-cat${_spCat===''?' on':''}" onclick="spSetCat('')">All</button>
-    ${present.map(c=>`<button type="button" class="sp-cat${_spCat===c.k?' on':''}" onclick="spSetCat('${c.k}')">${h(c.label)}<span class="sp-filter-n">${counts[c.k]}</span></button>`).join('')}
-  </div>`;
-}
-function spSetCat(k){
-  _spCat=(k===_spCat)?'':k;
-  renderSales(true);
-  const f=document.getElementById('sales-feed-list');
-  if(f)f.scrollIntoView({behavior:'smooth',block:'start'});
-}
+let _spFilter='', _spQ='', _spAZ=false;
+// Categories were tried and taken out again: her sales are whole stores, not
+// departments, so 152 of 156 had nothing to put in the box. Find a store does
+// the job the chips were meant to do.
 
 // ── find a store, and A to Z ──
 // Every sale on this page is a different store, so a store filter would be a
@@ -6474,16 +6430,15 @@ function spToggleAZ(){
 function spLiveAreaHtml(rows,picked){
   if(rows.length)return `<div class="sp-list">${rows.map(renderSaleEntry).join('')}</div>`;
   if(_spQ)return `<div class="sales-empty"><h3>No sale matching &ldquo;${h(_spQ)}&rdquo;</h3><p>Try fewer letters, or clear the box to see every sale running.</p></div>`;
-  if(picked||_spCat)return `<div class="sales-empty"><h3>Nothing in ${h(((_spCat?spCatLabel(_spCat)+' ':'')+(picked?picked.label.toLowerCase():'')).trim())}</h3><p>Tap All to see every sale running.</p></div>`;
+  if(picked)return `<div class="sales-empty"><h3>Nothing in ${h(picked.label.toLowerCase())}</h3><p>Tap All to see every sale running.</p></div>`;
   return `<div class="sales-empty"><h3>No sales running right now</h3><p>${isCreator?'Hit "+ New Post" to add one.':'Check back soon. New ones go up as they land.'}</p></div>`;
 }
 function spPaintLive(){
   const area=document.getElementById('sp-live-area');
   if(!area){renderSales(true);return;}
   const live=spLiveSorted();
-  const inCat=_spCat?live.filter(p=>spCatOf(p)===_spCat):live;
   const picked=SP_FILTERS.find(f=>f.k===_spFilter);
-  const rows=(picked?inCat.filter(picked.test):inCat).filter(p=>spMatches(p,_spQ));
+  const rows=(picked?live.filter(picked.test):live).filter(p=>spMatches(p,_spQ));
   area.innerHTML=spLiveAreaHtml(rows,picked);
 }
 const SP_FILTERS=[
@@ -6787,7 +6742,6 @@ function openNewPostForm(){
   document.getElementById('sp-form-title').textContent='New Post';
   document.getElementById('sp-f-title').value='';
   document.getElementById('sp-f-subtitle').value='';
-  document.getElementById('sp-f-category').value='';
   document.getElementById('sp-f-shoplink').value='';
   document.getElementById('sp-f-body').value='';
   spInitEndsField(null);
@@ -6805,7 +6759,6 @@ async function openEditPostForm(id){
   document.getElementById('sp-form-title').textContent='Edit Post';
   document.getElementById('sp-f-title').value=p.title||'';
   document.getElementById('sp-f-subtitle').value=p.subtitle||'';
-  document.getElementById('sp-f-category').value=spCatOf(p);
   document.getElementById('sp-f-shoplink').value=spShopLink(p);
   document.getElementById('sp-f-body').value=p.body||'';
   spInitEndsField(p.expires_at);
@@ -7383,7 +7336,6 @@ async function savePostForm(){
   const title=document.getElementById('sp-f-title').value.trim();
   if(!title){toast('Title required');return;}
   const subtitle=document.getElementById('sp-f-subtitle').value.trim();
-  const category=document.getElementById('sp-f-category').value||null;
   const body=document.getElementById('sp-f-body').value.trim();
   const rawEnds=document.getElementById('sp-f-expires').value;
   const expires_at=rawEnds?new Date(rawEnds+'T23:59:59').toISOString():null;
@@ -7394,8 +7346,8 @@ async function savePostForm(){
   try{
     if(_editingPostId){
       const p=_posts.find(x=>x.id===_editingPostId);
-      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;p.category=category;}
-      await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks,category});
+      if(p){p.title=title;p.subtitle=subtitle;p.body=body;p.expires_at=expires_at;p.picks=picks;}
+      await savePost({id:_editingPostId,title,subtitle,body,expires_at,picks});
       // The shop link lives on the banner. Put it there, making a banner-less
       // row for it if this post has no image yet, so she never has to open
       // Add Image just to set a link.
@@ -7419,7 +7371,7 @@ async function savePostForm(){
         }
       }
     } else {
-      const newPost={id:uid(),title,subtitle,body,expires_at,picks,category,published_at:new Date().toISOString(),images:[]};
+      const newPost={id:uid(),title,subtitle,body,expires_at,picks,published_at:new Date().toISOString(),images:[]};
       await savePost(newPost);
       // Anything she typed, or the pasted email gave us, becomes the banner in one go
       const firstLink=shopLink||_spPastedLink||'';
@@ -9299,17 +9251,6 @@ async function runFetchImages(){
     </div>
     <div class="fg"><label class="fl">Title</label><input type="text" class="fi" id="sp-f-title" placeholder="e.g. Saks 50% Off Designer Items"></div>
     <div class="fg"><label class="fl">Subtitle <span class="flh">(optional, e.g. "Ends Sunday")</span></label><input type="text" class="fi" id="sp-f-subtitle" placeholder=""></div>
-    <div class="fg"><label class="fl">Category <span class="flh">(what the sale is, for the filter row)</span></label>
-      <select class="fi" id="sp-f-category">
-        <option value="">Not set</option>
-        <option value="apparel">Apparel</option>
-        <option value="shoes">Shoes</option>
-        <option value="handbags">Handbags</option>
-        <option value="home">Home</option>
-        <option value="kids">Kids</option>
-        <option value="beauty">Beauty</option>
-        <option value="health">Health</option>
-      </select>
     </div>
     <div class="fg"><label class="fl">Shop link <span class="flh">(this is the Shop Now button, and where a tapped code sends them)</span></label><input type="url" class="fi" id="sp-f-shoplink" placeholder="https://…"></div>
     <div class="fg">
