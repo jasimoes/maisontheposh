@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-23bn no-cats -->
+<!-- MTP BUILD 2026-11-24bo stats-day -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -415,10 +415,26 @@ body.creator .ed-acts{display:flex;}
 .st-num{font-family:var(--serif);font-size:34px;font-weight:300;line-height:1;color:var(--ink);}
 .st-lab{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin-top:9px;line-height:1.5;}
 .st-chart{display:flex;align-items:flex-end;gap:2px;height:120px;background:var(--white);padding:16px;margin-bottom:0;}
-.st-bar{flex:1;background:var(--ink);opacity:.72;min-height:2px;transition:opacity .15s;}
+.st-bar{flex:1;background:var(--ink);opacity:.72;min-height:2px;transition:opacity .15s;border:none;padding:0;cursor:pointer;font:inherit;}
 .st-bar:hover{opacity:1;}
 .st-bar.st-bar-0{opacity:.12;}
-.st-axis{display:flex;justify-content:space-between;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:7px 2px 34px;}
+.st-bar.st-bar-0:hover{opacity:.3;}
+.st-bar.on{opacity:1;box-shadow:inset 0 0 0 2px var(--white);}
+/* A date under every few bars, always ending on today, and the panel below
+   is whichever day she taps. */
+.st-axis-days{display:flex;gap:2px;margin:7px 2px 0;}
+.st-axis-d{flex:1;text-align:center;font-family:var(--sans);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--soft);white-space:nowrap;}
+.st-hint{font-family:var(--sans);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:14px 2px 34px;}
+.st-dp{background:var(--white);padding:22px 24px;margin:14px 0 34px;border-top:2px solid var(--ink);}
+.st-dp-hd{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:18px;}
+.st-dp-t{font-family:var(--serif);font-size:21px;font-weight:300;color:var(--ink);}
+.st-dp-x{background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);padding:4px 0;}
+.st-dp-x:hover{color:var(--ink);}
+.st-dp-nums{display:flex;flex-wrap:wrap;gap:30px;margin-bottom:24px;}
+.st-dp-n{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);line-height:1.5;}
+.st-dp-n b{display:block;font-family:var(--serif);font-size:26px;font-weight:300;letter-spacing:0;text-transform:none;color:var(--ink);margin-bottom:5px;}
+.st-dp-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px 34px;}
+.st-dp-h{font-family:var(--sans);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--soft);margin:0;}
 .st-cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:30px 34px;}
 .st-sec{background:var(--white);padding:24px 26px;}
 .st-h{font-family:var(--serif);font-size:19px;font-weight:300;color:var(--ink);margin:0 0 4px;}
@@ -432,7 +448,9 @@ body.creator .ed-acts{display:flex;}
 .st-none{font-family:var(--sans);font-size:11.5px;color:var(--soft);line-height:1.7;margin:10px 0 0;}
 .st-foot{font-family:var(--sans);font-size:11px;color:var(--soft);line-height:1.8;margin-top:34px;max-width:var(--measure);}
 @media(max-width:1000px){.st-tiles{grid-template-columns:repeat(2,minmax(0,1fr));}.st-cols{grid-template-columns:1fr;}}
-@media(max-width:700px){.st-tiles{grid-template-columns:1fr 1fr;gap:10px;}.st-num{font-size:26px;}}
+@media(max-width:700px){.st-tiles{grid-template-columns:1fr 1fr;gap:10px;}.st-num{font-size:26px;}
+  .st-axis-d{font-size:7.5px;letter-spacing:.04em;}
+  .st-dp{padding:20px 18px;}.st-dp-cols{grid-template-columns:1fr;}.st-dp-nums{gap:20px;}.st-dp-n b{font-size:22px;}}
 /* ── GIFT GUIDE: her own product grid ──────────────────────────────────
    The ShopMy embed is their page inside an iframe: no prices in her type,
    no sorting, and a white background that cannot be changed. For a guide
@@ -2894,8 +2912,8 @@ document.addEventListener('click',e=>{
     // A generic call to action names the button, not the thing. Climb to the
     // card it sits in and take its heading instead.
     if(!label||/^(shop now|shop|read more|read it|read|view item|view|open|buy|see more|more|here|link|visit|go)\b/i.test(label)){
-      const card=a.closest('.sp,.ed-card,.gg-item,article,section,li');
-      const head=card&&card.querySelector('.sp-title,.ed-title,.gg-name,h1,h2,h3,h4');
+      const card=a.closest('.sr,.sp,.ed-card,.gg-item,article,section,li');
+      const head=card&&card.querySelector('.sr-title,.sp-title,.ed-title,.gg-name,h1,h2,h3,h4');
       const alt=a.querySelector('img')&&a.querySelector('img').alt;
       label=(head&&head.textContent.replace(/\s+/g,' ').trim())||alt||label||host;
     }
@@ -2906,7 +2924,7 @@ const TAB_LABEL={journal:'Posts',weekly:'The Edits',stockist:'Stockist',gifts:'G
   sales:'On Sale Now',about:'About',stats:'Dashboard'};
 
 // ══ DASHBOARD ══
-let _stDays=30, _stData=null, _stLoading=false;
+let _stDays=30, _stData=null, _stLoading=false, _stDay=null;
 async function stLoad(force){
   if(_stLoading)return;
   if(_stData&&_stData.days===_stDays&&!force)return;
@@ -2918,7 +2936,39 @@ async function stLoad(force){
   _stLoading=false;
   if(activeT1==='stats')renderStats();
 }
-function stSetDays(d){_stDays=d;_stData=null;renderStats();stLoad(true);}
+function stSetDays(d){_stDays=d;_stData=null;_stDay=null;renderStats();stLoad(true);}
+// A bar is a day she can open. Tapping the same one again closes it.
+function stPickDay(key){
+  _stDay=(key&&key!==_stDay)?key:null;
+  renderStats();
+  const p=document.getElementById('st-day-panel');
+  if(p)p.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function stDayPanel(series){
+  const row=_stDay&&series.find(x=>x.d===_stDay);
+  if(!row)return '<p class="st-hint">Tap a bar for that day</p>';
+  const d=_stData||{};
+  const outs=(d.day_out||[]).filter(x=>x.d===_stDay);
+  const srch=(d.day_search||[]).filter(x=>x.d===_stDay);
+  const parts=_stDay.split('-');
+  const long=new Date(parts[0],parts[1]-1,parts[2])
+    .toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  const num=(n,label)=>`<span class="st-dp-n"><b>${(n||0).toLocaleString()}</b>${label}</span>`;
+  return `<div class="st-dp" id="st-day-panel">
+    <div class="st-dp-hd"><span class="st-dp-t">${h(long)}</span><button type="button" class="st-dp-x" onclick="stPickDay('')">Clear</button></div>
+    <div class="st-dp-nums">${num(row.views,'page views')}${num(row.search+row.empty,'searches')}${num(row.out,'clicks out')}${num(row.open,'edits and guides opened')}</div>
+    <div class="st-dp-cols">
+      <section>
+        <h4 class="st-dp-h">What they clicked</h4>
+        ${stRows(outs,'Nothing clicked through on this day.',r=>`<li><span>${h(r.t)}${r.w?`<em>${h(r.w)}</em>`:''}</span><b>${r.n}</b></li>`)}
+      </section>
+      <section>
+        <h4 class="st-dp-h">What they searched</h4>
+        ${stRows(srch,'No searches on this day.',r=>`<li><span>${h(r.t)}${r.e?'<em>found nothing</em>':''}</span><b>${r.n}</b></li>`)}
+      </section>
+    </div>
+  </div>`;
+}
 function stRows(list,empty,fmt){
   if(!list||!list.length)return `<p class="st-none">${empty}</p>`;
   return `<ol class="st-list">${list.map(fmt).join('')}</ol>`;
@@ -2934,20 +2984,27 @@ function renderStats(){
   // One day of data drawn on its own becomes a single bar the width of the
   // page, which reads as a chart of nothing.
   const got={};
-  ((d&&d.by_day)||[]).forEach(x=>{got[x.d]=x.views||0;});
+  ((d&&d.by_day)||[]).forEach(x=>{got[x.d]=x;});
   const span=_stDays;
   const series=[];
   for(let k=span-1;k>=0;k--){
     const dt=new Date();dt.setHours(0,0,0,0);dt.setDate(dt.getDate()-k);
     const key=dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0');
-    series.push({d:key,views:got[key]||0});
+    const r=got[key]||{};
+    series.push({d:key,views:r.views||0,search:r.search||0,empty:r.empty||0,out:r.out||0,open:r.open||0});
   }
+  if(_stDay&&!series.some(x=>x.d===_stDay))_stDay=null;   // the window moved past it
   const views=series.reduce((a,x)=>a+x.views,0);
   const peak=series.reduce((a,x)=>Math.max(a,x.views),0)||1;
   const fmtDay=k=>{const [y,m,day]=k.split('-');return new Date(y,m-1,day).toLocaleDateString('en-US',{month:'short',day:'numeric'});};
-  const chart=`<div class="st-chart">${series.map(x=>
-      `<span class="st-bar${x.views?'':' st-bar-0'}" style="height:${x.views?Math.max(4,Math.round(x.views/peak*100)):2}%" title="${h(fmtDay(x.d))}: ${x.views}"></span>`).join('')}</div>
-    <div class="st-axis"><span>${h(fmtDay(series[0].d))}</span><span>today</span></div>`;
+  // Dates spaced evenly and counted back from today, so today is always named
+  const every=Math.max(1,Math.round(span/6));
+  const marks={};
+  for(let i=series.length-1;i>=0;i-=every)marks[i]=1;
+  const chart=`<div class="st-chart">${series.map((x,i)=>
+      `<button type="button" class="st-bar${x.views?'':' st-bar-0'}${_stDay===x.d?' on':''}" onclick="stPickDay('${x.d}')" style="height:${x.views?Math.max(4,Math.round(x.views/peak*100)):2}%" title="${h(fmtDay(x.d))}: ${x.views} page views, ${x.out} clicks out" aria-label="${h(fmtDay(x.d))}"></button>`).join('')}</div>
+    <div class="st-axis-days">${series.map((x,i)=>`<span class="st-axis-d">${marks[i]?h(fmtDay(x.d)):''}</span>`).join('')}</div>
+    ${stDayPanel(series)}`;
   const tile=(n,label)=>`<div class="st-tile"><div class="st-num">${(n||0).toLocaleString()}</div><div class="st-lab">${label}</div></div>`;
   feed.innerHTML=`<div class="st-wrap">
     <div class="ed-hd"><h2>Dashboard</h2><p>Only you can see this page. No cookies, no names, just what happened.</p></div>
