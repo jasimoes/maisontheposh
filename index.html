@@ -1,4 +1,4 @@
-<!-- MTP BUILD 2026-11-24bo stats-day -->
+<!-- MTP BUILD 2026-11-28bp dupe-unhide -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -451,6 +451,14 @@ body.creator .ed-acts{display:flex;}
 @media(max-width:700px){.st-tiles{grid-template-columns:1fr 1fr;gap:10px;}.st-num{font-size:26px;}
   .st-axis-d{font-size:7.5px;letter-spacing:.04em;}
   .st-dp{padding:20px 18px;}.st-dp-cols{grid-template-columns:1fr;}.st-dp-nums{gap:20px;}.st-dp-n b{font-size:22px;}}
+/* A collection she already imported in the background is not a dead end:
+   say where it is and give her one tap to bring it out. */
+.wc-dupe{background:var(--surf,#F6F4EF);border-left:2px solid var(--ink);padding:15px 17px;margin:0 0 22px;}
+.wc-dupe-t{font-family:var(--sans);font-size:12px;line-height:1.7;color:var(--ink);margin:0 0 13px;}
+.wc-dupe-t b{font-weight:500;}
+.wc-dupe-btn{background:var(--ink);color:#fff;border:none;cursor:pointer;font-family:var(--sans);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:11px 20px;}
+.wc-dupe-btn:hover{opacity:.85;}
+
 /* ── GIFT GUIDE: her own product grid ──────────────────────────────────
    The ShopMy embed is their page inside an iframe: no prices in her type,
    no sorting, and a white background that cannot be changed. For a guide
@@ -3326,6 +3334,7 @@ function wcOpenAdd(){
   document.getElementById('wc-f-title').value='';
   document.getElementById('wc-f-src').value='';
   const hAdd=document.getElementById('wc-f-hidden');if(hAdd)hAdd.checked=false;
+  wcDupeClear();
   const nb=document.getElementById('wc-f-blurb');if(nb)nb.value='';
   // nothing to show from ShopMy until the collection has been fetched once
   _wcCoverAuto='';wcCoverStrip([]);wcCoverPick('');
@@ -3431,6 +3440,29 @@ async function wcCoverFile(files){
   wcCoverPick(small);
 }
 
+function wcDupeClear(){
+  const box=document.getElementById('wc-dupe');
+  if(box){box.hidden=true;box.innerHTML='';}
+}
+// One tap out of the background. Only the one row is written.
+async function wcShowHidden(tab,id){
+  const arr=wcList(tab).slice();
+  const i=arr.findIndex(c=>c.id===id);
+  if(i<0){toast('Could not find that collection');return;}
+  arr[i]={...arr[i],hidden:false};
+  try{
+    await sbFetch('wc_carousels?id=eq.'+encodeURIComponent(id),{
+      method:'PATCH',headers:{'Prefer':'return=minimal'},body:JSON.stringify({hidden:false})});
+    _wcData[tab]=arr;wcCacheSave(tab,arr);
+    if(_wcFilter===WC_HIDDEN_KEY)_wcFilter='all';
+    wcCloseForm();renderWeekly();
+    toast(`Now showing on ${WC_TAB_LABELS[tab]||'this tab'}`);
+  }catch(e){
+    console.error('wcShowHidden failed:',e);
+    toast('\u26a0 Could not change that. Check your connection');
+  }
+}
+
 async function wcSaveForm(){
   const title=document.getElementById('wc-f-title').value.trim();
   const src=wcCleanSrc(document.getElementById('wc-f-src').value);
@@ -3448,7 +3480,20 @@ async function wcSaveForm(){
   const label=btn.textContent;btn.textContent='Saving…';btn.disabled=true;
   try{
     if(_wcEditIdx===null){
-      if(arr.some(c=>c.src===src)){toast(`That collection is already on ${WC_TAB_LABELS[tab]}`);return;}
+      // Over 200 collections came in from ShopMy as background ones, so "already
+      // here" is usually a collection she cannot see rather than a mistake.
+      const dupe=arr.find(c=>c.src===src);
+      if(dupe){
+        const box=document.getElementById('wc-dupe');
+        if(dupe.hidden&&box){
+          box.innerHTML=`<p class="wc-dupe-t">This one is already here, kept in the background as <b>${h(dupe.title||'untitled')}</b>. Background collections stay searchable but are not shown as cards.</p>
+            <button type="button" class="wc-dupe-btn" onclick="wcShowHidden('${h(tab)}','${h(dupe.id)}')">Show it on ${h(WC_TAB_LABELS[tab]||'this tab')}</button>`;
+          box.hidden=false;
+        }else{
+          toast(`That collection is already on ${WC_TAB_LABELS[tab]} as "${dupe.title||'untitled'}"`);
+        }
+        return;
+      }
       const nid=uid();
       arr.unshift({id:nid,title,src,group,hidden,
         coverOwn:coverOwn.trim(),blurbOwn:blurbOwn.trim(),
@@ -9511,6 +9556,7 @@ async function runFetchImages(){
 <div class="fov" id="wc-ov" onclick="if(event.target===this)wcCloseForm()">
   <div class="fp" style="max-width:560px;" onclick="event.stopPropagation()">
     <h3 class="ftitle" id="wc-form-title">Add Collection</h3>
+    <div class="wc-dupe" id="wc-dupe" hidden></div>
     <div class="fg">
       <label class="fl">Collection name <span class="flh">(shows above the carousel)</span></label>
       <input type="text" class="fi" id="wc-f-title" placeholder="e.g. Substack: Week 35, 2026" onkeydown="if(event.key==='Enter')document.getElementById('wc-f-src').focus()">
